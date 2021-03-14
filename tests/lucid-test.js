@@ -8,11 +8,22 @@ import {
 
 test('Lucid finds the correct matches', (t) => {
     const haystack = 'The quick brown fox jumps over the lazy dog';
-    const needle = 'The dog';
+    const needle = 'The dog barks';
     const found = findMatches(haystack, needle);
 
     t.deepEquals(found.matches, ['The', 'the', 'dog']);
     t.equals(found.matches.length, 3);
+    t.end();
+});
+
+test('Lucid handles empty strings correctly', (t) => {
+    const haystack = 'The quick brown fox jumps over the lazy dog';
+    const needle = '     The       dog      barks      ';
+    const found1 = findMatches(haystack, needle);
+    const found2 = findMatches(haystack, '    ');
+
+    t.deepEquals(found1.matches, ['The', 'the', 'dog']);
+    t.deepEquals(found2.matches, []);
     t.end();
 });
 
@@ -28,7 +39,7 @@ test('Lucid finds the correct emojis', (t) => {
 
 test('Lucid highlights correctly', (t) => {
     const haystack = 'The quick brown fox jumps over the lazy dog';
-    const needle = 'The dog';
+    const needle = 'The dog barks';
     const found = findMatches(haystack, needle);
 
     t.equals(found.mark, '<span class="matched">The</span> quick brown fox jumps over <span class="matched">the</span> lazy <span class="matched">dog</span>');
@@ -37,7 +48,7 @@ test('Lucid highlights correctly', (t) => {
 
 test('Lucid highlights correctly with options', (t) => {
     const haystack = 'The quick brown fox jumps over the lazy dog';
-    const needle = 'The dog';
+    const needle = 'The dog barks';
     const options = { el: 'mark', cssClass: 'found' };
     const found = findMatches(haystack, needle, options);
 
@@ -66,7 +77,7 @@ test('Lucid highlights HTML strings correctly', (t) => {
 
 test('Lucid finds the correct matches with special characters like äöüè', (t) => {
     const haystack = 'Thé quīçk brown føx jümps over the låzy dog';
-    const needle = 'Thë dog';
+    const needle = 'Thë dog barkß';
     const found = findMatchesNormalized(haystack, needle);
 
     t.deepEquals(found.matches, ['Thé', 'the', 'dog']);
