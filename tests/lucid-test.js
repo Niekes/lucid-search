@@ -75,6 +75,16 @@ test('Lucid highlights HTML strings correctly', (t) => {
     t.end();
 });
 
+test('Lucid highlights nested HTML strings correctly', (t) => {
+    const haystack = 'The quick brown <strong>fox</strong> jumps over the lazy <div><nav><strong>dog</strong></nav></div>';
+    const needle = 'The dog strong div nav';
+    const found = findMatchesHtml(haystack, needle);
+
+    t.equals(found.mark, '<span class="matched">The</span> quick brown <strong>fox</strong> jumps over <span class="matched">the</span> lazy <div><nav><strong><span class="matched">dog</span></strong></nav></div>');
+    t.equals(found.matches.length, 3);
+    t.end();
+});
+
 test('Lucid finds the correct matches with special characters like äöüè', (t) => {
     const haystack = 'Thé quīçk brown føx jümps over the låzy dog';
     const needle = 'Thë dog barkß';
