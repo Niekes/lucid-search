@@ -1,0 +1,34 @@
+<div id="haystack">{{{haystack}}}</div>
+<input id="needle" placeholder="Type to search...." type="text">
+<div id="result">Nothing matched, sorry</div>
+
+<script type="text/javascript">
+ document.addEventListener('DOMContentLoaded', () => {
+    const haystack = document.querySelector('#haystack').innerHTML.trim();
+
+    /*
+        Listen for input
+    */
+    document.querySelector('#needle').addEventListener('input', (e) => {
+        {{ html }}
+        /*
+            Pass user input as needle
+        */
+        const needle = e.target.value;
+        const found = lucidSearch.{{method}}(haystack, needle);
+
+
+        /*
+            Display results
+        */
+        document.querySelector('#haystack').innerHTML = found.mark;
+        document.querySelector('#result').innerHTML = found.matches.length > 0
+            ? `<strong>${found.matches.length}</strong> match(es) were found`
+            : 'Nothing matched, sorry';
+    });
+});
+</script>
+
+<style type="text/css">
+{{cssStyle}}
+</style>

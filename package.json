@@ -1,0 +1,42 @@
+{
+  "name": "lucid-search",
+  "version": "0.0.1",
+  "description": "find and highligh results",
+  "private": false,
+  "main": "src/examples/index.js",
+  "scripts": {
+    "test": "tape -r esm -r ./tests/setup.js ./tests/**/*-test.js | tap-spec",
+    "build": "webpack --mode=production --env.fractalMode=build",
+    "reset": "rm package-lock.json || true && rm -rf node_modules/ || true && npm install && npm dedupe && npm run dev",
+    "dev": "rm -rf src/lucid-search.*.js && webpack --mode=development --env.fractalMode=server",
+    "start": "npm run dev"
+  },
+  "keywords": [
+    "search",
+    "highlight",
+    "match"
+  ],
+  "author": "Stefan Nieke",
+  "license": "MIT",
+  "devDependencies": {
+    "browser-env": "^3.3.0",
+    "eslint": "^5.3.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-loader": "^2.1.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.12.3",
+    "esm": "^3.2.25",
+    "extract-loader": "^3.1.0",
+    "file-loader": "^3.0.1",
+    "fractal-webpack-plugin": "^4.1.0",
+    "handlebars-helpers": "^0.10.0",
+    "tap-spec": "^5.0.0",
+    "tape": "^5.2.2",
+    "terser-webpack-plugin": "^1.4.1",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.28.3",
+    "webpack-cli": "^3.2.1",
+    "yargs": "^12.0.5"
+  }
+}

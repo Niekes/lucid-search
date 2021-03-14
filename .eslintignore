@@ -1,0 +1,5 @@
+*.hbs
+*.md
+fractal.js
+public/
+src/lucid-search.*.js
