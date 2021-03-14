@@ -20,10 +20,9 @@ function findHTML(haystack, needles, options) {
         cssClass,
     } = options;
 
-    const matches = needles.map((n) => {
-        if (!n) return null;
-        return haystack.match(new RegExp(`(${n})(?!([^<]+)?>)`, 'gi'));
-    }).flat().filter(d => d !== null);
+    const matches = needles
+        .map(n => haystack.match(new RegExp(`(${n})(?!([^<]+)?>)`, 'gi')))
+        .flat().filter(n => n !== null);
 
     newHaystack = newHaystack.replace(
         new RegExp(
@@ -48,10 +47,9 @@ function find(haystack, needles, options) {
         cssClass,
     } = options;
 
-    const matches = needles.map((n) => {
-        if (!n) return null;
-        return haystack.match(new RegExp(n, 'gi'));
-    }).flat().filter(d => d !== null);
+    const matches = needles
+        .map(n => haystack.match(new RegExp(n, 'gi')))
+        .flat().filter(n => n !== null);
 
     newHaystack = newHaystack.replace(
         new RegExp(matches.join('|'), 'gi'),
@@ -67,25 +65,25 @@ function find(haystack, needles, options) {
 }
 
 export function findMatchesNormalized(haystack, needle, options = defaultOptions) {
-    const needles = normalize(needle).split(split);
+    const needles = normalize(needle).split(split).filter(n => n !== '');
 
     return find(haystack, needles, options);
 }
 
 export function findMatchesHtmlNormalized(haystack, needle, options = defaultOptions) {
-    const needles = normalize(needle).split(split);
+    const needles = normalize(needle).split(split).filter(n => n !== '');
 
     return findHTML(haystack, needles, options);
 }
 
 export function findMatchesHtml(haystack, needle, options = defaultOptions) {
-    const needles = needle.split(split);
+    const needles = needle.split(split).filter(n => n !== '');
 
     return findHTML(haystack, needles, options);
 }
 
 export function findMatches(haystack, needle, options = defaultOptions) {
-    const needles = needle.split(split);
+    const needles = needle.split(split).filter(n => n !== '');
 
     return find(haystack, needles, options);
 }
