@@ -4,7 +4,6 @@ Lucid is **NOT** a fuzzy-search. Lucid cares about **exact** matches
 # Installing
 
 ```bash
-# NPM
 npm i lucid-search --save
 ```
 
