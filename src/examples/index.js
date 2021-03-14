@@ -1,5 +1,10 @@
 const defaultOptions = { el: 'span', cssClass: 'matched' };
-const split = /[.\-_\s]/;
+
+function splitNeedle(needle) {
+    return needle
+        .split(/[.\-_\s]/)
+        .filter(n => n !== '');
+}
 
 function normalize(string) {
     return string
@@ -13,6 +18,13 @@ function normalize(string) {
 }
 
 function findHTML(haystack, needles, options) {
+    if (!needles.length) {
+        return {
+            matches: [],
+            mark: haystack,
+        };
+    }
+
     let newHaystack = haystack;
 
     const {
@@ -22,17 +34,18 @@ function findHTML(haystack, needles, options) {
 
     const matches = needles
         .map(n => haystack.match(new RegExp(`(${n})(?!([^<]+)?>)`, 'gi')))
-        .flat().filter(n => n !== null);
+        .filter(n => n !== null)
+        .join('|').replace(/,/gi, '|');
 
     newHaystack = newHaystack.replace(
         new RegExp(
-            `(${matches.join('|')})(?!([^<]+)?>)`, 'gi',
+            `(${matches})(?!([^<]+)?>)`, 'gi',
         ),
         s => `<${el} class="${cssClass}">${s}</${el}>`,
     );
 
     return {
-        matches,
+        matches: matches.split('|'),
         mark: matches.length > 0
             ? newHaystack
             : haystack,
@@ -40,6 +53,13 @@ function findHTML(haystack, needles, options) {
 }
 
 function find(haystack, needles, options) {
+    if (!needles.length) {
+        return {
+            matches: [],
+            mark: haystack,
+        };
+    }
+
     let newHaystack = haystack;
 
     const {
@@ -49,15 +69,16 @@ function find(haystack, needles, options) {
 
     const matches = needles
         .map(n => haystack.match(new RegExp(n, 'gi')))
-        .flat().filter(n => n !== null);
+        .filter(n => n !== null)
+        .join('|').replace(/,/gi, '|');
 
     newHaystack = newHaystack.replace(
-        new RegExp(matches.join('|'), 'gi'),
+        new RegExp(matches, 'gi'),
         s => `<${el} class="${cssClass}">${s}</${el}>`,
     );
 
     return {
-        matches,
+        matches: matches.split('|'),
         mark: matches.length > 0
             ? newHaystack
             : haystack,
@@ -65,25 +86,25 @@ function find(haystack, needles, options) {
 }
 
 export function findMatchesNormalized(haystack, needle, options = defaultOptions) {
-    const needles = normalize(needle).split(split).filter(n => n !== '');
+    const needles = splitNeedle(normalize(needle));
 
     return find(haystack, needles, options);
 }
 
 export function findMatchesHtmlNormalized(haystack, needle, options = defaultOptions) {
-    const needles = normalize(needle).split(split).filter(n => n !== '');
+    const needles = splitNeedle(normalize(needle));
 
     return findHTML(haystack, needles, options);
 }
 
 export function findMatchesHtml(haystack, needle, options = defaultOptions) {
-    const needles = needle.split(split).filter(n => n !== '');
+    const needles = splitNeedle(needle);
 
     return findHTML(haystack, needles, options);
 }
 
 export function findMatches(haystack, needle, options = defaultOptions) {
-    const needles = needle.split(split).filter(n => n !== '');
+    const needles = splitNeedle(needle);
 
     return find(haystack, needles, options);
 }
