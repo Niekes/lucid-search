@@ -14,8 +14,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://lucid.niekes.com"
+    "url": "github.com/niekes/lucid-search"
   },
+  "homepage": "https://lucid.niekes.com",
   "keywords": [
     "search",
     "highlight",
