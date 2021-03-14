@@ -6,13 +6,23 @@ import {
     findMatchesHtmlNormalized,
 } from '../src/examples/index';
 
-test('Lucid find the correct matches', (t) => {
+test('Lucid finds the correct matches', (t) => {
     const haystack = 'The quick brown fox jumps over the lazy dog';
     const needle = 'The dog';
     const found = findMatches(haystack, needle);
 
     t.deepEquals(found.matches, ['The', 'the', 'dog']);
     t.equals(found.matches.length, 3);
+    t.end();
+});
+
+test('Lucid finds the correct emojis', (t) => {
+    const haystack = '😋 😛 😝 😜 🤪 🤨 🧐 🤓 😎';
+    const needle = '😎';
+    const found = findMatches(haystack, needle);
+
+    t.deepEquals(found.matches, ['😎']);
+    t.equals(found.matches.length, 1);
     t.end();
 });
 
@@ -35,7 +45,7 @@ test('Lucid highlights correctly with options', (t) => {
     t.end();
 });
 
-test('Lucid find the correct matches in HTML string', (t) => {
+test('Lucid finds the correct matches in HTML string', (t) => {
     const haystack = 'The quick brown <strong>fox</strong> jumps over the lazy <div>dog</div>';
     const needle = 'The dog strong div';
     const found = findMatchesHtml(haystack, needle);
@@ -54,7 +64,7 @@ test('Lucid highlights HTML strings correctly', (t) => {
     t.end();
 });
 
-test('Lucid find the correct matches with special characters like äöüè', (t) => {
+test('Lucid finds the correct matches with special characters like äöüè', (t) => {
     const haystack = 'Thé quīçk brown føx jümps over the låzy dog';
     const needle = 'Thë dog';
     const found = findMatchesNormalized(haystack, needle);
