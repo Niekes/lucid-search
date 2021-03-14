@@ -47,11 +47,11 @@ console.log(found);
 
 ### Flavours
 
-`findMatches(heystack, needle, options)`: Use for plain strings **without** special characters like _üöäè_
+`findMatches(haystack, needle, options)`: Use for plain strings **without** special characters like _üöäè_
 
-`findMatchesHtml(heystack, needle, options)`: Use for **html** strings **without** special characters like _üöäè_
+`findMatchesHtml(haystack, needle, options)`: Use for **html** strings **without** special characters like _üöäè_
 
-`findMatchesNormalized(heystack, needle, options)` Use for plain strings **with** special characters like _üöäè_
+`findMatchesNormalized(haystack, needle, options)` Use for plain strings **with** special characters like _üöäè_
 
-`findMatchesHtmlNormalized(heystack, needle, options)`: Use for **html** strings **with** special characters like _üöäè_
+`findMatchesHtmlNormalized(haystack, needle, options)`: Use for **html** strings **with** special characters like _üöäè_
 
