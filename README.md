@@ -59,11 +59,11 @@ console.log(found);
 
 ### Flavours
 
-`findMatches()`: Use for strings **without** special characters like üöäè
+`findMatches()`: Use for plain strings **without** special characters like _üöäè_
 
-`findMatchesHtml()`: Use for html strings **without** special characters like üöäè
+`findMatchesHtml()`: Use for **html** strings **without** special characters like _üöäè_
 
-`findMatchesNormalized()` Use for strings **with** special characters like üöäè
+`findMatchesNormalized()` Use for strings **with** special characters like _üöäè_
 
-`findMatchesHtmlNormalized()`: Use for html strings **with** special characters like üöäè
+`findMatchesHtmlNormalized()`: Use for **html** strings **with** special characters like _üöäè_
 
