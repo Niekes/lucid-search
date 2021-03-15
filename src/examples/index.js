@@ -40,11 +40,18 @@ function find(haystack, needles, options, matchFn) {
         cssClass,
     } = options;
 
+    /*
+        Find matches
+    */
     const matches = needles
         .map(n => haystack.match(matchFn(n)))
         .filter(n => n !== null)
-        .join('|').replace(/,/gi, '|');
+        .join('|')
+        .replace(/,/gi, '|');
 
+    /*
+        Mark matches
+    */
     newHaystack = newHaystack.replace(
         matchFn(matches),
         s => `<${el} class="${cssClass}">${s}</${el}>`,
