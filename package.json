@@ -9,7 +9,7 @@
     "build": "webpack --mode=production --env.fractalMode=build",
     "reset": "rm package-lock.json || true && rm -rf node_modules/ || true && npm install && npm dedupe && npm run dev",
     "dev": "rm -rf src/lucid-search.*.js && webpack --mode=development --env.fractalMode=server",
-    "deploy": "npm run build && node deploy",
+    "deploy": "rm -rf src/lucid-search.*.js && npm run build && node deploy",
     "start": "npm run dev"
   },
   "repository": {
