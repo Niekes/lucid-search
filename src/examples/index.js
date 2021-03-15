@@ -58,6 +58,18 @@ function find(haystack, needles, options, matchFn) {
     };
 }
 
+export function findMatches(haystack, needle, options = defaultOptions) {
+    const needles = splitNeedle(needle);
+
+    return find(haystack, needles, options, match);
+}
+
+export function findMatchesHtml(haystack, needle, options = defaultOptions) {
+    const needles = splitNeedle(needle);
+
+    return find(haystack, needles, options, matchHtml);
+}
+
 export function findMatchesNormalized(haystack, needle, options = defaultOptions) {
     const needles = splitNeedle(normalize(needle));
 
@@ -68,16 +80,4 @@ export function findMatchesHtmlNormalized(haystack, needle, options = defaultOpt
     const needles = splitNeedle(normalize(needle));
 
     return find(haystack, needles, options, matchHtml);
-}
-
-export function findMatchesHtml(haystack, needle, options = defaultOptions) {
-    const needles = splitNeedle(needle);
-
-    return find(haystack, needles, options, matchHtml);
-}
-
-export function findMatches(haystack, needle, options = defaultOptions) {
-    const needles = splitNeedle(needle);
-
-    return find(haystack, needles, options, match);
 }
