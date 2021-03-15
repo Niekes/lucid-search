@@ -1,6 +1,6 @@
 {
   "name": "lucid-search",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "find and highligh results",
   "private": false,
   "main": "src/examples/index.js",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "github.com/niekes/lucid-search"
+    "url": "https://github.com/niekes/lucid-search"
   },
   "homepage": "https://lucid.niekes.com",
   "keywords": [

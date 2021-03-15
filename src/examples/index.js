@@ -1,5 +1,13 @@
 const defaultOptions = { el: 'span', cssClass: 'matched' };
 
+function matchHtml(n) {
+    return new RegExp(`(${n})(?!([^<]+)?>)`, 'gi');
+}
+
+function match(n) {
+    return new RegExp(n, 'gi');
+}
+
 function splitNeedle(needle) {
     return needle
         .split(/[.\-_\s]/)
@@ -17,7 +25,7 @@ function normalize(string) {
         .replace(/u|ü|ù|ú|ŭ|ū|û/gi, '[uüùúŭūû]');
 }
 
-function findHTML(haystack, needles, options) {
+function find(haystack, needles, options, matchFn) {
     if (!needles.length) {
         return {
             matches: [],
@@ -33,47 +41,12 @@ function findHTML(haystack, needles, options) {
     } = options;
 
     const matches = needles
-        .map(n => haystack.match(new RegExp(`(${n})(?!([^<]+)?>)`, 'gi')))
+        .map(n => haystack.match(matchFn(n)))
         .filter(n => n !== null)
         .join('|').replace(/,/gi, '|');
 
     newHaystack = newHaystack.replace(
-        new RegExp(
-            `(${matches})(?!([^<]+)?>)`, 'gi',
-        ),
-        s => `<${el} class="${cssClass}">${s}</${el}>`,
-    );
-
-    return {
-        matches: matches.split('|'),
-        mark: matches.length > 0
-            ? newHaystack
-            : haystack,
-    };
-}
-
-function find(haystack, needles, options) {
-    if (!needles.length) {
-        return {
-            matches: [],
-            mark: haystack,
-        };
-    }
-
-    let newHaystack = haystack;
-
-    const {
-        el,
-        cssClass,
-    } = options;
-
-    const matches = needles
-        .map(n => haystack.match(new RegExp(n, 'gi')))
-        .filter(n => n !== null)
-        .join('|').replace(/,/gi, '|');
-
-    newHaystack = newHaystack.replace(
-        new RegExp(matches, 'gi'),
+        matchFn(matches),
         s => `<${el} class="${cssClass}">${s}</${el}>`,
     );
 
@@ -88,23 +61,23 @@ function find(haystack, needles, options) {
 export function findMatchesNormalized(haystack, needle, options = defaultOptions) {
     const needles = splitNeedle(normalize(needle));
 
-    return find(haystack, needles, options);
+    return find(haystack, needles, options, match);
 }
 
 export function findMatchesHtmlNormalized(haystack, needle, options = defaultOptions) {
     const needles = splitNeedle(normalize(needle));
 
-    return findHTML(haystack, needles, options);
+    return find(haystack, needles, options, matchHtml);
 }
 
 export function findMatchesHtml(haystack, needle, options = defaultOptions) {
     const needles = splitNeedle(needle);
 
-    return findHTML(haystack, needles, options);
+    return find(haystack, needles, options, matchHtml);
 }
 
 export function findMatches(haystack, needle, options = defaultOptions) {
     const needles = splitNeedle(needle);
 
-    return find(haystack, needles, options);
+    return find(haystack, needles, options, match);
 }
