@@ -45,7 +45,7 @@ const options = {
     cssClass: 'found', // default is "marked"
 };
 
-const found = findMatches(haystack, needle);
+const found = findMatches(haystack, needle, options);
 
 console.log(found);
 /*
