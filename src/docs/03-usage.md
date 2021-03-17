@@ -1,3 +1,4 @@
+
 ### Default
 ```js
 import {
@@ -56,7 +57,7 @@ console.log(found);
 
 `findMatchesHtml(haystack, needle, options)`
 
-* Use for **html** strings **without** special characters like _üöäè_
+* Use for plain strings and **html** strings **without** special characters like _üöäè_
 * [Demo](https://lucid.niekes.com/components/detail/lucid-search--html-string.html)
 
 ---
@@ -70,33 +71,33 @@ console.log(found);
 
 `findMatchesHtmlNormalized(haystack, needle, options)`
 
-* Use for **html** strings **with** special characters like _üöäè_
+* Use for plain strings and **html** strings **with** special characters like _üöäè_
 * [Demo](https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute-inside-html-strings.html)
 
 ---
 
 `uncoverMatches(haystack, needles, options)`
 
-* Similar to *findMatches* but expects and array of strings like `'["the", "dog"]'`
+* Similar to *findMatches* but expects an array of strings like `["the", "dog"]`
 * [Demo](https://lucid.niekes.com/components/detail/lucid-search--custom-needle-split.html)
 
 ---
 
 `uncoverMatchesHtml(haystack, needles, options)`
 
-* Similar to *findMatchesHtml* but expects and array of strings like `'["the", "dog"]'`
+* Similar to *findMatchesHtml* but expects an array of strings like `["the", "dog"]`
 
 ---
 
 `uncoverMatchesNormalized(haystack, needles, options)`
 
-* Similar to *findMatchesNormalized* but expects and array of strings like `'["the", "dog"]'`
+* Similar to *findMatchesNormalized* but expects an array of strings like `["the", "dog"]`
 
 ---
 
 `uncoverMatchesHtmlNormalized(haystack, needles, options)`
 
-* Similar to *findMatchesHtmlNormalized* but expects and array of strings like `'["the", "dog"]'`
+* Similar to *findMatchesHtmlNormalized* but expects an array of strings like `["the", "dog"]`
 
 ### Funding
 <a href="https://www.buymeacoffee.com/niekes" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="70"></a>
