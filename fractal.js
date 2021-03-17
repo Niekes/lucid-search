@@ -25,6 +25,7 @@ fractal.components.set('path', path.join(__dirname, 'src'));
 fractal.components.set('default.context', {
     jsFile: argv.env.fractalMode === 'server' ? `/${jsFile}` : `../../${jsFile}`,
     jsMinfile: argv.env.fractalMode === 'server' ? `/${jsMinfile}` : `../../${jsMinfile}`,
+    ngramJs: argv.env.fractalMode === 'server' ? `/ngram.js` : `../../ngram.js`,
 });
 fractal.components.set('default.display', {
     height: '100%'
