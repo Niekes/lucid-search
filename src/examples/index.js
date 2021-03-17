@@ -1,4 +1,7 @@
-const defaultOptions = { el: 'span', cssClass: 'matched' };
+const defaultOptions = {
+    cssClass: 'matched',
+    el: 'span',
+};
 
 function matchHtml(n) {
     return new RegExp(`(${n})(?!([^<]+)?>)`, 'gi');
@@ -33,8 +36,9 @@ function find(haystack, needles, options, matchFn) {
         };
     }
 
-    let newHaystack = haystack;
-
+    /*
+        Options
+    */
     const {
         el,
         cssClass,
@@ -43,48 +47,75 @@ function find(haystack, needles, options, matchFn) {
     /*
         Find matches
     */
-    const matches = needles
-        .map(n => haystack.match(matchFn(n)))
-        .filter(n => n !== null)
-        .join('|')
-        .replace(/,/gi, '|');
+    let j = needles.length;
+    let mark = haystack;
+    const matches = [];
+
+    // eslint-disable-next-line no-plusplus
+    while (j--) {
+        const m = haystack.match(matchFn(needles[j]));
+
+        if (m) {
+            matches.push(m);
+        }
+    }
+
+    if (!matches.length) {
+        return {
+            matches: [],
+            mark: haystack,
+        };
+    }
+
+    const matched = matches.join('|').replace(/,/gi, '|');
+    const matchedSplit = matched.split('|');
 
     /*
         Mark matches
     */
-    newHaystack = newHaystack.replace(
-        matchFn(matches),
+    mark = mark.replace(
+        matchFn(matched),
         s => `<${el} class="${cssClass}">${s}</${el}>`,
     );
 
     return {
-        matches: matches.split('|'),
+        matches: matchedSplit,
         mark: matches.length > 0
-            ? newHaystack
+            ? mark
             : haystack,
     };
 }
 
+/* default */
 export function findMatches(haystack, needle, options = defaultOptions) {
-    const needles = splitNeedle(needle);
-
-    return find(haystack, needles, options, match);
+    return find(haystack, splitNeedle(needle), options, match);
 }
 
 export function findMatchesHtml(haystack, needle, options = defaultOptions) {
-    const needles = splitNeedle(needle);
-
-    return find(haystack, needles, options, matchHtml);
+    return find(haystack, splitNeedle(needle), options, matchHtml);
 }
 
 export function findMatchesNormalized(haystack, needle, options = defaultOptions) {
-    const needles = splitNeedle(normalize(needle));
-
-    return find(haystack, needles, options, match);
+    return find(haystack, splitNeedle(normalize(needle)), options, match);
 }
 
 export function findMatchesHtmlNormalized(haystack, needle, options = defaultOptions) {
-    const needles = splitNeedle(normalize(needle));
+    return find(haystack, splitNeedle(normalize(needle)), options, matchHtml);
+}
 
+/* custom splitting */
+export function uncoverMatches(haystack, needles, options = defaultOptions) {
+    return find(haystack, needles, options, match);
+}
+
+export function uncoverMatchesHtml(haystack, needles, options = defaultOptions) {
+    return find(haystack, needles, options, matchHtml);
+}
+
+export function uncoverMatchesNormalized(haystack, needles, options = defaultOptions) {
+    return find(haystack, needles, options, match);
+}
+
+export function uncoverMatchesHtmlNormalized(haystack, needles, options = defaultOptions) {
     return find(haystack, needles, options, matchHtml);
 }

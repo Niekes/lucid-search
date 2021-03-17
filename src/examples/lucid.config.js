@@ -4,32 +4,8 @@ module.exports = {
     status: 'ready',
     context: {
         method: 'findMatches',
+        example0: true,
         haystack: 'The quick brown fox jumps over the lazy dog',
-        cssStyle: `
-#haystack {
-    color: #aaa;
-    font-size: 1.5rem;
-    font-style: italic;
-    padding: 2rem;
-    text-align: center;
-}
-
-#needle {
-    margin: 0 auto;
-    max-width: 50%;
-    padding: 1rem;
-    width: 50%;
-}
-
-#result {
-    color: #000;
-    padding: 0.5rem;
-    text-align: center;
-}
-
-.matched {
-    color: #000;
-}`,
     },
     variants: [
         {
@@ -37,31 +13,6 @@ module.exports = {
             context: {
                 haystack: 'Thé quīçk brown føx jümps over the låzy dog',
                 method: 'findMatchesNormalized',
-                cssStyle: `
-#haystack {
-    color: #aaa;
-    font-size: 1.5rem;
-    font-style: italic;
-    padding: 2rem;
-    text-align: center;
-}
-
-#needle {
-    margin: 0 auto;
-    max-width: 50%;
-    padding: 1rem;
-    width: 50%;
-}
-
-#result {
-    color: #000;
-    padding: 0.5rem;
-    text-align: center;
-}
-
-.matched {
-    color: #000;
-}`,
             },
         },
         {
@@ -69,31 +20,6 @@ module.exports = {
             context: {
                 method: 'findMatchesHtml',
                 haystack: 'The quick brown <strong>fox</strong> jumps over the lazy <strong>dog</strong>',
-                cssStyle: `
-#haystack {
-    color: #aaa;
-    font-size: 1.5rem;
-    font-style: italic;
-    padding: 2rem;
-    text-align: center;
-}
-
-#needle {
-    margin: 0 auto;
-    max-width: 50%;
-    padding: 1rem;
-    width: 50%;
-}
-
-#result {
-    color: #000;
-    padding: 0.5rem;
-    text-align: center;
-}
-
-.matched {
-    color: #000;
-}`,
             },
         },
         {
@@ -102,33 +28,18 @@ module.exports = {
             context: {
                 method: 'findMatchesHtmlNormalized',
                 haystack: 'Thé quīçk brown <strong>føx</strong> jümps over the låzy <strong>dog</strong>',
-                cssStyle: `
-#haystack {
-    color: #aaa;
-    font-size: 1.5rem;
-    font-style: italic;
-    padding: 2rem;
-    text-align: center;
-}
-
-#needle {
-    margin: 0 auto;
-    max-width: 50%;
-    padding: 1rem;
-    width: 50%;
-}
-
-#result {
-    color: #000;
-    padding: 0.5rem;
-    text-align: center;
-}
-
-.matched {
-    color: #000;
-}`,
             },
 
+        },
+        {
+
+            name: 'Custom needle split',
+            context: {
+                example0: false,
+                example1: true,
+                method: 'uncoverMatches',
+                haystack: 'The quick brown fox jumps over the lazy dog',
+            },
         },
     ],
 };
