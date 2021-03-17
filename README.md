@@ -91,26 +91,26 @@ console.log(found);
 
 `uncoverMatches(haystack, needles, options)`
 
-* Similar to *findMatches* but expects an array of strings like `["the", "dog"]`
+* Similar to *findMatches* but expects an array of strings like `["the", "dog"]` as needle
 * [Demo](https://lucid.niekes.com/components/detail/lucid-search--custom-needle-split.html)
 
 ---
 
 `uncoverMatchesHtml(haystack, needles, options)`
 
-* Similar to *findMatchesHtml* but expects an array of strings like `["the", "dog"]`
+* Similar to *findMatchesHtml* but expects an array of strings like `["the", "dog"]` as needle
 
 ---
 
 `uncoverMatchesNormalized(haystack, needles, options)`
 
-* Similar to *findMatchesNormalized* but expects an array of strings like `["the", "dog"]`
+* Similar to *findMatchesNormalized* but expects an array of strings like `["the", "dog"]` as needle
 
 ---
 
 `uncoverMatchesHtmlNormalized(haystack, needles, options)`
 
-* Similar to *findMatchesHtmlNormalized* but expects an array of strings like `["the", "dog"]`
+* Similar to *findMatchesHtmlNormalized* but expects an array of strings like `["the", "dog"]` as needle
 
 ### Funding
 <a href="https://www.buymeacoffee.com/niekes" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="70"></a>
