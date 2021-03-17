@@ -61,21 +61,56 @@ console.log(found);
 
 ### Flavours
 
-`findMatches(haystack, needle, options)`: Use for plain strings **without** special characters like _üöäè_ - [Demo](https://lucid.niekes.com/components/detail/lucid-search--default.html)
+`findMatches(haystack, needle, options)`
 
-`findMatchesHtml(haystack, needle, options)`: Use for **html** strings **without** special characters like _üöäè_ - [Demo](https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute.html)
+* Use for plain strings **without** special characters like _üöäè_
+* [Demo](https://lucid.niekes.com/components/detail/lucid-search--default.html)
 
-`findMatchesNormalized(haystack, needle, options)` Use for plain strings **with** special characters like _üöäè_ - [Demo](https://lucid.niekes.com/components/detail/lucid-search--default.html)
+---
 
-`findMatchesHtmlNormalized(haystack, needle, options)`: Use for **html** strings **with** special characters like _üöäè_ - [Demo](https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute-inside-html-strings.html)
+`findMatchesHtml(haystack, needle, options)`
 
-`uncoverMatches(haystack, needles, options)`: Similar to *findMatches* but expects and array of strings like '["the", "dog"]' - [Demo](https://lucid.niekes.com/components/detail/lucid-search--custom-needle-split.html)
+* Use for **html** strings **without** special characters like _üöäè_
+* [Demo](https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute.html)
 
-`uncoverMatchesHtml(haystack, needles, options)`: Similar to *findMatchesHtml* but expects and array of strings like '["the", "dog"]'
+---
 
-`uncoverMatchesNormalized(haystack, needles, options)`: Similar to *findMatchesNormalized* but expects and array of strings like '["the", "dog"]'
+`findMatchesNormalized(haystack, needle, options)`
 
-`uncoverMatchesHtmlNormalized(haystack, needles, options)`: Similar to *findMatchesHtmlNormalized* but expects and array of strings like '["the", "dog"]'
+* Use for plain strings **with** special characters like _üöäè_
+* [Demo](https://lucid.niekes.com/components/detail/lucid-search--html-string.html)
+
+---
+
+`findMatchesHtmlNormalized(haystack, needle, options)`
+
+* Use for **html** strings **with** special characters like _üöäè_
+* [Demo](https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute-inside-html-strings.html)
+
+---
+
+`uncoverMatches(haystack, needles, options)`
+
+* Similar to *findMatches* but expects and array of strings like `'["the", "dog"]'`
+* [Demo](https://lucid.niekes.com/components/detail/lucid-search--custom-needle-split.html)
+
+---
+
+`uncoverMatchesHtml(haystack, needles, options)`
+
+* Similar to *findMatchesHtml* but expects and array of strings like `'["the", "dog"]'`
+
+---
+
+`uncoverMatchesNormalized(haystack, needles, options)`
+
+* Similar to *findMatchesNormalized* but expects and array of strings like `'["the", "dog"]'`
+
+---
+
+`uncoverMatchesHtmlNormalized(haystack, needles, options)`
+
+* Similar to *findMatchesHtmlNormalized* but expects and array of strings like `'["the", "dog"]'`
 
 ### Funding
 <a href="https://www.buymeacoffee.com/niekes" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="70"></a>
