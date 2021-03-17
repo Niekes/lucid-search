@@ -71,14 +71,14 @@ console.log(found);
 `findMatchesHtml(haystack, needle, options)`
 
 * Use for **html** strings **without** special characters like _üöäè_
-* [Demo](https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute.html)
+* [Demo](https://lucid.niekes.com/components/detail/lucid-search--html-string.html)
 
 ---
 
 `findMatchesNormalized(haystack, needle, options)`
 
 * Use for plain strings **with** special characters like _üöäè_
-* [Demo](https://lucid.niekes.com/components/detail/lucid-search--html-string.html)
+* [Demo](https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute.html)
 
 ---
 
