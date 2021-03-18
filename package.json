@@ -1,6 +1,6 @@
 {
   "name": "lucid-search",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "find and highligh results",
   "private": false,
   "main": "src/examples/index.js",
