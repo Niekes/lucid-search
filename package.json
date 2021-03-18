@@ -1,6 +1,6 @@
 {
   "name": "lucid-search",
-  "version": "1.0.7",
+  "version": "1.0.10",
   "description": "find and highligh results",
   "private": false,
   "main": "src/examples/index.js",
@@ -45,5 +45,6 @@
     "webpack": "^4.28.3",
     "webpack-cli": "^3.2.1",
     "yargs": "^12.0.5"
-  }
+  },
+  "files": ["/src/lucid-search.*.js", "/src/lucid-search.*.min.js"]
 }
