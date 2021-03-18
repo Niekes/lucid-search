@@ -13,7 +13,7 @@ npm i lucid-search --save
 
 ### CDN
 ```html
-<script src="https://unpkg.com/lucid-search/src/lucid-search.min.js"></script>
+<script src="https://unpkg.com/lucid-search/dist/lucid-search.min.js"></script>
 ```
 
 # Demo
@@ -21,7 +21,7 @@ npm i lucid-search --save
 
 # Usage
 
-### Default
+### Default (ES6)
 ```js
 import {
     findMatches,
