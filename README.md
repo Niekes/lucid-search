@@ -41,7 +41,7 @@ console.log(found);
 */
 ```
 
-### With options
+### With options (ES6)
 ```js
 import {
     findMatches,
@@ -66,6 +66,14 @@ console.log(found);
     matches: (3) ["The", "the", "dog"]
 }
 */
+```
+
+### Default (CDN)
+Same like with ES6, only with `lucidSearch` prefix:
+```js
+// ...
+const found = lucidSearch.findMatches(haystack, needle);
+// ...
 ```
 
 ### Flavours
