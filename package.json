@@ -1,16 +1,17 @@
 {
   "name": "lucid-search",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "find and highligh results",
   "private": false,
   "main": "src/examples/index.js",
   "scripts": {
     "test": "tape -r esm -r ./tests/setup.js ./tests/**/*-test.js | tap-spec",
-    "build": "webpack --mode=production --env.fractalMode=build",
+    "build": "rm -rf src/lucid-search.*.js && webpack --mode=production --env.fractalMode=build",
     "reset": "rm package-lock.json || true && rm -rf node_modules/ || true && npm install && npm dedupe && npm run dev",
     "dev": "rm -rf src/lucid-search.*.js && webpack --mode=development --env.fractalMode=server",
     "deploy": "rm -rf src/lucid-search.*.js && npm run build && node deploy",
-    "start": "npm run dev"
+    "start": "npm run dev",
+    "prepack": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -46,5 +47,5 @@
     "webpack-cli": "^3.2.1",
     "yargs": "^12.0.5"
   },
-  "files": ["/src/lucid-search.*.js", "/src/lucid-search.*.min.js"]
+  "files": ["/dist/lucid-search.min.js"]
 }

@@ -1,3 +1,5 @@
 node_modules
 dist/
 src/lucid-search.*.*.js
+src/lucid-search.min.js
+lucid-search-**.**.tgz

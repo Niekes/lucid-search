@@ -6,8 +6,14 @@
 
 # Installing
 
+### Npm
 ```bash
 npm i lucid-search --save
+```
+
+### CDN
+```html
+<script src="https://unpkg.com/lucid-search/src/lucid-search.min.js"></script>
 ```
 
 # Demo

@@ -11,6 +11,7 @@ module.exports = env => ({
     entry: {
         [`${name}.v${version}`]: pathToEntry,
         [`${name}.v${version}.min`]: pathToEntry,
+        [`${name}.min`]: pathToEntry,
     },
     watch: env.fractalMode === 'server',
     output: {
