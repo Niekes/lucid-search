@@ -5,6 +5,8 @@ module.exports = {
     context: {
         method: 'findMatches',
         example0: true,
+        example1: false,
+        example2: false,
         haystack: 'The quick brown fox jumps over the lazy dog',
     },
     variants: [
@@ -33,10 +35,21 @@ module.exports = {
         },
         {
 
+            name: 'Autocomplete suggestions',
+            context: {
+                example0: false,
+                example1: false,
+                example2: true,
+                method: 'findMatches',
+            },
+        },
+        {
+
             name: 'Custom needle split',
             context: {
                 example0: false,
                 example1: true,
+                example2: false,
                 method: 'uncoverMatches',
                 haystack: 'The quick brown fox jumps over the lazy dog',
             },

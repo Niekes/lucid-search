@@ -71,7 +71,7 @@ fractal.docs.engine(hbs);
 const myCustomisedTheme = mandelbrot({
     nav: ['search', 'docs', 'components', 'information'],
     skin: 'aqua',
-    panels: ['html', 'info', 'notes'],
+    panels: ['html'],
     styles: ['default', '/_subtheme/styles.css'],
     information: [
         {

@@ -1,5 +1,4 @@
 **Lucid** is a stand-alone, zero-dependency, fast and lightweight library to highlight text and find matches.
-Lucid is **NOT** a fuzzy-search. Lucid cares about **exact** matches.
 
 # Installing
 
