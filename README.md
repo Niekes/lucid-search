@@ -1,5 +1,6 @@
 **Lucid** is a stand-alone, zero-dependency, fast and lightweight library to highlight text and find matches.
 
+[![npm](https://img.shields.io/npm/dt/lucid-search)](https://www.npmjs.com/package/lucid-search)
 [![npm](https://img.shields.io/npm/dw/lucid-search)](https://www.npmjs.com/package/lucid-search)
 [![npm](https://img.shields.io/npm/l/lucid-search)](https://github.com/Niekes/lucid-search/blob/master/LICENSE)
 [![npm](https://img.shields.io/npm/v/lucid-search)](https://www.npmjs.com/package/lucid-search)
