@@ -1,8 +1,6 @@
 **Lucid** is a stand-alone, zero-dependency, fast and lightweight library to highlight text and find matches.
 
-
-
-[![Build][build-badge]][build]
+[![Travis (.org) branch](https://img.shields.io/travis/niekes/lucid-search/master)](https://travis-ci.com/github/Niekes/lucid-search)
 [![npm](https://img.shields.io/npm/dt/lucid-search)](https://www.npmjs.com/package/lucid-search)
 [![npm](https://img.shields.io/npm/dw/lucid-search)](https://www.npmjs.com/package/lucid-search)
 [![npm](https://img.shields.io/npm/l/lucid-search)](https://github.com/Niekes/lucid-search/blob/master/LICENSE)
@@ -138,6 +136,3 @@ const found = lucidSearch.findMatches(haystack, needle);
 
 ### Funding
 <a href="https://www.buymeacoffee.com/niekes" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="70"></a>
-
-<!-- Badges -->
-[build-badge]: https://img.shields.io/travis/niekes/lucid-search.svg
