@@ -6,6 +6,8 @@
 [![npm bundle size](https://img.shields.io/bundlephobia/min/lucid-search)](https://bundlephobia.com/result?p=lucid-search)
 [![npm](https://img.shields.io/npm/v/lucid-search)](https://www.npmjs.com/package/lucid-search)
 
+
+
 # Installing
 
 ### Npm
