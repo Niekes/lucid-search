@@ -10,7 +10,7 @@
 
 <table>
     <tr>
-        <td> <a target="_blank" href="https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute-inside-html-strings.html"> <img src="assets/demo-1.gif"> </a> </td>
+        <td> <a target="_blank" href="https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute-inside-html-strings.html"> <img src="assets/demo-0.gif"> </a> </td>
     </tr>
 </table>
 
