@@ -1,7 +1,7 @@
 **Lucid** is a stand-alone, zero-dependency, fast and lightweight library to highlight text and find matches.
 
 [![Codecov](https://img.shields.io/codecov/c/github/niekes/lucid-search)](https://app.codecov.io/gh/niekes/lucid-search)
-[![Travis (.org) branch](https://img.shields.io/travis/niekes/lucid-search/master)](https://travis-ci.com/github/Niekes/lucid-search)
+[![Travis (.org) branch](https://travis-ci.com/Niekes/lucid-search.svg?branch=master)](https://travis-ci.com/github/Niekes/lucid-search)
 [![npm](https://img.shields.io/npm/dt/lucid-search)](https://www.npmjs.com/package/lucid-search)
 [![npm](https://img.shields.io/npm/dw/lucid-search)](https://www.npmjs.com/package/lucid-search)
 [![npm](https://img.shields.io/npm/l/lucid-search)](https://github.com/Niekes/lucid-search/blob/master/LICENSE)
