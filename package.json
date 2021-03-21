@@ -6,7 +6,7 @@
   "main": "src/examples/index.js",
   "scripts": {
     "test": "c8 --reporter=lcov tape -r esm ./tests/setup.js ./tests/**/*-test.js | tap-spec",
-    "test-report": "c8 tape -r esm ./tests/setup.js ./tests/**/*-test.js | tap-spec",
+    "test-report": "c8 tape -r esm ./tests/setup.js ./tests/**/*-test.js | tap-spec && c8 report",
     "build": "rm -rf src/lucid-search.*.js && webpack --mode=production --env.fractalMode=build",
     "reset": "rm package-lock.json || true && rm -rf node_modules/ || true && npm install && npm dedupe && npm run dev",
     "dev": "rm -rf src/lucid-search.*.js && webpack --mode=development --env.fractalMode=server",
