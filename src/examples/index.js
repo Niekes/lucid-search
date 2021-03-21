@@ -81,32 +81,25 @@ function find(haystack, needles, options, matchFn) {
 export function findMatches(haystack, needle, options = defaultOptions) {
     return find(haystack, splitNeedle(needle), options, match);
 }
-
 export function findMatchesHtml(haystack, needle, options = defaultOptions) {
     return find(haystack, splitNeedle(needle), options, matchHtml);
 }
-
 export function findMatchesNormalized(haystack, needle, options = defaultOptions) {
     return find(haystack, splitNeedle(normalize(needle)), options, match);
 }
-
 export function findMatchesHtmlNormalized(haystack, needle, options = defaultOptions) {
     return find(haystack, splitNeedle(normalize(needle)), options, matchHtml);
 }
-
 /* custom splitting */
 export function uncoverMatches(haystack, needles, options = defaultOptions) {
     return find(haystack, needles, options, match);
 }
-
 export function uncoverMatchesHtml(haystack, needles, options = defaultOptions) {
     return find(haystack, needles, options, matchHtml);
 }
-
 export function uncoverMatchesNormalized(haystack, needles, options = defaultOptions) {
     return find(haystack, needles, options, match);
 }
-
 export function uncoverMatchesHtmlNormalized(haystack, needles, options = defaultOptions) {
     return find(haystack, needles, options, matchHtml);
 }
