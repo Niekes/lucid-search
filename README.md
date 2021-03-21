@@ -8,6 +8,12 @@
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/lucid-search)](https://bundlephobia.com/result?p=lucid-search)
 [![npm](https://img.shields.io/npm/v/lucid-search)](https://www.npmjs.com/package/lucid-search)
 
+<table>
+    <tr>
+        <td> <a target="_blank" href="https://lucid.niekes.com/components/detail/lucid-search--default.html"> <img src="assets/demo-1.gif"> </a> </td>
+    </tr>
+</table>
+
 # Installing
 
 ### Npm
