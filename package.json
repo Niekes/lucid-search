@@ -18,6 +18,9 @@
     "type": "git",
     "url": "https://github.com/niekes/lucid-search"
   },
+  "bugs": {
+    "url": "https://github.com/niekes/lucid-search/issues"
+  },
   "homepage": "https://lucid.niekes.com",
   "keywords": [
     "search",
