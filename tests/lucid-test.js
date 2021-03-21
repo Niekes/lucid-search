@@ -5,7 +5,7 @@ import {
     findMatchesNormalized,
     findMatchesHtmlNormalized,
     uncoverMatches,
-} from '../src/examples/index';
+} from '../src/index';
 
 test('Lucid finds the correct matches', (t) => {
     const haystack = 'The quick brown fox jumps over the lazy dog';

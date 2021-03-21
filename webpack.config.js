@@ -1,19 +1,14 @@
 const path = require('path');
-const FractalWebpackPlugin = require('fractal-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const pkg = require('./package.json');
 
-const { name, version } = pkg;
+const { name } = pkg;
+const pathToEntry = './src/index.js';
 
-const pathToEntry = './src/examples/index.js';
-
-module.exports = env => ({
+module.exports = () => ({
     entry: {
-        [`${name}.v${version}`]: pathToEntry,
-        [`${name}.v${version}.min`]: pathToEntry,
         [`${name}.min`]: pathToEntry,
     },
-    watch: env.fractalMode === 'server',
     output: {
         library: 'lucidSearch',
         libraryTarget: 'umd',
@@ -30,11 +25,6 @@ module.exports = env => ({
             },
         ],
     },
-    plugins: [
-        new FractalWebpackPlugin({
-            mode: env.fractalMode,
-        }),
-    ],
     optimization: {
         minimize: true,
         minimizer: [new TerserPlugin({

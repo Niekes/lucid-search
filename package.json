@@ -3,18 +3,15 @@
   "version": "1.0.13",
   "description": "Highlight text and find matches",
   "private": false,
-  "main": "src/examples/index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "c8 --reporter=lcov tape -r esm ./tests/setup.js ./tests/**/*-test.js | tap-spec",
     "coverage": "c8 tape -r esm ./tests/setup.js ./tests/**/*-test.js | tap-spec && c8 report",
-    "build": "rm -rf src/lucid-search.*.js && webpack --mode=production --env.fractalMode=build",
-    "reset": "rm package-lock.json || true && rm -rf node_modules/ || true && npm install && npm dedupe && npm run dev",
-    "dev": "rm -rf src/lucid-search.*.js && webpack --mode=development --env.fractalMode=server",
-    "deploy": "rm -rf src/lucid-search.*.js && npm run build && node deploy",
-    "start": "npm run dev",
+    "build": "rm -rf src/lucid-search.*.js && webpack --mode=production",
+    "reset": "rm package-lock.json || true && rm -rf node_modules/ || true && npm install && npm dedupe && npm test",
     "prepack": "npm run build"
   },
-  "homepage": "https://lucid.niekes.com",
+  "homepage": "https://github.com/niekes/lucid-search",
   "repository": {
     "type": "git",
     "url": "https://github.com/niekes/lucid-search"
@@ -25,7 +22,8 @@
   "keywords": [
     "search",
     "highlight",
-    "match"
+    "match",
+    "special characters"
   ],
   "author": "Stefan Nieke",
   "license": "BSD-3-Clause",
@@ -41,7 +39,6 @@
     "esm": "^3.2.25",
     "extract-loader": "^3.1.0",
     "file-loader": "^3.0.1",
-    "fractal-webpack-plugin": "^4.1.0",
     "ftp-deploy": "^2.4.1",
     "handlebars-helpers": "^0.10.0",
     "tap-spec": "^5.0.0",
@@ -53,6 +50,6 @@
     "yargs": "^12.0.5"
   },
   "files": [
-    "/dist/lucid-search.min.js"
+    "/src/lucid-search.min.js"
   ]
 }
