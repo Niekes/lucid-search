@@ -29,6 +29,8 @@ npm i lucid-search --save
 # Demo
 * [Go to examples](https://lucid.niekes.com/components/detail/lucid-search--default.html)
 
+<!-- https://codepen.io/collection/AEqKVL -->
+
 # Usage
 
 ### Default (ES6)
