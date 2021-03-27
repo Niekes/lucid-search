@@ -144,7 +144,7 @@ const found = lucidSearch.findMatches(haystack, needle);
 `score(matches, [haystack])`
 
 * Creates a score for passed matches, pass haystack so that lucid-search ranks matches closer to the beginning higher
-* [Demo](hhttps://codepen.io/Niekes/pen/KKaMPBg)
+* [Demo](https://codepen.io/Niekes/pen/KKaMPBg)
 
 ### Funding
 <a href="https://www.buymeacoffee.com/niekes" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="70"></a>
