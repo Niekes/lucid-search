@@ -38,13 +38,11 @@ function find(haystack, needles, options, matchFn) {
     /*
         Find matches
     */
-    let j = needles.length;
     let mark = haystack;
     const matches = [];
 
-    // eslint-disable-next-line no-plusplus
-    while (j--) {
-        const m = haystack.match(matchFn(needles[j]));
+    for (let i = 0; i < needles.length; i += 1) {
+        const m = haystack.match(matchFn(needles[i]));
 
         if (m) {
             matches.push(m);
@@ -102,4 +100,17 @@ export function uncoverMatchesNormalized(haystack, needles, options = defaultOpt
 }
 export function uncoverMatchesHtmlNormalized(haystack, needles, options = defaultOptions) {
     return find(haystack, needles, options, matchHtml);
+}
+/* score */
+export function score(matches, haystack = '') {
+    return Array.from(new Set(matches))
+        .reduce((sum, m) => {
+            const index = haystack.indexOf(m);
+            const { length } = haystack;
+            const weight = index !== -1 && length
+                ? ((length - index) / length) + 1
+                : 1;
+
+            return sum + m.length * weight;
+        }, 0);
 }
