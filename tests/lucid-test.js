@@ -5,6 +5,7 @@ import {
     findMatchesNormalized,
     findMatchesHtmlNormalized,
     uncoverMatches,
+    score,
 } from '../src/index';
 
 test('Lucid finds the correct matches', (t) => {
@@ -12,7 +13,7 @@ test('Lucid finds the correct matches', (t) => {
     const needle = 'The dog barks';
     const found = findMatches(haystack, needle);
 
-    t.deepEquals(found.matches, ['dog', 'The', 'the']);
+    t.deepEquals(found.matches, ['The', 'the', 'dog']);
     t.equals(found.matches.length, 3);
     t.end();
 });
@@ -32,7 +33,7 @@ Perhaps far exposed age effects. Now distrusts you her delivered applauded affec
     const needle = 'prevailed match keyboard did';
     const found = findMatches(haystack, needle);
 
-    t.deepEquals(found.matches, ['did', 'did', 'match', 'prevailed']);
+    t.deepEquals(found.matches, ['prevailed', 'match', 'did', 'did']);
     t.equals(found.matches.length, 4);
     t.end();
 });
@@ -43,7 +44,7 @@ test('Lucid handles empty strings correctly', (t) => {
     const found1 = findMatches(haystack, needle);
     const found2 = findMatches(haystack, '    ');
 
-    t.deepEquals(found1.matches, ['dog', 'The', 'the']);
+    t.deepEquals(found1.matches, ['The', 'the', 'dog']);
     t.deepEquals(found2.matches, []);
     t.end();
 });
@@ -67,6 +68,16 @@ test('Lucid highlights correctly', (t) => {
     t.end();
 });
 
+test('Lucid highlights correctly', (t) => {
+    const haystack = 'Emmerich, Wyman and Sanford';
+    const needle = 'emmerich e';
+    const found = findMatches(haystack, needle);
+
+    t.deepEquals(found.matches, ['Emmerich', 'E', 'e']);
+    t.equals(found.mark, '<span class="matched">Emmerich</span>, Wyman and Sanford');
+    t.end();
+});
+
 test('Lucid highlights correctly with options', (t) => {
     const haystack = 'The quick brown fox jumps over the lazy dog';
     const needle = 'The dog barks';
@@ -82,7 +93,7 @@ test('Lucid finds the correct matches in HTML string', (t) => {
     const needle = 'The dog strong div';
     const found = findMatchesHtml(haystack, needle);
 
-    t.deepEquals(found.matches, ['dog', 'The', 'the']);
+    t.deepEquals(found.matches, ['The', 'the', 'dog']);
     t.equals(found.matches.length, 3);
     t.end();
 });
@@ -111,7 +122,7 @@ test('Lucid finds the correct matches with special characters like äöüè', (t
     const needle = 'Thë dog barkß';
     const found = findMatchesNormalized(haystack, needle);
 
-    t.deepEquals(found.matches, ['dog', 'Thé', 'the']);
+    t.deepEquals(found.matches, ['Thé', 'the', 'dog']);
     t.equals(found.matches.length, 3);
     t.end();
 });
@@ -130,7 +141,7 @@ test('Lucid highlights HTML strings correctly with special characters like äö�
     const needle = 'The dog strong div';
     const found = findMatchesHtmlNormalized(haystack, needle);
 
-    t.deepEquals(found.matches, ['dog', 'Thé', 'the']);
+    t.deepEquals(found.matches, ['Thé', 'the', 'dog']);
     t.equals(found.matches.length, 3);
     t.end();
 });
@@ -140,7 +151,7 @@ test('Lucid finds the correct matches when needle was passed as an array of stri
     const needles = ['The', 'dog', 'barks'];
     const found = uncoverMatches(haystack, needles);
 
-    t.deepEquals(found.matches, ['dog', 'The', 'the']);
+    t.deepEquals(found.matches, ['The', 'the', 'dog']);
     t.equals(found.matches.length, 3);
     t.end();
 });
@@ -151,5 +162,27 @@ test('Lucid highlights correctly when needle was passed as an array of strings',
     const found = uncoverMatches(haystack, needles);
 
     t.equals(found.mark, 'The quick brown <span class="matched">fox jumps</span> over the lazy dog');
+    t.end();
+});
+
+test('Lucid scores words closer to the beginning higher', (t) => {
+    const haystack = 'The quick brown fox jumps over the lazy dog';
+    const needle1 = 'quick';
+    const needle2 = 'jumps';
+    const found1 = findMatches(haystack, needle1);
+    const found2 = findMatches(haystack, needle2);
+
+    t.equals(score(found1.matches, haystack) > score(found2.matches, haystack), true);
+    t.end();
+});
+
+test('Lucid scores long matches higher than short ones', (t) => {
+    const haystack = 'The quick brown fox jumps over the lazy dog';
+    const needle1 = 'fox';
+    const needle2 = 'jumps';
+    const found1 = findMatches(haystack, needle1);
+    const found2 = findMatches(haystack, needle2);
+
+    t.equals(score(found1.matches) < score(found2.matches), true);
     t.end();
 });

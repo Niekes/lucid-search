@@ -10,7 +10,7 @@
 
 <table>
     <tr>
-        <td> <a target="_blank" href="https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute-inside-html-strings.html"> <img src="assets/demo.gif"> </a> </td>
+        <td> <a target="_blank" href="https://codepen.io/niekes/pen/QWGJBKe"> <img src="assets/demo-1.gif"> </a> </td>
     </tr>
 </table>
 
@@ -27,9 +27,7 @@ npm i lucid-search --save
 ```
 
 # Demo
-* [Go to examples](https://lucid.niekes.com/components/detail/lucid-search--default.html)
-
-<!-- https://codepen.io/collection/AEqKVL -->
+* [Go to examples](https://codepen.io/collection/AEqKVL)
 
 # Usage
 
@@ -93,35 +91,35 @@ const found = lucidSearch.findMatches(haystack, needle);
 `findMatches(haystack, needle, options)`
 
 * Use for plain strings **without** special characters like _üöäè_
-* [Demo](https://lucid.niekes.com/components/detail/lucid-search--default.html)
+* [Demo](https://codepen.io/Niekes/pen/qBRNdqp)
 
 ---
 
 `findMatchesHtml(haystack, needle, options)`
 
 * Use for plain strings and **html** strings **without** special characters like _üöäè_
-* [Demo](https://lucid.niekes.com/components/detail/lucid-search--html-string.html)
+* [Demo](https://codepen.io/Niekes/pen/abpZOyV)
 
 ---
 
 `findMatchesNormalized(haystack, needle, options)`
 
 * Use for plain strings **with** special characters like _üöäè_
-* [Demo](https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute.html)
+* [Demo](https://codepen.io/Niekes/pen/zYNBGpE)
 
 ---
 
 `findMatchesHtmlNormalized(haystack, needle, options)`
 
 * Use for plain strings and **html** strings **with** special characters like _üöäè_
-* [Demo](https://lucid.niekes.com/components/detail/lucid-search--special-characters-and-umlaute-inside-html-strings.html)
+* [Demo](https://codepen.io/Niekes/pen/QWGJBKe)
 
 ---
 
 `uncoverMatches(haystack, needles, options)`
 
 * Similar to *findMatches* but expects an array of strings like `["the", "dog"]` as needle
-* [Demo](https://lucid.niekes.com/components/detail/lucid-search--custom-needle-split.html)
+* [Demo](https://codepen.io/Niekes/pen/eYgzNjR)
 
 ---
 
@@ -140,6 +138,13 @@ const found = lucidSearch.findMatches(haystack, needle);
 `uncoverMatchesHtmlNormalized(haystack, needles, options)`
 
 * Similar to *findMatchesHtmlNormalized* but expects an array of strings like `["the", "dog"]` as needle
+
+---
+
+`score(matches, [haystack])`
+
+* Creates a score for passed matches, pass haystack so that lucid-search ranks matches closer to the beginning higher
+* [Demo](hhttps://codepen.io/Niekes/pen/KKaMPBg)
 
 ### Funding
 <a href="https://www.buymeacoffee.com/niekes" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="70"></a>
