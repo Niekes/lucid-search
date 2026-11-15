@@ -44,6 +44,7 @@ const config: UserConfig = {
         globals: true,
         environment: 'node',
         include: ['tests/**/*.test.ts'],
+        benchmark: { include: ['bench/**/*.bench.ts'] },
         coverage: {
             provider: 'v8',
             reporter: ['text', 'html', 'json-summary'],

@@ -1,0 +1,64 @@
+import { findAll } from 'highlight-words-core';
+import highlightWords from 'highlight-words';
+import { createHighlighter } from 'spotmark';
+import AccentFolding from 'accent-folding';
+import * as lucid from '../index';
+
+/** Turns (haystack, needle) into an HTML string with every match wrapped in a span. */
+export type Adapter = (haystack: string, needle: string) => string;
+
+// Copied once: calling through the module runner's export getters would slow lucid down only.
+const { findMatches, findMatchesNormalized } = lucid;
+
+const wrap = (text: string): string => `<span class="matched">${text}</span>`;
+const terms = (needle: string): string[] => needle.split(' ');
+const stripAccents = (text: string): string => text.normalize('NFD').replace(/\p{M}/gu, '');
+
+function hwc(haystack: string, needle: string, sanitize?: (text: string) => string): string {
+    return findAll({
+        textToHighlight: haystack,
+        searchWords: terms(needle),
+        autoEscape: true,
+        sanitize
+    })
+        .map(({ start, end, highlight }) => {
+            const text = haystack.slice(start, end);
+            return highlight ? wrap(text) : text;
+        })
+        .join('');
+}
+
+const spotmark = createHighlighter({
+    className: 'matched',
+    separateWordSearch: true,
+    diacritics: false
+});
+const spotmarkAccents = createHighlighter({
+    className: 'matched',
+    separateWordSearch: true,
+    diacritics: true
+});
+const folding = new AccentFolding();
+
+/** Plain-text adapters: case-insensitive, every occurrence, no accent folding. */
+export const plain: Record<string, Adapter> = {
+    'lucid-search': (h, n) => findMatches(h, n).mark,
+    'highlight-words-core': (h, n) => hwc(h, n),
+    'highlight-words': (h, n) =>
+        highlightWords({ text: h, query: n })
+            .map(({ text, match }) => (match ? wrap(text) : text))
+            .join(''),
+    spotmark: (h, n) => spotmark(h, n)
+};
+
+/** Accent-insensitive adapters. accent-folding takes a single search term. */
+export const accents: Record<string, Adapter> = {
+    'lucid-search': (h, n) => findMatchesNormalized(h, n).mark,
+    'highlight-words-core': (h, n) => hwc(h, n, stripAccents),
+    spotmark: (h, n) => spotmarkAccents(h, n),
+    'accent-folding': (h, n) => folding.highlightMatch(h, n, 'span')
+};
+
+/** The highlighted texts in order, so outputs with different tags can be compared. */
+export const highlighted = (html: string): string[] =>
+    [...html.matchAll(/<span[^>]*>(.*?)<\/span>/g)].map((m) => m[1]);

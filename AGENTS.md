@@ -56,6 +56,7 @@ Declared in `.fallowrc.jsonc`; a violation fails the build.
 | `core`       | `src/**`   | `core`                                    |
 | `tests`      | `tests/**` | `public-api` (and `core` only through it) |
 | `docs`       | `docs/**`  | `public-api` (and `core` only through it) |
+| `bench`      | `bench/**` | `public-api` (and `core` only through it) |
 
 Tests and docs import from `index.ts` only. A test that imports `src/`
 directly leaves the public export untested, which `coverage-gaps` reports.
@@ -68,3 +69,12 @@ updates `CHANGELOG.md`. Merging it into `master` triggers
 the version is not on npm yet) and creates the `vX.Y.Z` GitHub release. The
 version goes live once a maintainer approves it with 2FA. Never run
 `npm publish`, `npm stage approve` or push a version tag by hand.
+
+## Benchmarks
+
+`bench/` compares lucid-search with other highlighting libraries: `pnpm bench`
+(Node), `pnpm bench:browser` (mark.js, Chromium) and `pnpm bench:size`. Each
+library must highlight exactly the same text as lucid-search before it is timed.
+The benchmarks are not part of `pnpm verify`, because timing varies between
+runs. After a run that changes the numbers, update `docs/guide/performance.md`
+with the new results and setup.

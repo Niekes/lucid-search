@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "ES2020",
-        "module": "ES2020",
+        "module": "ES2022",
         "lib": ["ES2020", "DOM"],
         "strict": true,
         "skipLibCheck": true,
@@ -10,12 +10,20 @@
         "isolatedDeclarations": true,
         "declaration": true,
         "noEmit": true,
+        "allowImportingTsExtensions": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
-        "types": ["vitest/globals"]
+        "types": ["vitest/globals", "node"]
     },
-    "include": ["index.ts", "src/**/*", "tests/**/*", "docs/.vitepress/**/*.ts", "vite.config.ts"],
+    "include": [
+        "index.ts",
+        "src/**/*",
+        "tests/**/*",
+        "bench/**/*",
+        "docs/.vitepress/**/*.ts",
+        "vite.config.ts"
+    ],
     "exclude": ["node_modules", "build", "docs/.vitepress/cache", "docs/.vitepress/dist"]
 }
