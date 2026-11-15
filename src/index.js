@@ -64,6 +64,9 @@ export function highlight(haystack, matches, { el = 'span', cssClass = 'matched'
 }
 
 export function score(matches, haystack) {
+    if (typeof haystack !== 'string') {
+        throw new TypeError('haystack must be a string');
+    }
     const firstStart = new Map();
     matches.forEach(({ text, start }) => {
         if (!firstStart.has(text)) firstStart.set(text, start);

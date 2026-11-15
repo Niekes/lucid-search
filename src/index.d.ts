@@ -35,5 +35,8 @@ export function highlight(
     options?: { el?: string; cssClass?: string },
 ): string;
 
-/** Rank Haystacks for the same Needle: longer and earlier distinct Matches score higher. */
+/**
+ * Rank Haystacks for the same Needle: longer and earlier distinct Matches score higher.
+ * @throws TypeError when haystack is not a string.
+ */
 export function score(matches: Match[], haystack: string): number;

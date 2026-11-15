@@ -20,3 +20,7 @@ test('score ranks Haystacks: an early Match beats a late one', () => {
 test('no Matches scores 0', () => {
     assert.equal(score([], 'anything'), 0);
 });
+
+test('score without a Haystack throws a TypeError an agent can act on', () => {
+    assert.throws(() => score([], undefined), /haystack must be a string/);
+});

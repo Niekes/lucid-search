@@ -3,6 +3,7 @@
   "version": "2.0.0",
   "description": "Find literal matches with positions in text; built for AI agents and search-as-you-type",
   "type": "module",
+  "packageManager": "pnpm@12.21.0",
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
