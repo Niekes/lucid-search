@@ -3,10 +3,16 @@
     "version": "2.0.0",
     "description": "Highlight text and find matches",
     "keywords": [
+        "accent-insensitive",
+        "diacritics",
         "highlight",
         "match",
         "search",
-        "special characters"
+        "special characters",
+        "text",
+        "text-highlighting",
+        "typescript",
+        "zero-dependency"
     ],
     "homepage": "https://niekes.github.io/lucid-search/",
     "bugs": {
