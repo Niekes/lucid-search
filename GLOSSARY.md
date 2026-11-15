@@ -1,17 +1,25 @@
 # Glossary
 
-**Haystack**: The text being searched. Always a single string.
+**Haystack**: the text being searched. It is either plain text or an HTML string. `search` and `highlight` treat it as plain text.
 
-**Needle**: What the caller searches for: either one string, which is split into Terms, or a ready-made list of Terms. Taken literally: characters such as `+`, `.` or `(` mean themselves, never pattern syntax.
+**Needle**: the raw search input, as a single string, e.g. `"The dog"`. Taken literally: characters such as `+`, `.` or `(` mean themselves, never pattern syntax.
 
-**Term**: One piece of a Needle, searched for on its own. Terms that differ only in case are the same Term. A Haystack matches if any Term is found in it.
+**Search term**: one piece of a needle after splitting on whitespace, `.`, `-` or `_`, e.g. `"The"` and `"dog"`. The _uncover_ flavours and `search` also take search terms directly instead of a needle. In `search`, search terms that differ only in case are the same search term.
 
-**Match**: One place in the Haystack where a Term was found, identified by where it starts and ends, the text found there and the Term that found it.
+**Match**: one occurrence of a search term found in the haystack, in its original casing (`"the"` and `"The"` are separate matches). The flavours return it as a string; `search` returns it as `{ start, end, text, term }`, so `haystack.slice(start, end) === text`.
 
-**Missing Term**: A Term that occurs nowhere in the Haystack. A Term covered by a longer overlapping Match still occurs, so it is not missing. Tells the caller which part of its Needle to rephrase.
+**Missing search term**: a search term that occurs nowhere in the haystack. One covered by a longer overlapping match still occurs, so it is not missing. Tells an agent which part of its needle to rephrase.
 
-**Highlight**: Marking the Matches inside a Haystack for display. Separate from searching; a search never produces display output.
+**Mark**: the haystack returned with every match wrapped in a highlight element. The flavours return it unescaped.
 
-**Normalization**: Treating accented and plain forms of a letter as the same letter (`e` matches `é`, `ë`, …), so a Needle without accents finds accented text.
+**Highlight**: build a mark from the matches of `search`, HTML-escaping the whole haystack. Separate from searching; `search` never produces display output.
 
-**Score**: A number for ranking Haystacks against the same Needle; higher means a better fit.
+**Flavour**: one of the eight `findMatches*` / `uncoverMatches*` functions. Each one is a combination of three choices:
+
+- _find_ (takes a needle) or _uncover_ (takes search terms)
+- plain or _Html_ (ignores text inside tags)
+- with or without _Normalized_
+
+**Normalize**: make a search term also match the accented variants of its letters, so `"a"` also matches `"ä"` and `"å"`. Each letter stays one character, so match positions still line up with the haystack.
+
+**Score**: a number ranking how well a haystack matched. Longer distinct matches and matches closer to the start of the haystack score higher.

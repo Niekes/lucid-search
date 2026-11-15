@@ -1,36 +1,92 @@
-**Lucid** is a stand-alone, zero-dependency, lightweight library that finds literal matches in text and tells you exactly where they are. It is built for AI agents (tool calls get plain JSON with positions) and for search-as-you-type UIs (safe highlighting).
+<p align="center">
+  <a href="https://github.com/sponsors/niekes"><img src="https://img.shields.io/badge/Sponsor_lucid--search-EA4AAA?logo=githubsponsors&logoColor=white&style=for-the-badge" alt="Sponsor lucid-search"></a>
+</p>
 
-[![npm](https://img.shields.io/npm/dt/lucid-search)](https://www.npmjs.com/package/lucid-search)
-[![npm](https://img.shields.io/npm/l/lucid-search)](https://github.com/Niekes/lucid-search/blob/master/LICENSE)
-[![npm bundle size](https://img.shields.io/bundlephobia/minzip/lucid-search)](https://bundlephobia.com/result?p=lucid-search)
-[![npm](https://img.shields.io/npm/v/lucid-search)](https://www.npmjs.com/package/lucid-search)
+<p align="center">
+  <strong>Highlight text and find matches. Zero dependencies, about 1 kB.</strong><br>
+  Free and open source, kept alive by one maintainer and the people who sponsor the work.
+</p>
 
-<table>
-    <tr>
-        <td> <a target="_blank" href="https://codepen.io/niekes/pen/QWGJBKe"> <img src="assets/demo-1.gif"> </a> </td>
-    </tr>
-</table>
+<p align="center">
+  <a href="https://github.com/niekes/lucid-search/actions"><img src="https://github.com/niekes/lucid-search/actions/workflows/main.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/niekes/lucid-search/actions"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/niekes/lucid-search/master/.github/badges/coverage.json" alt="Coverage"></a>
+  <a href="https://fallow.tools/docs/explanations/health/"><img src="https://raw.githubusercontent.com/niekes/lucid-search/master/.github/badges/health.svg" alt="fallow health"></a>
+  <a href="https://www.npmjs.com/package/lucid-search"><img src="https://img.shields.io/npm/dt/lucid-search" alt="npm downloads"></a>
+  <a href="https://www.npmjs.com/package/lucid-search"><img src="https://img.shields.io/npm/dw/lucid-search" alt="npm weekly downloads"></a>
+  <a href="https://github.com/niekes/lucid-search/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/lucid-search" alt="License"></a>
+  <a href="https://www.npmjs.com/package/lucid-search"><img src="https://img.shields.io/npm/v/lucid-search" alt="npm version"></a>
+  <a href="https://bundlephobia.com/result?p=lucid-search"><img src="https://img.shields.io/bundlephobia/minzip/lucid-search" alt="Bundle size"></a>
+  <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript">
+  <a href="https://github.com/niekes/lucid-search"><img src="https://img.shields.io/github/stars/niekes/lucid-search" alt="GitHub stars"></a>
+  <a href="https://github.com/sponsors/niekes"><img src="https://img.shields.io/github/sponsors/niekes?logo=GitHub+Sponsors&logoColor=%23EA4AAA&style=flat" alt="GitHub Sponsors"></a>
+</p>
 
-# Installing
+<p align="center">
+  <a href="https://niekes.github.io/lucid-search/">Docs</a> ·
+  <a href="https://niekes.github.io/lucid-search/guide/getting-started">Getting started</a> ·
+  <a href="https://niekes.github.io/lucid-search/api/">API reference</a> ·
+  <a href="https://niekes.github.io/lucid-search/playground">Playground</a> ·
+  <a href="https://niekes.github.io/lucid-search/guide/migration">Migrating from v1</a>
+</p>
+
+---
+
+<p align="center">
+  <a target="_blank" href="https://niekes.github.io/lucid-search/playground"><img src="assets/demo-1.gif" alt="lucid-search highlighting matches as you type"></a>
+</p>
+
+Try it in the [playground](https://niekes.github.io/lucid-search/playground).
+
+## Sponsor lucid-search
+
+**lucid-search** is free, and it always will be. There is no company behind it — just one maintainer working in spare time — so the cost of keeping it alive is paid for by the people who depend on it.
+
+If lucid-search saves you time, [become a sponsor](https://github.com/sponsors/niekes).
+
+| Tier        | What you get                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| **$5/mo**   | Your name in the [sponsors list](#sponsors) and my sincere thanks                           |
+| **$25/mo**  | The above, plus your logo in the README and on the docs site, and priority issue triage     |
+| **$100/mo** | The above, plus direct email access for feature requests and a mention in the release notes |
+
+Where the money goes:
+
+- **Issue triage and bug fixes.** Sponsorship buys a reply within a couple of days instead of whenever I get to it.
+- **Types that stay correct.** Keeping the TypeScript types accurate as TypeScript and the platform move on.
+- **The documentation site.** Hosting, builds and the playground.
+- **Time for new work.** More languages for normalizing, and better ranking.
+
+Prefer a one-off? The [sponsor page](https://github.com/sponsors/niekes) also takes one-time contributions.
+
+**Need a company sponsorship or an invoice?** [Get in touch](mailto:s@niekes.com).
+
+## Sponsors
+
+Thank you to the people who make this possible. Sponsors at $25/mo and above get their logo in this README and on the docs site; everyone gets their name below.
+
+<!-- New sponsors go below this line, one per line. -->
+
+## Using lucid-search
 
 ```bash
-npm i lucid-search
+npm install lucid-search
 ```
-
-```html
-<script type="module">
-    import { search } from 'https://unpkg.com/lucid-search@2/src/index.js';
-</script>
-```
-
-ES modules only, Node >= 20.19.
-
-# Usage
-
-### `search(haystack, needle, { normalize? })`
 
 ```js
-import { search } from 'lucid-search';
+import { findMatches } from 'lucid-search';
+
+findMatches('The quick brown fox jumps over the lazy dog', 'The dog').mark;
+// '<span class="matched">The</span> quick brown fox jumps over <span class="matched">the</span> lazy <span class="matched">dog</span>'
+```
+
+`mark` is not escaped. Only put it into `innerHTML` if you trust the haystack.
+
+## Using it from an AI agent
+
+`search` returns plain JSON with positions, plus the search terms it could not find, so an agent knows what to rephrase. `highlight` turns those matches into HTML and escapes the whole haystack.
+
+```js
+import { search, highlight } from 'lucid-search';
 
 search('The quick brown fox jumps over the lazy dog', 'The dog barks');
 /*
@@ -38,85 +94,43 @@ search('The quick brown fox jumps over the lazy dog', 'The dog barks');
     matches: [
         { start: 0, end: 3, text: 'The', term: 'The' },
         { start: 31, end: 34, text: 'the', term: 'The' },
-        { start: 40, end: 43, text: 'dog', term: 'dog' },
+        { start: 40, end: 43, text: 'dog', term: 'dog' }
     ],
-    missing: ['barks'],
+    missing: ['barks']
 }
 */
 ```
 
-* The needle is **literal**: `c++`, `$5` or `(x` match themselves, never as a regex.
-* A string needle is split into terms on whitespace, `.`, `-` and `_`. Pass an array (`['new york', 'c++']`) to choose the terms yourself.
-* Case-insensitive, matches inside words, sorted by `start`, never overlapping (the longer term wins).
-* `missing` lists the terms that occur nowhere, so an agent knows what to rephrase.
-* `{ normalize: true }` lets `creme` find `Crème`; positions still point into the original text.
-* Wrong input types throw a `TypeError`.
-
-### `highlight(haystack, matches, { el = 'span', cssClass = 'matched' })`
-
-```js
-import { search, highlight } from 'lucid-search';
-
-const text = 'The lazy dog';
-highlight(text, search(text, 'dog').matches, { el: 'mark' });
-// 'The lazy <mark class="matched">dog</mark>'
-```
-
-The whole haystack is HTML-escaped, so it is safe to put into `innerHTML`.
-
-### `score(matches, haystack)`
-
-Rank several haystacks for the same needle: longer and earlier matches score higher.
-
-```js
-const ranked = docs
-    .map(doc => ({ doc, matches: search(doc, needle).matches }))
-    .map(r => ({ ...r, score: score(r.matches, r.doc) }))
-    .filter(r => r.score > 0)
-    .sort((a, b) => b.score - a.score);
-```
-
-# Using it from an AI agent
-
-Give the model the text around each match instead of the whole document:
-
-```js
-const context = matches.map(m => text.slice(Math.max(0, m.start - 80), m.end + 80));
-```
-
-Wrap `search` as a tool (shape shown for the Anthropic Messages API; other frameworks are similar):
+Give the model the text around each match instead of the whole document, by wrapping `search` as a tool (shape shown for the Anthropic Messages API; other frameworks are similar):
 
 ```js
 const tool = {
     name: 'find_in_text',
-    description: 'Find literal, case-insensitive occurrences of search terms in the document. Returns positions, short context, and terms that were not found.',
+    description:
+        'Find literal, case-insensitive occurrences of search terms in the document. Returns positions, short context, and terms that were not found.',
     input_schema: {
         type: 'object',
         properties: { terms: { type: 'array', items: { type: 'string' } } },
-        required: ['terms'],
-    },
+        required: ['terms']
+    }
 };
 
 function findInText({ terms }) {
     const { matches, missing } = search(documentText, terms, { normalize: true });
     return {
         missing,
-        matches: matches.slice(0, 20).map(m => ({
+        matches: matches.slice(0, 20).map((m) => ({
             ...m,
-            context: documentText.slice(Math.max(0, m.start - 80), m.end + 80),
-        })),
+            context: documentText.slice(Math.max(0, m.start - 80), m.end + 80)
+        }))
     };
 }
 ```
 
 See [`llms.txt`](llms.txt) for a compact API reference for coding assistants.
 
-# Upgrading from v1
+Everything else lives in the [documentation](https://niekes.github.io/lucid-search/): [getting started](https://niekes.github.io/lucid-search/guide/getting-started), the [API reference](https://niekes.github.io/lucid-search/api/), the [playground](https://niekes.github.io/lucid-search/playground) and [migrating from v1](https://niekes.github.io/lucid-search/guide/migration).
 
-v1's eight `findMatches*` / `uncoverMatches*` functions are replaced by `search` (+ `highlight` if you rendered `mark`). Needles are no longer regular expressions. See [docs/adr/0001](docs/adr/0001-search-returns-data-for-agent-callers.md).
+## Star History
 
-### Funding
-<a href="https://www.buymeacoffee.com/niekes" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="70"></a>
-
-### License
-[BSD-3-Clause](https://github.com/Niekes/lucid-search/blob/master/LICENSE) © [Stefan Nieke](https://www.niekes.com)
+[![Star History Chart](https://api.star-history.com/svg?repos=niekes/lucid-search&type=date&legend=bottom-right)](https://www.star-history.com/#niekes/lucid-search&type=date&legend=bottom-right)

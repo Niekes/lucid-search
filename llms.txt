@@ -1,6 +1,6 @@
 # lucid-search
 
-> Zero-dependency ES module that finds literal, case-insensitive matches in a string and returns their positions. Safe HTML highlighting and a ranking score included.
+> Zero-dependency library (ESM, CommonJS, UMD) that finds literal, case-insensitive matches in a string and returns their positions. Safe HTML highlighting and a ranking score included.
 
 import { search, highlight, score } from 'lucid-search';
 
@@ -15,7 +15,7 @@ Returns { matches: { start, end, text, term }[], missing: string[] }.
 ## highlight(haystack: string, matches: Match[], options?: { el?: string = 'span', cssClass?: string = 'matched' })
 Returns HTML: the haystack HTML-escaped, each match wrapped in <el class="cssClass">. Pass matches as search returned them.
 
-## score(matches: Match[], haystack: string): number
+## score(matches: (Match | string)[], haystack = ''): number
 Higher = better fit. Use to sort several haystacks searched with the same needle.
 
 ## Examples
@@ -23,3 +23,6 @@ search('The lazy dog', 'the cat') // { matches: [{ start: 0, end: 3, text: 'The'
 highlight('a < dog', search('a < dog', 'dog').matches) // 'a &lt; <span class="matched">dog</span>'
 docs.sort((a, b) => score(search(b, q).matches, b) - score(search(a, q).matches, a)) // best first
 const context = matches.map(m => text.slice(Math.max(0, m.start - 80), m.end + 80));
+
+## Older API
+The eight findMatches* / uncoverMatches* flavours return { matches: string[], mark: string } with an unescaped mark. Prefer search + highlight in new code.
