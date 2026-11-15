@@ -185,6 +185,35 @@ it('Lucid marks the longest match when search terms overlap', () => {
     expect(found.mark).toBe('<span class="matched">Emmerich</span>');
 });
 
+it('Lucid covers overlapping matches with one highlight', () => {
+    const found = findMatches('The quick brown fox jumps over the lazy dog', 'ove ver');
+
+    expect(found.matches).toEqual(['ove', 'ver']);
+    expect(found.mark).toBe(
+        'The quick brown fox jumps <span class="matched">over</span> the lazy dog'
+    );
+});
+
+it('Lucid covers touching matches with one highlight', () => {
+    expect(findMatches('jumps over the', 'ov er').mark).toBe(
+        'jumps <span class="matched">over</span> the'
+    );
+});
+
+it('Lucid highlights only the match, not the rest of the word', () => {
+    expect(
+        findMatches('The quick brown fox jumps over the lazy dog', 'o', { el: 'mark' }).mark
+    ).toBe(
+        'The quick br<mark class="matched">o</mark>wn f<mark class="matched">o</mark>x jumps <mark class="matched">o</mark>ver the lazy d<mark class="matched">o</mark>g'
+    );
+});
+
+it('Lucid covers overlapping matches with one highlight in HTML strings', () => {
+    expect(findMatchesHtml('jumps <b class="over">over</b>', 'ove ver').mark).toBe(
+        'jumps <b class="over"><span class="matched">over</span></b>'
+    );
+});
+
 it('Lucid normalizes search terms passed as an array', () => {
     const found = uncoverMatchesNormalized('Thé quick dög', ['the', 'dog']);
 

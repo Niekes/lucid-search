@@ -34,10 +34,10 @@ Matching ignores case, and regex characters in the needle are treated as plain t
 findMatches(haystack, needle, { el: 'mark', cssClass: 'found' });
 ```
 
-| Option     | Default   | Description                       |
-| ---------- | --------- | --------------------------------- |
-| `el`       | `span`    | The element that wraps each match |
-| `cssClass` | `matched` | The class of that element         |
+| Option     | Default   | Description                   |
+| ---------- | --------- | ----------------------------- |
+| `el`       | `span`    | The element of each highlight |
+| `cssClass` | `matched` | The class of that element     |
 
 Options you leave out keep their default.
 

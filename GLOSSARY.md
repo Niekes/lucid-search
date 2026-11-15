@@ -8,7 +8,9 @@
 
 **Match**: one occurrence of a search term found in the haystack, in its original casing (`"the"` and `"The"` are separate matches).
 
-**Mark**: the haystack returned with every match wrapped in a highlight element.
+**Mark**: the haystack returned with every match covered by a highlight.
+
+**Highlight**: one element wrapped around part of the mark. Matches that overlap or touch share one highlight (`"ove ver"` highlights all of `"over"`). A highlight never reaches past its matches: searching `"o"` highlights only the `o`, not the rest of the word.
 
 **Flavour**: one of the eight search functions. Each one is a combination of three choices:
 

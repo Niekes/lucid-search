@@ -5,7 +5,7 @@ Every flavour has the same shape and returns a `Found` object:
 ```ts
 interface Found {
     matches: string[]; // every match, in its original casing
-    mark: string; // the haystack with every match wrapped in <el class="cssClass">
+    mark: string; // the haystack with every match highlighted in <el class="cssClass">
 }
 
 interface MarkOptions {

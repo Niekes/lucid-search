@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Matches that overlap or touch share one highlight: the needle `ove ver` highlights all of `over`, not just `ove`.
+
 ## [2.0.0] - 2026-11-15
 
 Rewritten in TypeScript. See [Migrating from v1](https://niekes.github.io/lucid-search/guide/migration).
