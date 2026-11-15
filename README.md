@@ -73,13 +73,19 @@ npm install lucid-search
 ```
 
 ```js
-import { findMatches } from 'lucid-search';
+import { findRanges, toSegments } from 'lucid-search';
 
-findMatches('The quick brown fox jumps over the lazy dog', 'The dog').mark;
-// '<span class="matched">The</span> quick brown fox jumps over <span class="matched">the</span> lazy <span class="matched">dog</span>'
+const haystack = 'Café au lait in Łódź';
+toSegments(haystack, findRanges(haystack, 'cafe lodz'));
+// [
+//   { text: 'Café', match: true },
+//   { text: ' au lait in ', match: false },
+//   { text: 'Łódź', match: true }
+// ]
 ```
 
-`mark` is not escaped. Only put it into `innerHTML` if you trust the haystack.
+lucid-search returns positions, never HTML, so you render the matches yourself, e.g. as
+`<mark>` elements in React, and an untrusted haystack can't inject markup.
 
 Everything else lives in the [documentation](https://niekes.github.io/lucid-search/): [getting started](https://niekes.github.io/lucid-search/guide/getting-started), the [API reference](https://niekes.github.io/lucid-search/api/), the [playground](https://niekes.github.io/lucid-search/playground) and [migrating from v1](https://niekes.github.io/lucid-search/guide/migration).
 

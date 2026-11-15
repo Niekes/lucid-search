@@ -2,23 +2,26 @@
 
 ## [2.0.0] - 2026-11-15
 
-Rewritten in TypeScript. See [Migrating from v1](https://niekes.github.io/lucid-search/guide/migration).
+Rewritten in TypeScript, returning positions instead of HTML. See [Migrating from v1](https://niekes.github.io/lucid-search/guide/migration).
 
 ### Breaking
 
-- `uncoverMatchesNormalized` and `uncoverMatchesHtmlNormalized` now normalize.
-- Regex characters in the needle are matched as plain text.
-- The longest match wins when search terms overlap.
-- `normalize` is a named export; the deep import `lucid-search/src/normalize` is gone.
+- The eight `findMatches*` and `uncoverMatches*` functions and the HTML `mark` string are removed. Use `findRanges` and `toSegments`, and render matches with your own elements ([ADR 0001](docs/adr/0001-ranges-not-html.md)).
+- HTML haystacks are no longer supported; strip markup first.
+- A query is split on whitespace only, so `e-mail` and `foo.bar` are one term.
+- `score(haystack, ranges)` replaces `score(matches, haystack)`.
+- `normalize` is no longer exported; normalization is the `normalize` option of `findRanges`, on by default.
 - The CDN file moved to `build/lucid-search.js`.
 
 ### Fixed
 
+- Terms are matched as plain text: `c++`, `(` or `[` no longer throw, and no query can make matching slow.
 - Matches that contain a comma are no longer split.
-- Empty search terms are ignored.
+- Accent-insensitive matching covers all Latin letters, including `ñ`, `ł`, `ý`, `ž`, `ğ`, `ş`, and `ß` matches `ss`.
 
 ### Added
 
-- TypeScript types, ESM and CommonJS builds.
-- Options can be passed partially; missing fields keep their default.
+- `findRanges(haystack, query, { normalize })` returns sorted, merged `{ start, end }` Ranges into the original haystack.
+- `toSegments(haystack, ranges)` returns `{ text, match }` Segments that rebuild the haystack exactly.
+- TypeScript types, ESM, CommonJS and UMD builds.
 - Documentation site with a playground.
