@@ -1,0 +1,65 @@
+{
+    "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+
+    // The docs playground is a dev surface: the shipped package never imports
+    // vue, so the docs may use it while it stays a devDependency.
+    "ignoreDependencies": ["vue"],
+
+    // The public entry point of the package, plus the docs site, which is a
+    // dev surface that reaches the library through the public API only.
+    "entry": ["index.ts", "docs/.vitepress/config.ts", "docs/.vitepress/theme/index.ts"],
+
+    // Every rule that can catch a violation of the architecture is an error.
+    "rules": {
+        "unused-files": "error",
+        "unused-exports": "error",
+        "unused-types": "error",
+        "unused-class-members": "error",
+        "private-type-leaks": "error",
+        "unresolved-imports": "error",
+        "unlisted-dependencies": "error",
+        "duplicate-exports": "error",
+        "circular-dependencies": "error",
+        "re-export-cycle": "error",
+        "boundary-violation": "error",
+        "coverage-gaps": "error",
+        "stale-suppressions": "error"
+    },
+
+    //   index.ts   public-api  ->  core
+    //   src/*      core        ->  core
+    //   tests/*    tests       ->  public-api (core only through it)
+    //   docs/*     docs        ->  public-api (core only through it)
+    //
+    // Fallow follows the re-exports of index.ts, so tests and docs must be
+    // allowed to reach core. They still import from index.ts only: a test
+    // that imports src/ directly leaves the public export untested, which
+    // the coverage-gaps rule reports.
+    "boundaries": {
+        "zones": [
+            { "name": "public-api", "patterns": ["index.ts"] },
+            { "name": "core", "patterns": ["src/**/*.ts"] },
+            { "name": "tests", "patterns": ["tests/**"] },
+            { "name": "docs", "patterns": ["docs/**"] }
+        ],
+        "rules": [
+            { "from": "public-api", "allow": ["core"] },
+            { "from": "core", "allow": ["core"] },
+            { "from": "tests", "allow": ["public-api", "core"] },
+            { "from": "docs", "allow": ["public-api", "core"] }
+        ],
+        "coverage": {
+            "requireAllFiles": true,
+            "allowUnmatched": ["vite.config.ts"]
+        },
+        "calls": {
+            "forbidden": [{ "from": "core", "callee": ["console.*", "debugger"] }]
+        }
+    },
+    // Every file in the package is new in v2, so there is no inherited debt to
+    // exempt: a finding anywhere in a changed file fails the audit.
+    "audit": { "gate": "all" },
+    "health": {
+        "ignore": ["tests/**", "docs/**"]
+    }
+}
