@@ -1,9 +1,6 @@
-**Lucid** is a stand-alone, zero-dependency, fast and lightweight library to highlight text and find matches.
+**Lucid** is a stand-alone, zero-dependency, lightweight library that finds literal matches in text and tells you exactly where they are. It is built for AI agents (tool calls get plain JSON with positions) and for search-as-you-type UIs (safe highlighting).
 
-[![Codecov](https://img.shields.io/codecov/c/github/niekes/lucid-search)](https://app.codecov.io/gh/niekes/lucid-search)
-[![Travis (.org) branch](https://travis-ci.com/Niekes/lucid-search.svg?branch=master)](https://travis-ci.com/github/Niekes/lucid-search)
 [![npm](https://img.shields.io/npm/dt/lucid-search)](https://www.npmjs.com/package/lucid-search)
-[![npm](https://img.shields.io/npm/dw/lucid-search)](https://www.npmjs.com/package/lucid-search)
 [![npm](https://img.shields.io/npm/l/lucid-search)](https://github.com/Niekes/lucid-search/blob/master/LICENSE)
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/lucid-search)](https://bundlephobia.com/result?p=lucid-search)
 [![npm](https://img.shields.io/npm/v/lucid-search)](https://www.npmjs.com/package/lucid-search)
@@ -16,135 +13,107 @@
 
 # Installing
 
-### Npm
 ```bash
-npm i lucid-search --save
+npm i lucid-search
 ```
 
-### CDN
 ```html
-<script src="https://unpkg.com/lucid-search/dist/lucid-search.min.js"></script>
+<script type="module">
+    import { search } from 'https://unpkg.com/lucid-search@2/src/index.js';
+</script>
 ```
 
-# Demo
-* [Go to examples](https://codepen.io/collection/AEqKVL)
+ES modules only, Node >= 20.19.
 
 # Usage
 
-### Default (ES6)
+### `search(haystack, needle, { normalize? })`
+
 ```js
-import {
-    findMatches,
-} from 'lucid-search';
+import { search } from 'lucid-search';
 
-const haystack = 'The quick brown fox jumps over the lazy dog';
-const needle = 'The dog';
-
-const found = findMatches(haystack, needle);
-
-console.log(found);
+search('The quick brown fox jumps over the lazy dog', 'The dog barks');
 /*
 {
-    mark: "<span class="matched">The</span> quick brown fox jumps over <span class="matched">the</span> lazy <span class="matched">dog</span>",
-    matches: (3) ["The", "the", "dog"]
+    matches: [
+        { start: 0, end: 3, text: 'The', term: 'The' },
+        { start: 31, end: 34, text: 'the', term: 'The' },
+        { start: 40, end: 43, text: 'dog', term: 'dog' },
+    ],
+    missing: ['barks'],
 }
 */
 ```
 
-### With options (ES6)
-```js
-import {
-    findMatches,
-} from 'lucid-search';
+* The needle is **literal**: `c++`, `$5` or `(x` match themselves, never as a regex.
+* A string needle is split into terms on whitespace, `.`, `-` and `_`. Pass an array (`['new york', 'c++']`) to choose the terms yourself.
+* Case-insensitive, matches inside words, sorted by `start`, never overlapping (the longer term wins).
+* `missing` lists the terms that occur nowhere, so an agent knows what to rephrase.
+* `{ normalize: true }` lets `creme` find `Crème`; positions still point into the original text.
+* Wrong input types throw a `TypeError`.
 
-const haystack = 'The quick brown fox jumps over the lazy dog';
-const needle = 'The dog';
-/*
-    Due to performance you need to pass in the whole options object with "el" and "cssClass"
-*/
-const options = {
-    cssClass: 'found', // default is "marked"
-    el: 'mark', // default is "span"
+### `highlight(haystack, matches, { el = 'span', cssClass = 'matched' })`
+
+```js
+import { search, highlight } from 'lucid-search';
+
+const text = 'The lazy dog';
+highlight(text, search(text, 'dog').matches, { el: 'mark' });
+// 'The lazy <mark class="matched">dog</mark>'
+```
+
+The whole haystack is HTML-escaped, so it is safe to put into `innerHTML`.
+
+### `score(matches, haystack)`
+
+Rank several haystacks for the same needle: longer and earlier matches score higher.
+
+```js
+const ranked = docs
+    .map(doc => ({ doc, matches: search(doc, needle).matches }))
+    .map(r => ({ ...r, score: score(r.matches, r.doc) }))
+    .filter(r => r.score > 0)
+    .sort((a, b) => b.score - a.score);
+```
+
+# Using it from an AI agent
+
+Give the model the text around each match instead of the whole document:
+
+```js
+const context = matches.map(m => text.slice(Math.max(0, m.start - 80), m.end + 80));
+```
+
+Wrap `search` as a tool (shape shown for the Anthropic Messages API; other frameworks are similar):
+
+```js
+const tool = {
+    name: 'find_in_text',
+    description: 'Find literal, case-insensitive occurrences of search terms in the document. Returns positions, short context, and terms that were not found.',
+    input_schema: {
+        type: 'object',
+        properties: { terms: { type: 'array', items: { type: 'string' } } },
+        required: ['terms'],
+    },
 };
 
-const found = findMatches(haystack, needle, options);
-
-console.log(found);
-/*
-{
-    mark: "<mark class="found">The</mark> quick brown fox jumps over <mark class="found">the</mark> lazy <mark class="found">dog</mark>",
-    matches: (3) ["The", "the", "dog"]
+function findInText({ terms }) {
+    const { matches, missing } = search(documentText, terms, { normalize: true });
+    return {
+        missing,
+        matches: matches.slice(0, 20).map(m => ({
+            ...m,
+            context: documentText.slice(Math.max(0, m.start - 80), m.end + 80),
+        })),
+    };
 }
-*/
 ```
 
-### Default (CDN)
-Same like with ES6, only with `lucidSearch` prefix:
-```js
-// ...
-const found = lucidSearch.findMatches(haystack, needle);
-// ...
-```
+See [`llms.txt`](llms.txt) for a compact API reference for coding assistants.
 
-### Flavours
+# Upgrading from v1
 
-`findMatches(haystack, needle, options)`
-
-* Use for plain strings **without** special characters like _üöäè_
-* [Demo](https://codepen.io/Niekes/pen/qBRNdqp)
-
----
-
-`findMatchesHtml(haystack, needle, options)`
-
-* Use for plain strings and **html** strings **without** special characters like _üöäè_
-* [Demo](https://codepen.io/Niekes/pen/abpZOyV)
-
----
-
-`findMatchesNormalized(haystack, needle, options)`
-
-* Use for plain strings **with** special characters like _üöäè_
-* [Demo](https://codepen.io/Niekes/pen/zYNBGpE)
-
----
-
-`findMatchesHtmlNormalized(haystack, needle, options)`
-
-* Use for plain strings and **html** strings **with** special characters like _üöäè_
-* [Demo](https://codepen.io/Niekes/pen/QWGJBKe)
-
----
-
-`uncoverMatches(haystack, needles, options)`
-
-* Similar to *findMatches* but expects an array of strings like `["the", "dog"]` as needle
-* [Demo](https://codepen.io/Niekes/pen/eYgzNjR)
-
----
-
-`uncoverMatchesHtml(haystack, needles, options)`
-
-* Similar to *findMatchesHtml* but expects an array of strings like `["the", "dog"]` as needle
-
----
-
-`uncoverMatchesNormalized(haystack, needles, options)`
-
-* Similar to *findMatchesNormalized* but expects an array of strings like `["the", "dog"]` as needle
-
----
-
-`uncoverMatchesHtmlNormalized(haystack, needles, options)`
-
-* Similar to *findMatchesHtmlNormalized* but expects an array of strings like `["the", "dog"]` as needle
-
----
-
-`score(matches, [haystack])`
-
-* Creates a score for passed matches, pass haystack so that lucid-search ranks matches closer to the beginning higher
-* [Demo](https://codepen.io/Niekes/pen/KKaMPBg)
+v1's eight `findMatches*` / `uncoverMatches*` functions are replaced by `search` (+ `highlight` if you rendered `mark`). Needles are no longer regular expressions. See [docs/adr/0001](docs/adr/0001-search-returns-data-for-agent-callers.md).
 
 ### Funding
 <a href="https://www.buymeacoffee.com/niekes" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="70"></a>

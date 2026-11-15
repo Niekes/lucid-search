@@ -1,116 +1,72 @@
-import normalize from './normalize';
+const ACCENT_GROUPS = [
+    'aæäåáàãâāą', 'cçčć', 'dđď', 'eéêèëēėę', 'gğ', 'iîïíīì', 'lł',
+    'nñńň', 'oœöóõôòøō', 'rř', 'sśšß', 'uüùúŭūûů', 'yýÿ', 'zžźż',
+];
 
-const defaultOptions = {
-    cssClass: 'matched',
-    el: 'span',
-};
+const escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-function matchHtml(n) {
-    return new RegExp(`(${n})(?!([^<]+)?>)`, 'gi');
+// Each letter becomes a one-character class, so Match positions still line up with the Haystack.
+const normalize = pattern => pattern.replace(/./g, (c) => {
+    const group = ACCENT_GROUPS.find(g => g.includes(c.toLowerCase()));
+    return group ? `[${group}]` : c;
+});
+
+function toTerms(needle) {
+    if (typeof needle === 'string') {
+        return needle.split(/[.\-_\s]+/).filter(Boolean);
+    }
+    if (Array.isArray(needle) && needle.every(t => typeof t === 'string')) {
+        return needle.filter(t => t.trim());
+    }
+    throw new TypeError('needle must be a string or an array of strings');
 }
 
-function match(n) {
-    return new RegExp(n, 'gi');
-}
-
-function splitNeedle(needle) {
-    return needle
-        .split(/[.\-_\s]/)
-        .filter(n => n !== '');
-}
-
-function find(haystack, needles, options, matchFn) {
-    if (!needles.length) {
-        return {
-            matches: [],
-            mark: haystack,
-        };
+export function search(haystack, needle, { normalize: fold = false } = {}) {
+    if (typeof haystack !== 'string') {
+        throw new TypeError('haystack must be a string');
+    }
+    const terms = [...new Set(toTerms(needle))];
+    if (!terms.length) {
+        return { matches: [], missing: [] };
     }
 
-    /*
-        Options
-    */
-    const {
-        el,
-        cssClass,
-    } = options;
+    const pattern = t => (fold ? normalize(escapeRegExp(t)) : escapeRegExp(t));
+    // Longest Term first, so it wins when two Terms match at the same position.
+    const byLength = [...terms].sort((a, b) => b.length - a.length);
+    const matches = [...haystack.matchAll(new RegExp(byLength.map(t => `(${pattern(t)})`).join('|'), 'gi'))]
+        .map(m => ({
+            start: m.index,
+            end: m.index + m[0].length,
+            text: m[0],
+            term: byLength[m.slice(1).findIndex(g => g !== undefined)],
+        }));
+    const missing = terms.filter(t => !new RegExp(pattern(t), 'i').test(haystack));
 
-    /*
-        Find matches
-    */
-    let mark = haystack;
-    const matches = [];
+    return { matches, missing };
+}
 
-    for (let i = 0; i < needles.length; i += 1) {
-        const m = haystack.match(matchFn(needles[i]));
+const HTML_ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const escapeHtml = s => s.replace(/[&<>"']/g, c => HTML_ENTITIES[c]);
 
-        if (m) {
-            matches.push(m);
-        }
+// matches must be sorted and non-overlapping, as search returns them.
+export function highlight(haystack, matches, { el = 'span', cssClass = 'matched' } = {}) {
+    if (!/^[a-z][a-z0-9-]*$/i.test(el) || /["<>]/.test(cssClass)) {
+        throw new TypeError('el must be a tag name and cssClass must not contain " < or >');
     }
-
-    if (!matches.length) {
-        return {
-            matches: [],
-            mark: haystack,
-        };
-    }
-
-    const matched = matches.join('|').replace(/,/gi, '|');
-    const matchedSplit = matched.split('|');
-
-    /*
-        Mark matches
-    */
-    mark = mark.replace(
-        matchFn(matched),
-        s => `<${el} class="${cssClass}">${s}</${el}>`,
-    );
-
-    return {
-        matches: matchedSplit,
-        mark: matches.length > 0
-            ? mark
-            : haystack,
-    };
+    let html = '';
+    let cursor = 0;
+    matches.forEach(({ start, end }) => {
+        html += `${escapeHtml(haystack.slice(cursor, start))}<${el} class="${cssClass}">${escapeHtml(haystack.slice(start, end))}</${el}>`;
+        cursor = end;
+    });
+    return html + escapeHtml(haystack.slice(cursor));
 }
 
-/* default */
-export function findMatches(haystack, needle, options = defaultOptions) {
-    return find(haystack, splitNeedle(needle), options, match);
-}
-export function findMatchesHtml(haystack, needle, options = defaultOptions) {
-    return find(haystack, splitNeedle(needle), options, matchHtml);
-}
-export function findMatchesNormalized(haystack, needle, options = defaultOptions) {
-    return find(haystack, splitNeedle(normalize(needle)), options, match);
-}
-export function findMatchesHtmlNormalized(haystack, needle, options = defaultOptions) {
-    return find(haystack, splitNeedle(normalize(needle)), options, matchHtml);
-}
-/* custom splitting */
-export function uncoverMatches(haystack, needles, options = defaultOptions) {
-    return find(haystack, needles, options, match);
-}
-export function uncoverMatchesHtml(haystack, needles, options = defaultOptions) {
-    return find(haystack, needles, options, matchHtml);
-}
-export function uncoverMatchesNormalized(haystack, needles, options = defaultOptions) {
-    return find(haystack, needles, options, match);
-}
-export function uncoverMatchesHtmlNormalized(haystack, needles, options = defaultOptions) {
-    return find(haystack, needles, options, matchHtml);
-}
-/* score */
-export function score(matches, haystack = '') {
-    return Array.from(new Set(matches))
-        .reduce((sum, m) => {
-            const index = haystack.indexOf(m);
-            const { length } = haystack;
-            const weight = index !== -1 && length
-                ? ((length - index) / length) + 1
-                : 1;
-
-            return sum + m.length * weight;
-        }, 0);
+export function score(matches, haystack) {
+    const firstStart = new Map();
+    matches.forEach(({ text, start }) => {
+        if (!firstStart.has(text)) firstStart.set(text, start);
+    });
+    const { length } = haystack;
+    return [...firstStart].reduce((sum, [text, start]) => sum + text.length * ((length - start) / length + 1), 0);
 }
