@@ -17,13 +17,17 @@ export interface Found {
     mark: string;
 }
 
-type Matcher = (pattern: string) => RegExp;
+/** Splits a haystack into parts that alternate text, tag, text, …; only text is searched. */
+type Splitter = (haystack: string) => string[];
 
 const defaults: MarkOptions = { el: 'span', cssClass: 'matched' };
 
-const plain: Matcher = (pattern) => new RegExp(pattern, 'gi');
-// Skips text inside tags: a match must not be followed by a `>` without a `<` before it.
-const html: Matcher = (pattern) => new RegExp(`(${pattern})(?!([^<]+)?>)`, 'gi');
+const plain: Splitter = (haystack) => [haystack];
+// `[^<>]` stops at the next `<`, so a run of `<` without `>` stays linear.
+const html: Splitter = (haystack) => haystack.split(/(<[^<>]*>)/);
+
+const regex = (pattern: string): RegExp => new RegExp(pattern, 'gi');
+const isText = (_part: string, index: number): boolean => index % 2 === 0;
 
 const escape = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const split = (needle: string): string[] => needle.split(/[.\-_\s]/);
@@ -34,18 +38,23 @@ function find(
     haystack: string,
     patterns: string[],
     options: Partial<MarkOptions>,
-    matcher: Matcher
+    splitter: Splitter
 ): Found {
-    const matches = patterns.flatMap((pattern) => haystack.match(matcher(pattern)) ?? []);
+    const parts = splitter(haystack);
+    const texts = parts.filter(isText);
+    const matches = patterns
+        .map(regex)
+        .flatMap((re) => texts.flatMap((text) => text.match(re) ?? []));
     if (!matches.length) return { matches, mark: haystack };
 
     const { el, cssClass } = { ...defaults, ...options };
     // Longest first, so a short match never splits a longer one it is part of.
     const alternatives = [...new Set(matches)].sort((a, b) => b.length - a.length);
-    const mark = haystack.replace(
-        matcher(alternatives.map(escape).join('|')),
-        (match) => `<${el} class="${cssClass}">${match}</${el}>`
-    );
+    const alternation = regex(alternatives.map(escape).join('|'));
+    const wrap = (match: string): string => `<${el} class="${cssClass}">${match}</${el}>`;
+    const mark = parts
+        .map((part, index) => (isText(part, index) ? part.replace(alternation, wrap) : part))
+        .join('');
     return { matches, mark };
 }
 
@@ -59,10 +68,10 @@ const flavour =
     <T>(
         toTerms: (needle: T) => string[],
         toPattern: (term: string) => string,
-        matcher: Matcher
+        splitter: Splitter
     ): Flavour<T> =>
     (haystack, needle, options = {}) =>
-        find(haystack, toTerms(needle).filter(Boolean).map(toPattern), options, matcher);
+        find(haystack, toTerms(needle).filter(Boolean).map(toPattern), options, splitter);
 
 const asIs = (terms: string[]): string[] => terms;
 

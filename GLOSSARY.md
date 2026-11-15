@@ -2,6 +2,8 @@
 
 **Haystack**: the text being searched. It is either plain text or an HTML string.
 
+**Tag**: in an HTML haystack, anything from a `<` to the next `>` with no other `<` in between, e.g. `<a href="x">`. A lone `>` outside a tag, as in `1 > 0`, is plain text.
+
 **Needle**: the raw search input the user typed, as a single string, e.g. `"The dog"`.
 
 **Search term**: one piece of a needle after splitting on whitespace, `.`, `-` or `_`, e.g. `"The"` and `"dog"`. The _uncover_ flavours take search terms directly instead of a needle.

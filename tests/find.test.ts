@@ -221,3 +221,26 @@ it('Lucid fills in options that were left out with the defaults', () => {
         'lazy <mark class="matched">dog</mark>'
     );
 });
+
+it('Lucid searches long HTML strings without tags quickly', () => {
+    const haystack = 'the lazy dog '.repeat(40_000);
+    const start = performance.now();
+    const found = findMatchesHtml(haystack, 'dog');
+
+    expect(performance.now() - start).toBeLessThan(1000);
+    expect(found.matches).toHaveLength(40_000);
+});
+
+it('Lucid finds matches before a lone > in HTML strings', () => {
+    const found = findMatchesHtml('the dog > 0', 'the dog');
+
+    expect(found.matches).toEqual(['the', 'dog']);
+});
+
+it('Lucid treats a < without its own > as text in HTML strings', () => {
+    const found = findMatchesHtml('if a <b and c <i>the</i>', 'and i');
+
+    expect(found.mark).toBe(
+        '<span class="matched">i</span>f a <b <span class="matched">and</span> c <i>the</i>'
+    );
+});
