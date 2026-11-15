@@ -28,6 +28,23 @@ found.mark;
 The needle is split on whitespace, `.`, `-` and `_`, so each word is searched on its own.
 Matching ignores case, and regex characters in the needle are treated as plain text.
 
+## Overlapping matches
+
+When matches overlap or touch, they share one highlight. A highlight never reaches past its
+matches, so a short search term marks only the letters it matches, not the whole word.
+
+```js
+const haystack = 'The quick brown fox jumps over the lazy dog';
+
+findMatches(haystack, 'ove ver').matches; // ['ove', 'ver']
+findMatches(haystack, 'ove ver').mark;
+// 'The quick brown fox jumps <span class="matched">over</span> the lazy dog'
+
+findMatches(haystack, 'o', { el: 'mark' }).mark;
+// 'The quick br<mark class="matched">o</mark>wn f<mark class="matched">o</mark>x jumps
+//  <mark class="matched">o</mark>ver the lazy d<mark class="matched">o</mark>g'
+```
+
 ## Options
 
 ```js
