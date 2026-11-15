@@ -1,5 +1,6 @@
-export default function normalize(string) {
-    return string
+/** Turns every letter that has accented variants into a regex character class of them. */
+export function normalize(term: string): string {
+    return term
         .replace(/a|æ|ä|å|á|à|ã|â|ā/gi, '[aæäåáàãâā]')
         .replace(/c|ç|č|ć/gi, '[cçčć]')
         .replace(/e|é|ê|è|ë|ē|ė/gi, '[eéêèëēė]')
