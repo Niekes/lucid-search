@@ -37,13 +37,13 @@ function find(
     options: Partial<MarkOptions>,
     matcher: Matcher
 ): Found {
-    const found = patterns.flatMap((pattern) => [...haystack.matchAll(matcher(pattern))]);
-    const matches = found.map(([match]) => match);
+    const results = patterns.flatMap((pattern) => [...haystack.matchAll(matcher(pattern))]);
+    const matches = results.map(([match]) => match);
     if (!matches.length) return { matches, mark: haystack };
 
     // Matches that overlap or touch merge into one highlight.
     const highlights: [number, number][] = [];
-    const ranges = found
+    const ranges = results
         .map(({ 0: match, index }): [number, number] => [index, index + match.length])
         .sort(([a], [b]) => a - b);
     for (const [from, to] of ranges) {

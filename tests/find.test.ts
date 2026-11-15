@@ -179,7 +179,7 @@ it('Lucid treats regex characters in the needle as plain text', () => {
     );
 });
 
-it('Lucid marks the longest match when search terms overlap', () => {
+it('Lucid covers a match inside a longer one with one highlight', () => {
     const found = findMatches('Emmerich', 'e emmerich');
 
     expect(found.mark).toBe('<span class="matched">Emmerich</span>');
