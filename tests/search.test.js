@@ -52,3 +52,7 @@ test('wrong input types throw a TypeError an agent can act on', () => {
 test('Missing Terms keep the order the caller gave them in', () => {
     assert.deepEqual(search(fox, 'yy zzz').missing, ['yy', 'zzz']);
 });
+
+test('Terms differing only in case are one Term, spelled as first given', () => {
+    assert.deepEqual(search(fox, ['CAT', 'cat', 'Cat']).missing, ['CAT']);
+});

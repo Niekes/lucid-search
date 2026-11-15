@@ -26,3 +26,8 @@ test('highlight rejects an element or class that could inject markup', () => {
 test('highlight with no Matches returns the escaped Haystack', () => {
     assert.equal(highlight('a < b', []), 'a &lt; b');
 });
+
+test('highlight rejects a non-string element or class', () => {
+    assert.throws(() => highlight('a', [], { el: null }), TypeError);
+    assert.throws(() => highlight('a', [], { cssClass: 5 }), TypeError);
+});
