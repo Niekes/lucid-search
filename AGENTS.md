@@ -50,13 +50,13 @@ files (`"audit": { "gate": "all" }` in `.fallowrc.jsonc`).
 
 Declared in `.fallowrc.jsonc`; a violation fails the build.
 
-| Zone         | Files      | May import                                |
-| ------------ | ---------- | ----------------------------------------- |
-| `public-api` | `index.ts` | `core`                                    |
-| `core`       | `src/**`   | `core`                                    |
-| `tests`      | `tests/**` | `public-api` (and `core` only through it) |
-| `docs`       | `docs/**`  | `public-api` (and `core` only through it) |
-| `bench`      | `bench/**` | `public-api` (and `core` only through it) |
+| Zone         | Files      | May import                                      |
+| ------------ | ---------- | ----------------------------------------------- |
+| `public-api` | `index.ts` | `core`                                          |
+| `core`       | `src/**`   | `core`                                          |
+| `tests`      | `tests/**` | `public-api` (and `core` only through it)       |
+| `docs`       | `docs/**`  | `public-api`, `bench` (the live benchmark page) |
+| `bench`      | `bench/**` | `public-api` (and `core` only through it)       |
 
 Tests and docs import from `index.ts` only. A test that imports `src/`
 directly leaves the public export untested, which `coverage-gaps` reports.
@@ -73,7 +73,8 @@ version goes live once a maintainer approves it with 2FA. Never run
 ## Benchmarks
 
 `bench/` compares lucid-search with other highlighting libraries: `pnpm bench`
-(Node), `pnpm bench:browser` (mark.js, Chromium) and `pnpm bench:size`. Each
+(Node), `pnpm bench:browser` (mark.js, Chromium) and `pnpm bench:size`. The docs page
+`docs/benchmark.md` runs the same string scenarios in the visitor's browser. Each
 library must highlight exactly the same text as lucid-search before it is timed.
 The benchmarks are not part of `pnpm verify`, because timing varies between
 runs. After a run that changes the numbers, update `docs/guide/performance.md`

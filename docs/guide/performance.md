@@ -18,6 +18,8 @@ absolute values.
 
 ## String libraries (Node)
 
+To run these scenarios in your own browser, open the [Benchmark](/benchmark) page.
+
 Each library returns an HTML string with every match wrapped in a `span`. Before timing,
 the benchmark checks that every library highlights exactly the same text. A library that
 doesn't is left out of that scenario.

@@ -9,7 +9,8 @@ const config: UserConfig = defineConfig({
         nav: [
             { text: 'Guide', link: '/guide/getting-started' },
             { text: 'API', link: '/api/' },
-            { text: 'Playground', link: '/playground' }
+            { text: 'Playground', link: '/playground' },
+            { text: 'Benchmark', link: '/benchmark' }
         ],
         sidebar: [
             {
@@ -21,7 +22,8 @@ const config: UserConfig = defineConfig({
                 ]
             },
             { text: 'API', items: [{ text: 'Reference', link: '/api/' }] },
-            { text: 'Playground', link: '/playground' }
+            { text: 'Playground', link: '/playground' },
+            { text: 'Benchmark', link: '/benchmark' }
         ],
         socialLinks: [{ icon: 'github', link: 'https://github.com/niekes/lucid-search' }],
         search: { provider: 'local' },

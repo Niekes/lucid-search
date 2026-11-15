@@ -3,6 +3,7 @@ import highlightWords from 'highlight-words';
 import { createHighlighter } from 'spotmark';
 import AccentFolding from 'accent-folding';
 import * as lucid from '../index';
+import type { Scenario } from './fixtures';
 
 /** Turns (haystack, needle) into an HTML string with every match wrapped in a span. */
 export type Adapter = (haystack: string, needle: string) => string;
@@ -41,7 +42,7 @@ const spotmarkAccents = createHighlighter({
 const folding = new AccentFolding();
 
 /** Plain-text adapters: case-insensitive, every occurrence, no accent folding. */
-export const plain: Record<string, Adapter> = {
+const plain: Record<string, Adapter> = {
     'lucid-search': (h, n) => findMatches(h, n).mark,
     'highlight-words-core': (h, n) => hwc(h, n),
     'highlight-words': (h, n) =>
@@ -52,13 +53,34 @@ export const plain: Record<string, Adapter> = {
 };
 
 /** Accent-insensitive adapters. accent-folding takes a single search term. */
-export const accents: Record<string, Adapter> = {
+const accents: Record<string, Adapter> = {
     'lucid-search': (h, n) => findMatchesNormalized(h, n).mark,
     'highlight-words-core': (h, n) => hwc(h, n, stripAccents),
     spotmark: (h, n) => spotmarkAccents(h, n),
     'accent-folding': (h, n) => folding.highlightMatch(h, n, 'span')
 };
 
-/** The highlighted texts in order, so outputs with different tags can be compared. */
-export const highlighted = (html: string): string[] =>
+// The highlighted texts in order, so outputs with different tags can be compared.
+const highlighted = (html: string): string[] =>
     [...html.matchAll(/<span[^>]*>(.*?)<\/span>/g)].map((m) => m[1]);
+
+/**
+ * The adapters for a scenario, split into the ones that highlight exactly the same text as
+ * lucid-search (only these are timed) and the names of the ones that don't.
+ */
+export function contenders({ name, haystacks, needle }: Scenario): {
+    same: [string, Adapter][];
+    skipped: string[];
+} {
+    const adapters = name.startsWith('S4') ? accents : plain;
+    const texts = (adapter: Adapter): string =>
+        JSON.stringify(haystacks.map((h) => highlighted(adapter(h, needle))));
+    const expected = texts(adapters['lucid-search']);
+    const same: [string, Adapter][] = [];
+    const skipped: string[] = [];
+    for (const [library, adapter] of Object.entries(adapters)) {
+        if (texts(adapter) === expected) same.push([library, adapter]);
+        else skipped.push(library);
+    }
+    return { same, skipped };
+}

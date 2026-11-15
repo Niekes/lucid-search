@@ -45,7 +45,7 @@
     //   index.ts   public-api  ->  core
     //   src/*      core        ->  core
     //   tests/*    tests       ->  public-api (core only through it)
-    //   docs/*     docs        ->  public-api (core only through it)
+    //   docs/*     docs        ->  public-api, bench (the live benchmark page)
     //   bench/*    bench       ->  public-api (core only through it)
     //
     // Fallow follows the re-exports of index.ts, so tests and docs must be
@@ -64,7 +64,7 @@
             { "from": "public-api", "allow": ["core"] },
             { "from": "core", "allow": ["core"] },
             { "from": "tests", "allow": ["public-api", "core"] },
-            { "from": "docs", "allow": ["public-api", "core"] },
+            { "from": "docs", "allow": ["public-api", "core", "bench"] },
             { "from": "bench", "allow": ["public-api", "core", "bench"] }
         ],
         "coverage": {
