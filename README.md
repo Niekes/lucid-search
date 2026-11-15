@@ -1,61 +1,88 @@
-**Lucid** is a stand-alone, zero-dependency, fast and lightweight library to highlight text and find matches.
+<p align="center">
+  <a href="https://github.com/sponsors/niekes"><img src="https://img.shields.io/badge/Sponsor_lucid--search-EA4AAA?logo=githubsponsors&logoColor=white&style=for-the-badge" alt="Sponsor lucid-search"></a>
+</p>
 
-[![CI](https://github.com/niekes/lucid-search/actions/workflows/main.yml/badge.svg)](https://github.com/niekes/lucid-search/actions/workflows/main.yml)
-[![npm](https://img.shields.io/npm/v/lucid-search)](https://www.npmjs.com/package/lucid-search)
-[![npm](https://img.shields.io/npm/dw/lucid-search)](https://www.npmjs.com/package/lucid-search)
-[![npm bundle size](https://img.shields.io/bundlephobia/minzip/lucid-search)](https://bundlephobia.com/result?p=lucid-search)
-[![npm](https://img.shields.io/npm/l/lucid-search)](https://github.com/niekes/lucid-search/blob/master/LICENSE)
+<p align="center">
+  <strong>Highlight text and find matches. Zero dependencies, about 1 kB.</strong><br>
+  Free and open source, kept alive by one maintainer and the people who sponsor the work.
+</p>
 
-<img src="assets/demo-1.gif" alt="lucid-search highlighting matches as you type">
+<p align="center">
+  <a href="https://github.com/niekes/lucid-search/actions"><img src="https://github.com/niekes/lucid-search/actions/workflows/main.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/niekes/lucid-search/actions"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/niekes/lucid-search/master/.github/badges/coverage.json" alt="Coverage"></a>
+  <a href="https://fallow.tools/docs/explanations/health/"><img src="https://raw.githubusercontent.com/niekes/lucid-search/master/.github/badges/health.svg" alt="fallow health"></a>
+  <a href="https://www.npmjs.com/package/lucid-search"><img src="https://img.shields.io/npm/dt/lucid-search" alt="npm downloads"></a>
+  <a href="https://www.npmjs.com/package/lucid-search"><img src="https://img.shields.io/npm/dw/lucid-search" alt="npm weekly downloads"></a>
+  <a href="https://github.com/niekes/lucid-search/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/lucid-search" alt="License"></a>
+  <a href="https://www.npmjs.com/package/lucid-search"><img src="https://img.shields.io/npm/v/lucid-search" alt="npm version"></a>
+  <a href="https://bundlephobia.com/result?p=lucid-search"><img src="https://img.shields.io/bundlephobia/minzip/lucid-search" alt="Bundle size"></a>
+  <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript">
+  <a href="https://github.com/niekes/lucid-search"><img src="https://img.shields.io/github/stars/niekes/lucid-search" alt="GitHub stars"></a>
+  <a href="https://github.com/sponsors/niekes"><img src="https://img.shields.io/github/sponsors/niekes?logo=GitHub+Sponsors&logoColor=%23EA4AAA&style=flat" alt="GitHub Sponsors"></a>
+</p>
 
-**[Documentation and playground](https://niekes.github.io/lucid-search/)** · [Migrating from v1](https://niekes.github.io/lucid-search/guide/migration)
+<p align="center">
+  <a href="https://niekes.github.io/lucid-search/">Docs</a> ·
+  <a href="https://niekes.github.io/lucid-search/guide/getting-started">Getting started</a> ·
+  <a href="https://niekes.github.io/lucid-search/api/">API reference</a> ·
+  <a href="https://niekes.github.io/lucid-search/playground">Playground</a> ·
+  <a href="https://niekes.github.io/lucid-search/guide/migration">Migrating from v1</a>
+</p>
 
-## Install
+---
+
+<p align="center">
+  <a target="_blank" href="https://niekes.github.io/lucid-search/playground"><img src="assets/demo-1.gif" alt="lucid-search highlighting matches as you type"></a>
+</p>
+
+Try it in the [playground](https://niekes.github.io/lucid-search/playground).
+
+## Sponsor lucid-search
+
+**lucid-search** is free, and it always will be. There is no company behind it — just one maintainer working in spare time — so the cost of keeping it alive is paid for by the people who depend on it.
+
+If lucid-search saves you time, [become a sponsor](https://github.com/sponsors/niekes).
+
+| Tier        | What you get                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| **$5/mo**   | Your name in the [sponsors list](#sponsors) and my sincere thanks                           |
+| **$25/mo**  | The above, plus your logo in the README and on the docs site, and priority issue triage     |
+| **$100/mo** | The above, plus direct email access for feature requests and a mention in the release notes |
+
+Where the money goes:
+
+- **Issue triage and bug fixes.** Sponsorship buys a reply within a couple of days instead of whenever I get to it.
+- **Types that stay correct.** Keeping the TypeScript types accurate as TypeScript and the platform move on.
+- **The documentation site.** Hosting, builds and the playground.
+- **Time for new work.** More languages for normalizing, and better ranking.
+
+Prefer a one-off? The [sponsor page](https://github.com/sponsors/niekes) also takes one-time contributions.
+
+**Need a company sponsorship or an invoice?** [Get in touch](mailto:s@niekes.com).
+
+## Sponsors
+
+Thank you to the people who make this possible. Sponsors at $25/mo and above get their logo in this README and on the docs site; everyone gets their name below.
+
+<!-- New sponsors go below this line, one per line. -->
+
+## Using lucid-search
 
 ```bash
-npm i lucid-search
+npm install lucid-search
 ```
-
-```html
-<!-- UMD build, exposes the global `lucidSearch` -->
-<script src="https://unpkg.com/lucid-search/build/lucid-search.js"></script>
-```
-
-## Usage
 
 ```js
 import { findMatches } from 'lucid-search';
 
-const found = findMatches('The quick brown fox jumps over the lazy dog', 'The dog', {
-    el: 'mark', // default 'span'
-    cssClass: 'found' // default 'matched'
-});
-
-found.matches; // ['The', 'the', 'dog']
-found.mark;
-// '<mark class="found">The</mark> quick brown fox jumps over <mark class="found">the</mark> lazy <mark class="found">dog</mark>'
+findMatches('The quick brown fox jumps over the lazy dog', 'The dog').mark;
+// '<span class="matched">The</span> quick brown fox jumps over <span class="matched">the</span> lazy <span class="matched">dog</span>'
 ```
 
 `mark` is not escaped. Only put it into `innerHTML` if you trust the haystack.
 
-## Flavours
+Everything else lives in the [documentation](https://niekes.github.io/lucid-search/): [getting started](https://niekes.github.io/lucid-search/guide/getting-started), the [API reference](https://niekes.github.io/lucid-search/api/), the [playground](https://niekes.github.io/lucid-search/playground) and [migrating from v1](https://niekes.github.io/lucid-search/guide/migration).
 
-| Flavour                        | Takes          | Haystack   | Matches `ä` for `a` |
-| ------------------------------ | -------------- | ---------- | ------------------- |
-| `findMatches`                  | needle string  | plain text | no                  |
-| `findMatchesHtml`              | needle string  | HTML       | no                  |
-| `findMatchesNormalized`        | needle string  | plain text | yes                 |
-| `findMatchesHtmlNormalized`    | needle string  | HTML       | yes                 |
-| `uncoverMatches`               | array of terms | plain text | no                  |
-| `uncoverMatchesHtml`           | array of terms | HTML       | no                  |
-| `uncoverMatchesNormalized`     | array of terms | plain text | yes                 |
-| `uncoverMatchesHtmlNormalized` | array of terms | HTML       | yes                 |
+## Star History
 
-`score(matches, haystack)` ranks results: longer matches and matches closer to the start score higher. See the [API reference](https://niekes.github.io/lucid-search/api/).
-
-## Development
-
-```bash
-pnpm install
-pnpm verify # typecheck, format, lint, tests with 100% coverage, fallow, build, docs
-```
+[![Star History Chart](https://api.star-history.com/svg?repos=niekes/lucid-search&type=date&legend=bottom-right)](https://www.star-history.com/#niekes/lucid-search&type=date&legend=bottom-right)
