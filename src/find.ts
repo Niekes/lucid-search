@@ -82,15 +82,15 @@ export function findRanges(
     const folded = fold(haystack, normalize);
     const ranges: Range[] = [];
     for (const term of terms) {
-        const needle = fold(term, normalize).text;
-        if (!needle) continue;
+        const foldedTerm = fold(term, normalize).text;
+        if (!foldedTerm) continue;
         for (
-            let at = folded.text.indexOf(needle);
+            let at = folded.text.indexOf(foldedTerm);
             at !== -1;
-            at = folded.text.indexOf(needle, at + 1)
+            at = folded.text.indexOf(foldedTerm, at + 1)
         ) {
             const { start } = folded.sources[at];
-            const { end } = folded.sources[at + needle.length - 1];
+            const { end } = folded.sources[at + foldedTerm.length - 1];
             ranges.push({ start, end });
         }
     }

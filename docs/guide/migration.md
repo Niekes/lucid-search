@@ -22,3 +22,8 @@ Other changes that can affect you:
 - **More letters ignore accents**, including `ñ`, `ł`, `ý`, `ž`, `ğ`, `ş`, and `ß` matches `ss`.
 - **The CDN file moved** to `build/lucid-search.js`. The package ships ESM, CommonJS and UMD
   builds with TypeScript types.
+
+## Staying on v1
+
+Install `npm i lucid-search@1`. The v1 docs are in the
+[README of 1.0.16](https://www.npmjs.com/package/lucid-search/v/1.0.16).
