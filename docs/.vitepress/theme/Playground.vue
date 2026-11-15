@@ -2,18 +2,33 @@
 import { computed, ref } from 'vue';
 import * as lucid from '../../../index';
 
-const flavours = [
+const findFlavours = [
     'findMatches',
     'findMatchesHtml',
     'findMatchesNormalized',
     'findMatchesHtmlNormalized'
 ] as const;
+const uncoverFlavours = [
+    'uncoverMatches',
+    'uncoverMatchesHtml',
+    'uncoverMatchesNormalized',
+    'uncoverMatchesHtmlNormalized'
+] as const;
+const flavours = [...findFlavours, ...uncoverFlavours];
+type FindFlavour = (typeof findFlavours)[number];
+type UncoverFlavour = (typeof uncoverFlavours)[number];
 
 const haystack = ref('Thé quick brown <strong>føx</strong> jumps over the låzy <em>dog</em>');
 const needle = ref('the fox dog strong');
-const flavour = ref<(typeof flavours)[number]>('findMatchesHtmlNormalized');
+const flavour = ref<FindFlavour | UncoverFlavour>('findMatchesHtmlNormalized');
+const isUncover = (name: string): name is UncoverFlavour => name.startsWith('uncover');
 
-const found = computed(() => lucid[flavour.value](haystack.value, needle.value));
+// The uncover flavours take search terms, so the needle is split on commas for them.
+const found = computed(() =>
+    isUncover(flavour.value)
+        ? lucid[flavour.value](haystack.value, needle.value.split(','))
+        : lucid[flavour.value](haystack.value, needle.value)
+);
 const score = computed(() => lucid.score(found.value.matches, haystack.value).toFixed(2));
 </script>
 
@@ -24,7 +39,7 @@ const score = computed(() => lucid.score(found.value.matches, haystack.value).to
             <textarea v-model="haystack" rows="3" />
         </label>
         <label>
-            Needle
+            {{ isUncover(flavour) ? 'Search terms (comma separated)' : 'Needle' }}
             <input v-model="needle" />
         </label>
         <label>

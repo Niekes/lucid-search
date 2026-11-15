@@ -59,6 +59,11 @@ findMatchesNormalized('Thé dög', 'the dog').matches; // ['Thé', 'dög']
 
 Combines `findMatchesHtml` and `findMatchesNormalized`.
 
+```js
+findMatchesHtmlNormalized('<b class="the">Thé</b>', 'the').mark;
+// '<b class="the"><span class="matched">Thé</span></b>'
+```
+
 ### `uncoverMatches(haystack, terms, options?)`
 
 Takes an array of search terms and does not split them, so a term can contain spaces.
@@ -68,8 +73,31 @@ uncoverMatches('The quick brown fox', ['brown fox']).mark;
 // 'The quick <span class="matched">brown fox</span>'
 ```
 
-`uncoverMatchesHtml`, `uncoverMatchesNormalized` and `uncoverMatchesHtmlNormalized` work like
-the matching `findMatches*` flavours.
+### `uncoverMatchesHtml(haystack, terms, options?)`
+
+Like `uncoverMatches`, but never matches inside tags or attributes.
+
+```js
+uncoverMatchesHtml('<a title="brown fox">brown fox</a>', ['brown fox']).mark;
+// '<a title="brown fox"><span class="matched">brown fox</span></a>'
+```
+
+### `uncoverMatchesNormalized(haystack, terms, options?)`
+
+Like `uncoverMatches`, but accent-insensitive.
+
+```js
+uncoverMatchesNormalized('Thé dög', ['the dog']).matches; // ['Thé dög']
+```
+
+### `uncoverMatchesHtmlNormalized(haystack, terms, options?)`
+
+Combines `uncoverMatchesHtml` and `uncoverMatchesNormalized`.
+
+```js
+uncoverMatchesHtmlNormalized('<i>Thé dög</i>', ['the dog']).mark;
+// '<i><span class="matched">Thé dög</span></i>'
+```
 
 ## `score(matches, haystack?)`
 

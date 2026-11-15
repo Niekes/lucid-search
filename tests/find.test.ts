@@ -16,7 +16,6 @@ it('Lucid finds the correct matches', () => {
     const found = findMatches(haystack, needle);
 
     expect(found.matches).toEqual(['The', 'the', 'dog']);
-    expect(found.matches.length).toBe(3);
 });
 
 it('Lucid finds the correct matches in long english texts', () => {
@@ -35,7 +34,6 @@ Perhaps far exposed age effects. Now distrusts you her delivered applauded affec
     const found = findMatches(haystack, needle);
 
     expect(found.matches).toEqual(['prevailed', 'match', 'did', 'did']);
-    expect(found.matches.length).toBe(4);
 });
 
 it('Lucid handles empty strings correctly', () => {
@@ -54,7 +52,6 @@ it('Lucid finds the correct emojis', () => {
     const found = findMatches(haystack, needle);
 
     expect(found.matches).toEqual(['😎']);
-    expect(found.matches.length).toBe(1);
 });
 
 it('Lucid highlights correctly', () => {
@@ -67,7 +64,7 @@ it('Lucid highlights correctly', () => {
     );
 });
 
-it('Lucid highlights correctly', () => {
+it('Lucid finds every casing of a short search term', () => {
     const haystack = 'Emmerich, Wyman and Sanford';
     const needle = 'emmerich e';
     const found = findMatches(haystack, needle);
@@ -93,7 +90,6 @@ it('Lucid finds the correct matches in HTML string', () => {
     const found = findMatchesHtml(haystack, needle);
 
     expect(found.matches).toEqual(['The', 'the', 'dog']);
-    expect(found.matches.length).toBe(3);
 });
 
 it('Lucid highlights HTML strings correctly', () => {
@@ -115,7 +111,6 @@ it('Lucid highlights nested HTML strings correctly', () => {
     expect(found.mark).toBe(
         '<span class="matched">The</span> quick brown <strong>fox</strong> jumps over <span class="matched">the</span> lazy <div><nav><strong><span class="matched">dog</span></strong></nav></div>'
     );
-    expect(found.matches.length).toBe(3);
 });
 
 it('Lucid finds the correct matches with special characters like äöüè', () => {
@@ -124,17 +119,6 @@ it('Lucid finds the correct matches with special characters like äöüè', () =
     const found = findMatchesNormalized(haystack, needle);
 
     expect(found.matches).toEqual(['Thé', 'the', 'dog']);
-    expect(found.matches.length).toBe(3);
-});
-
-it('Lucid highlights HTML strings correctly with special characters like äöüè', () => {
-    const haystack = 'Thé quīçk brown <strong>føx</strong> jümps over the låzy <div>dog</div>';
-    const needle = 'The dog strong div';
-    const found = findMatchesHtmlNormalized(haystack, needle);
-
-    expect(found.mark).toBe(
-        '<span class="matched">Thé</span> quīçk brown <strong>føx</strong> jümps over <span class="matched">the</span> låzy <div><span class="matched">dog</span></div>'
-    );
 });
 
 it('Lucid highlights HTML strings correctly with special characters like äöüè', () => {
@@ -143,22 +127,23 @@ it('Lucid highlights HTML strings correctly with special characters like äöü�
     const found = findMatchesHtmlNormalized(haystack, needle);
 
     expect(found.matches).toEqual(['Thé', 'the', 'dog']);
-    expect(found.matches.length).toBe(3);
+    expect(found.mark).toBe(
+        '<span class="matched">Thé</span> quīçk brown <strong>føx</strong> jümps over <span class="matched">the</span> låzy <div><span class="matched">dog</span></div>'
+    );
 });
 
-it('Lucid finds the correct matches when needle was passed as an array of strings', () => {
+it('Lucid finds the correct matches when search terms are passed as an array', () => {
     const haystack = 'The quick brown fox jumps over the lazy dog';
-    const needles = ['The', 'dog', 'barks'];
-    const found = uncoverMatches(haystack, needles);
+    const searchTerms = ['The', 'dog', 'barks'];
+    const found = uncoverMatches(haystack, searchTerms);
 
     expect(found.matches).toEqual(['The', 'the', 'dog']);
-    expect(found.matches.length).toBe(3);
 });
 
-it('Lucid highlights correctly when needle was passed as an array of strings', () => {
+it('Lucid highlights correctly when search terms are passed as an array', () => {
     const haystack = 'The quick brown fox jumps over the lazy dog';
-    const needles = ['fox jumps'];
-    const found = uncoverMatches(haystack, needles);
+    const searchTerms = ['fox jumps'];
+    const found = uncoverMatches(haystack, searchTerms);
 
     expect(found.mark).toBe(
         'The quick brown <span class="matched">fox jumps</span> over the lazy dog'

@@ -28,7 +28,7 @@ const html: Matcher = (pattern) => new RegExp(`(${pattern})(?!([^<]+)?>)`, 'gi')
 const escape = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const split = (needle: string): string[] => needle.split(/[.\-_\s]/);
 
-const accented = (term: string): string => normalize(escape(term));
+const normalized = (term: string): string => normalize(escape(term));
 
 function find(
     haystack: string,
@@ -49,7 +49,10 @@ function find(
     return { matches, mark };
 }
 
-/** One of the eight search functions. `T` is a needle (`string`) or search terms (`string[]`). */
+/**
+ * One of the eight search functions. `T` is a needle (`string`) or search terms (`string[]`).
+ * The returned `mark` is not escaped: only put it into `innerHTML` if you trust the haystack.
+ */
 export type Flavour<T> = (haystack: string, needle: T, options?: Partial<MarkOptions>) => Found;
 
 const flavour =
@@ -61,13 +64,13 @@ const flavour =
     (haystack, needle, options = {}) =>
         find(haystack, toTerms(needle).filter(Boolean).map(toPattern), options, matcher);
 
-const same = (terms: string[]): string[] => terms;
+const asIs = (terms: string[]): string[] => terms;
 
 export const findMatches: Flavour<string> = flavour(split, escape, plain);
 export const findMatchesHtml: Flavour<string> = flavour(split, escape, html);
-export const findMatchesNormalized: Flavour<string> = flavour(split, accented, plain);
-export const findMatchesHtmlNormalized: Flavour<string> = flavour(split, accented, html);
-export const uncoverMatches: Flavour<string[]> = flavour(same, escape, plain);
-export const uncoverMatchesHtml: Flavour<string[]> = flavour(same, escape, html);
-export const uncoverMatchesNormalized: Flavour<string[]> = flavour(same, accented, plain);
-export const uncoverMatchesHtmlNormalized: Flavour<string[]> = flavour(same, accented, html);
+export const findMatchesNormalized: Flavour<string> = flavour(split, normalized, plain);
+export const findMatchesHtmlNormalized: Flavour<string> = flavour(split, normalized, html);
+export const uncoverMatches: Flavour<string[]> = flavour(asIs, escape, plain);
+export const uncoverMatchesHtml: Flavour<string[]> = flavour(asIs, escape, html);
+export const uncoverMatchesNormalized: Flavour<string[]> = flavour(asIs, normalized, plain);
+export const uncoverMatchesHtmlNormalized: Flavour<string[]> = flavour(asIs, normalized, html);
