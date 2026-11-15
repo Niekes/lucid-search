@@ -4,6 +4,10 @@ on:
     - pull_request
     - push
 
+# Read-only by default; the badges job asks for write access itself.
+permissions:
+    contents: read
+
 jobs:
     verify:
         name: Verify (Node ${{ matrix.node }})
