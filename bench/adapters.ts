@@ -57,7 +57,7 @@ const plain: Record<string, Adapter> = {
     spotmark: (h, n) => spotmark(h, n)
 };
 
-/** Accent-insensitive adapters. accent-folding takes a single search term. */
+/** Accent-insensitive adapters. accent-folding takes a single term. */
 const accents: Record<string, Adapter> = {
     'lucid-search': (h, n) => highlight(h, search(h, n, { normalize: true }).matches),
     'lucid-search (findRanges)': (h, n) => segments(h, n, true),

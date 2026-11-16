@@ -20,10 +20,9 @@ const el = ref('mark');
 const cssClass = ref('matched');
 const editing = ref(false);
 
-// One JSON line per item, like console output, each after a line break so they follow the summary.
-// One string, not an element per line, so long results stay fast.
-const lines = (items: object[]): string =>
-    items.map((item) => `\n${JSON.stringify(item)}`).join('');
+// One JSON line per item, as one string, not an element per line, so long results stay fast.
+const lines = (items: object[]): string => items.map((item) => JSON.stringify(item)).join('\n');
+const list = (texts: string[]): string => texts.join(', ') || 'none';
 
 const result = computed(() => {
     try {
@@ -31,16 +30,25 @@ const result = computed(() => {
             const { matches, missing } = search(haystack.value, query.value, {
                 normalize: normalize.value
             });
+            const perTerm = new Map<string, number>();
+            for (const { term } of matches) perTerm.set(term, (perTerm.get(term) ?? 0) + 1);
             return {
+                stats: [
+                    { label: 'Matches', value: matches.length },
+                    { label: 'Found', value: list([...perTerm].map(([t, n]) => `${t} ×${n}`)) },
+                    { label: 'Missing', value: list(missing) }
+                ],
                 lines: lines(matches),
-                summary: `${matches.length} matches · missing: ${JSON.stringify(missing)}`,
                 html: highlight(haystack.value, matches, { el: el.value, cssClass: cssClass.value })
             };
         }
         const ranges = findRanges(haystack.value, query.value, { normalize: normalize.value });
         return {
+            stats: [
+                { label: 'Ranges', value: ranges.length },
+                { label: 'Score', value: Number(score(haystack.value, ranges).toFixed(2)) }
+            ],
             lines: lines(ranges),
-            summary: `${ranges.length} ranges · score: ${score(haystack.value, ranges).toFixed(2)}`,
             segments: toSegments(haystack.value, ranges)
         };
     } catch (error) {
@@ -81,9 +89,20 @@ const result = computed(() => {
             </template>
         </div>
 
-        <pre
-            class="terminal"
-        ><!-- One live region that always exists, so screen readers announce the summary or the error, never the lines. --><span :class="result.error ? 'error' : 'summary'" aria-live="polite">{{ result.error ?? result.summary }}</span>{{ result.lines }}</pre>
+        <!-- Always in the page, so screen readers announce every change of the stats or the error. -->
+        <div class="stats" aria-live="polite">
+            <p v-if="result.error" class="card error">{{ result.error }}</p>
+            <div v-for="stat in result.stats" v-else :key="stat.label" class="card">
+                <div class="label">{{ stat.label }}</div>
+                <div class="value" :class="{ number: typeof stat.value === 'number' }">
+                    {{ stat.value }}
+                </div>
+            </div>
+        </div>
+        <details v-if="result.lines" class="raw">
+            <summary>Show the result as JSON</summary>
+            <pre>{{ result.lines }}</pre>
+        </details>
 
         <div class="text-header">
             <strong>Haystack</strong>
@@ -133,24 +152,51 @@ const result = computed(() => {
 .options .short {
     width: 7em;
 }
-.terminal {
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.card {
+    margin: 0;
+    padding: 12px 16px;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 8px;
+    background: var(--vp-c-bg-soft);
+}
+.card .label {
+    color: var(--vp-c-text-2);
+    font-size: 13px;
+}
+.card .value {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+.card .value.number {
+    font-size: 24px;
+}
+.card.error {
+    grid-column: 1 / -1;
+    border-color: var(--vp-c-danger-1);
+    color: var(--vp-c-danger-1);
+}
+.raw {
+    margin-bottom: 16px;
+}
+.raw summary {
+    cursor: pointer;
+    color: var(--vp-c-text-2);
+    font-size: 14px;
+}
+.raw pre {
     max-height: 18em;
     overflow: auto;
-    margin: 0 0 16px;
+    margin: 8px 0 0;
     padding: 12px 16px;
     border-radius: 8px;
-    background: #1e1e1e;
-    color: #d4d4d4;
+    background: var(--vp-c-bg-soft);
     font-size: 13px;
-    line-height: 1.5;
-    white-space: pre;
-}
-.terminal .summary {
-    color: #8ab4f8;
-}
-.terminal .error {
-    color: #f48771;
-    white-space: pre-wrap;
 }
 .text-header {
     display: flex;

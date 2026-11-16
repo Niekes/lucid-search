@@ -1,18 +1,18 @@
-import { normalize as foldAccents } from './normalize';
+import { foldChar, foldCharUncached } from './find';
 
-/** One place in the haystack where a search term was found. `haystack.slice(start, end) === text`. */
+/** One place in the haystack where a term was found. `haystack.slice(start, end) === text`. */
 export interface Match {
     start: number;
     end: number;
     text: string;
-    /** The search term (as the caller wrote it) that found this match. */
+    /** The term (as the caller wrote it) that found this match. */
     term: string;
 }
 
 export interface SearchResult {
     /** Sorted by start, never overlapping. */
     matches: Match[];
-    /** Search terms that occur nowhere in the haystack, in the caller's order. */
+    /** Terms that occur nowhere in the haystack, in the caller's order. */
     missing: string[];
 }
 
@@ -30,12 +30,75 @@ export interface HighlightOptions {
 
 const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-function toTerms(needle: unknown): string[] {
-    if (typeof needle === 'string') return needle.split(/[.\-_\s]+/).filter(Boolean);
-    if (Array.isArray(needle) && needle.every((t) => typeof t === 'string')) {
-        return needle.filter((t: string) => t.trim());
+// Every character that folds to something else, keyed by what it folds to: 'e' -> 'éèÉ…', 'ss' -> 'ßẞ'.
+// Built once, in a few milliseconds, from the same folding as `findRanges`. Hangul syllables are
+// left out: they fold to two or three letters and match themselves instead (see `foldedPattern`).
+let variants: Map<string, string> | undefined;
+
+function variantsOf(folded: string): string {
+    if (!variants) {
+        variants = new Map();
+        for (let code = 0xc0; code <= 0xffff; code += 1) {
+            if (code === 0xac00) code = 0xe000; // skips Hangul syllables and surrogates
+            const char = String.fromCharCode(code);
+            const to = foldCharUncached(char, true);
+            if (to !== char.toLowerCase()) variants.set(to, (variants.get(to) ?? '') + char);
+        }
     }
-    throw new TypeError('needle must be a string or an array of strings');
+    return variants.get(folded) ?? '';
+}
+
+const escapeClass = (chars: string): string => chars.replace(/[\\\]^-]/g, '\\$&');
+
+// One folded character, or any character that folds to it, plus combining marks that fold away.
+const unit = (char: string): string => {
+    const others = variantsOf(char);
+    return `${others ? `[${escapeClass(char + others)}]` : escapeRegExp(char)}\\p{M}*`;
+};
+
+// Folded characters, with `ss`, `ae` and `oe` also matching `ß`, `æ` and `œ`.
+// shortcut: pairs are read left to right, so `sss` finds `ßs` but not `sß`; fine for real words.
+function runPattern(folded: string): string {
+    const chars = Array.from(folded);
+    let pattern = '';
+    for (let i = 0; i < chars.length; i += 1) {
+        const pair = i + 1 < chars.length ? variantsOf(chars[i] + chars[i + 1]) : '';
+        if (pair) {
+            pattern += `(?:${unit(chars[i])}${unit(chars[i + 1])}|[${escapeClass(pair)}]\\p{M}*)`;
+            i += 1;
+        } else {
+            pattern += unit(chars[i]);
+        }
+    }
+    return pattern;
+}
+
+/** A pattern that matches the term the way `findRanges` folds text: ignoring case and accents. */
+function foldedPattern(term: string): string {
+    let pattern = '';
+    let run = '';
+    // Composed first, so a term typed as separate parts (`한` as three letters) is one character.
+    for (const char of term.normalize('NFC')) {
+        const folded = foldChar(char, true);
+        // A character the table leaves out also matches itself as a whole: `한` finds `한` as well
+        // as its parts.
+        if (folded && folded !== char.toLowerCase() && !variantsOf(folded).includes(char)) {
+            pattern += `${runPattern(run)}(?:${escapeRegExp(char)}\\p{M}*|${runPattern(folded)})`;
+            run = '';
+        } else {
+            run += folded;
+        }
+    }
+    // A term of only combining marks folds to nothing and matches nowhere.
+    return pattern + runPattern(run) || '(?!)';
+}
+
+function toTerms(query: unknown): string[] {
+    if (typeof query === 'string') return query.split(/[.\-_\s]+/).filter(Boolean);
+    if (Array.isArray(query) && query.every((t) => typeof t === 'string')) {
+        return query.filter((t: string) => t.trim());
+    }
+    throw new TypeError('query must be a string or an array of strings');
 }
 
 interface Compiled {
@@ -53,14 +116,16 @@ function compile(query: string[], normalize: boolean): Compiled {
     const terms = query.filter(
         (t, i, all) => all.findIndex((u) => u.toLowerCase() === t.toLowerCase()) === i
     );
-    const toPattern = (t: string): string =>
-        normalize ? foldAccents(escapeRegExp(t)) : escapeRegExp(t);
+    const toPattern = normalize ? foldedPattern : escapeRegExp;
+    // `u` for `\p{M}`; it also lets ſ match s and ς match σ, which `findRanges` does not.
+    // Without normalize the flags stay as they were, so plain matching does not change.
+    const flags = normalize ? 'iu' : 'i';
     const byLength = [...terms].sort((a, b) => b.length - a.length);
     return {
         terms,
         byLength,
-        alternatives: new RegExp(byLength.map((t) => `(${toPattern(t)})`).join('|'), 'gi'),
-        perTerm: terms.map((t) => new RegExp(toPattern(t), 'i'))
+        alternatives: new RegExp(byLength.map((t) => `(${toPattern(t)})`).join('|'), `g${flags}`),
+        perTerm: terms.map((t) => new RegExp(toPattern(t), flags))
     };
 }
 
@@ -87,17 +152,18 @@ function compiledQuery(query: string | string[], normalize: boolean): Compiled {
 }
 
 /**
- * Find every literal, case-insensitive occurrence of the needle's search terms.
- * A string needle is split on whitespace, `.`, `-` and `_`; pass an array to choose the terms.
- * @throws TypeError when haystack is not a string or needle is not a string / string[].
+ * Find every literal, case-insensitive occurrence of the query's terms.
+ * A string query is split on whitespace, `.`, `-` and `_`; pass an array to choose the terms.
+ * With `normalize`, accents are ignored the same way `findRanges` ignores them.
+ * @throws TypeError when haystack is not a string or query is not a string / string[].
  */
 export function search(
     haystack: string,
-    needle: string | string[],
+    query: string | string[],
     { normalize = false }: Partial<SearchOptions> = {}
 ): SearchResult {
     if (typeof haystack !== 'string') throw new TypeError('haystack must be a string');
-    const { terms, byLength, alternatives, perTerm } = compiledQuery(needle, normalize);
+    const { terms, byLength, alternatives, perTerm } = compiledQuery(query, normalize);
     if (!terms.length) return { matches: [], missing: [] };
 
     const matches: Match[] = [];

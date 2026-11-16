@@ -4,13 +4,13 @@
 
 import { findRanges, toSegments, search, highlight, score } from 'lucid-search';
 
-## search(haystack: string, needle: string | string[], options?: { normalize?: boolean })
+## search(haystack: string, query: string | string[], options?: { normalize?: boolean })
 Returns { matches: { start, end, text, term }[], missing: string[] }.
 - haystack.slice(start, end) === text. Matches are sorted by start and never overlap; the longer term wins.
-- needle is literal (no regex). A string is split on whitespace . - _ into terms; pass an array to keep terms intact.
+- query is literal (no regex). A string is split on whitespace . - _ into terms; pass an array to keep terms intact.
 - missing = terms found nowhere, in the caller's order. Array terms are used exactly as given (spaces included); case-only duplicates collapse to the first spelling.
-- normalize: true makes plain letters match accented ones (creme -> Crème) without shifting positions.
-- Throws TypeError on non-string haystack or invalid needle. Empty needle -> { matches: [], missing: [] }.
+- normalize: true ignores accents the same way findRanges does (creme -> Crème, strasse -> Straße) without shifting positions.
+- Throws TypeError on non-string haystack or invalid query. Empty query -> { matches: [], missing: [] }.
 
 ## highlight(haystack: string, matches: Match[], options?: { el?: string = 'span', cssClass?: string = 'matched' })
 Returns HTML: the haystack HTML-escaped, each match wrapped in <el class="cssClass">. Pass matches as search returned them.
