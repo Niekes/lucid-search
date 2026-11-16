@@ -42,7 +42,7 @@ function foldCharUncached(char: string, normalize: boolean): string {
 const folds = [new Map<string, string>(), new Map<string, string>()];
 
 function foldChar(char: string, normalize: boolean): string {
-    const cache = folds[+normalize];
+    const cache = folds[normalize ? 1 : 0];
     let text = cache.get(char);
     if (text === undefined) {
         text = foldCharUncached(char, normalize);

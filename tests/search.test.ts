@@ -3,6 +3,7 @@ import { search, highlight, score, findRanges } from '../index';
 const fox = 'The quick brown fox jumps over the lazy dog';
 // Agents call these from untyped JSON, so the runtime checks are part of the contract.
 const untyped = (value: unknown) => value as string;
+const untypedOptions = (normalize: unknown) => ({ normalize }) as { normalize: boolean };
 
 describe('search', () => {
     it('returns each match with its position and the search term that found it', () => {
@@ -146,8 +147,8 @@ it('search finds long queries on every call', () => {
 });
 
 it('search still rejects invalid array queries after a similar valid one was cached', () => {
-    // eslint-disable-next-line no-sparse-arrays
-    const holes = [, 'a'] as unknown as string[];
+    const holes = new Array<string>(2);
+    holes[1] = 'a';
     expect(search('a b', holes).missing).toEqual([]);
 
     expect(() => search('a b', [untyped(null), 'a'])).toThrow(
@@ -156,4 +157,11 @@ it('search still rejects invalid array queries after a similar valid one was cac
     expect(() => search('a', [untyped(1n), 'a'])).toThrow(
         'needle must be a string or an array of strings'
     );
+});
+
+it('search treats a non-boolean normalize by its truthiness without changing later calls', () => {
+    expect(search('café', 'cafe', untypedOptions('0')).matches).toHaveLength(1);
+    expect(search('café', 'cafe', { normalize: false }).matches).toEqual([]);
+    expect(search('café', 'cafe', untypedOptions('')).matches).toEqual([]);
+    expect(search('café', 'cafe', { normalize: true }).matches).toHaveLength(1);
 });

@@ -67,6 +67,25 @@ function compile(query: string[], normalize: boolean): Compiled {
 // `matchAll` copies the regex and `test` has no `g` flag, so reusing them is safe.
 const cache = new Map<string, Compiled>();
 
+/** The compiled query, from the cache when the same query was searched recently. */
+function compiledQuery(query: string | string[], normalize: boolean): Compiled {
+    // A string query is the key as it is. An array query is checked first, so an invalid one
+    // throws before it can hit the cache, and keyed by its terms, each quoted so none can collide.
+    const terms = typeof query === 'string' ? undefined : toTerms(query);
+    const key = `${normalize ? 1 : 0}${terms ? `a${terms.map((t) => JSON.stringify(t)).join(',')}` : `s${query}`}`;
+    let entry = cache.get(key);
+    if (!entry) {
+        entry = compile(terms ?? toTerms(query), normalize);
+        // Long queries are rarely repeated and would keep large keys and regexes alive.
+        if (key.length < 1000) {
+            // shortcut: forgets every query after 100, upgrade to an LRU if a page cycles through more.
+            if (cache.size >= 100) cache.clear();
+            cache.set(key, entry);
+        }
+    }
+    return entry;
+}
+
 /**
  * Find every literal, case-insensitive occurrence of the needle's search terms.
  * A string needle is split on whitespace, `.`, `-` and `_`; pass an array to choose the terms.
@@ -78,21 +97,7 @@ export function search(
     { normalize = false }: Partial<SearchOptions> = {}
 ): SearchResult {
     if (typeof haystack !== 'string') throw new TypeError('haystack must be a string');
-    // A string query is the key as it is. An array query is checked first, so an invalid one
-    // throws before it can hit the cache, and keyed by its terms, each quoted so none can collide.
-    const split = typeof needle === 'string' ? undefined : toTerms(needle);
-    const key = `${+normalize}${split ? `a${split.map((t) => JSON.stringify(t)).join(',')}` : `s${needle}`}`;
-    let compiled = cache.get(key);
-    if (!compiled) {
-        compiled = compile(split ?? toTerms(needle), normalize);
-        // Long queries are rarely repeated and would keep large keys and regexes alive.
-        if (key.length < 1000) {
-            // shortcut: forgets every query after 100, upgrade to an LRU if a page cycles through more.
-            if (cache.size >= 100) cache.clear();
-            cache.set(key, compiled);
-        }
-    }
-    const { terms, byLength, alternatives, perTerm } = compiled;
+    const { terms, byLength, alternatives, perTerm } = compiledQuery(needle, normalize);
     if (!terms.length) return { matches: [], missing: [] };
 
     const matches: Match[] = [];

@@ -77,3 +77,11 @@ it('findRanges still matches after more than 10,000 distinct characters', () => 
 
     expect(findRanges('Café', 'cafe')).toEqual([{ start: 0, end: 4 }]);
 });
+
+it('findRanges treats a non-boolean normalize by its truthiness without changing later calls', () => {
+    const loose = (value: string) => ({ normalize: value }) as unknown as { normalize: boolean };
+
+    expect(findRanges('Café', 'cafe', loose('yes'))).toEqual([{ start: 0, end: 4 }]);
+    expect(findRanges('é', 'e', loose('0'))).toEqual([{ start: 0, end: 1 }]);
+    expect(findRanges('é', 'e', { normalize: false })).toEqual([]);
+});
