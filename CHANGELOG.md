@@ -10,7 +10,7 @@
 ### Changed
 
 - `findRanges` is about 4 times faster on haystacks with accents: it folds only the characters outside ASCII.
-- `findRanges` with `toSegments` grows from 0.9 to 1.9 kB gzip, for the typo matching.
+- `findRanges` with `toSegments` grows from 0.9 to 2.1 kB gzip, for the typo matching.
 
 ## [2.1.0] - 2026-11-15
 

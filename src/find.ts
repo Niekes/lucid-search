@@ -202,7 +202,17 @@ function scan(
 }
 
 // Haystack edges, whitespace and punctuation separate words.
-const isGap = (char: string | undefined): boolean => char === undefined || /[\s\p{P}]/u.test(char);
+const gap = /[\s\p{P}]/u;
+// The same test for ASCII, as a table: ranking candidates asks it four times per candidate.
+// Pure, so a bundle that only imports `search` drops it.
+const asciiGaps = /* @__PURE__ */ Array.from({ length: 128 }, (_, code) =>
+    gap.test(String.fromCharCode(code))
+);
+const isGap = (char: string | undefined): boolean => {
+    if (char === undefined) return true;
+    const code = char.charCodeAt(0);
+    return code < 128 ? asciiGaps[code] : gap.test(char);
+};
 
 /**
  * How far a candidate is from the Term's shape, lowest first: an edge that cuts a word or sits on a
@@ -217,11 +227,11 @@ function shape(text: string, term: string, { start, end }: Range): number {
     return cuts * 128 + letters * 32 + Math.abs(end - start + 1 - term.length);
 }
 
-/** The start of the best match of `term` ending at `end`: fewest Typos, then the closest shape. */
-function startOf(text: string, term: string, end: number, typos: number): number {
-    // Reversed by UTF-16 unit, the way `scan` walks the text backwards.
-    let reversed = '';
-    for (let unit = term.length - 1; unit >= 0; unit -= 1) reversed += term[unit];
+/**
+ * The start of the best match of `term` ending at `end`: fewest Typos, then the closest shape.
+ * `reversed` is the Term reversed by UTF-16 unit, the way `scan` walks the text backwards.
+ */
+function startOf(text: string, term: string, reversed: string, end: number, typos: number): number {
     let best = { start: end, typos: Infinity, shape: Infinity };
     scan(
         reversed,
@@ -232,17 +242,21 @@ function startOf(text: string, term: string, end: number, typos: number): number
         true,
         typos,
         (start, found) => {
+            if (found > best.typos) return;
             const candidate = { start, typos: found, shape: shape(text, term, { start, end }) };
-            if (found < best.typos || (found === best.typos && candidate.shape < best.shape)) {
-                best = candidate;
-            }
+            if (found < best.typos || candidate.shape < best.shape) best = candidate;
         }
     );
     return best.start;
 }
 
+interface End {
+    end: number;
+    typos: number;
+}
+
 interface Candidate extends Range {
-    rank: number;
+    shape: number;
 }
 
 /**
@@ -252,24 +266,47 @@ interface Candidate extends Range {
  */
 function fuzzyFind(folded: Folded, term: string, typos: number, found: Range[]): void {
     const { text } = folded;
-    let run: Candidate[] = [];
+    let reversed = '';
+    for (let unit = term.length - 1; unit >= 0; unit -= 1) reversed += term[unit];
+    // Whatever its start, a match ending at `end` covers its last `core` units.
+    const core = term.length - typos;
+    let run: End[] = [];
+    let fewest = typos;
     const flush = (): void => {
         // Units of the text a kept match covers, counted from the earliest start the run allows.
         const base = Math.max(0, run[0].end - term.length - typos);
         const taken = new Uint8Array(run[run.length - 1].end - base + 1);
-        const free = ({ start, end }: Range): boolean =>
-            taken.subarray(start - base, end - base + 1).every((unit) => !unit);
-        for (const candidate of run.sort((a, b) => a.rank - b.rank)) {
-            if (candidate.rank >= 1024 && !free(candidate)) continue;
-            taken.fill(1, candidate.start - base, candidate.end - base + 1);
-            found.push(toRange(folded, candidate.start, candidate.end));
+        const free = (start: number, end: number): boolean => {
+            for (let unit = start - base; unit <= end - base; unit += 1)
+                if (taken[unit]) return false;
+            return true;
+        };
+        for (let count = fewest; count <= typos; count += 1) {
+            const spans: Candidate[] = [];
+            for (const at of run) {
+                // One that overlaps a kept match in its core is skipped before its start is searched for.
+                if (at.typos !== count || (count && !free(at.end - core + 1, at.end))) continue;
+                const start = startOf(text, term, reversed, at.end, typos);
+                spans.push({
+                    start,
+                    end: at.end,
+                    shape: shape(text, term, { start, end: at.end })
+                });
+            }
+            spans.sort((a, b) => a.shape - b.shape);
+            for (const { start, end } of spans) {
+                if (count && !free(start, end)) continue;
+                taken.fill(1, start - base, end - base + 1);
+                found.push(toRange(folded, start, end));
+            }
         }
         run = [];
+        fewest = typos;
     };
     scan(term, text, 0, 1, text.length, false, typos, (end, count) => {
         if (run.length && end !== run[run.length - 1].end + 1) flush();
-        const span = { start: startOf(text, term, end, typos), end };
-        run.push({ ...span, rank: count * 1024 + shape(text, term, span) });
+        run.push({ end, typos: count });
+        fewest = Math.min(fewest, count);
     });
     if (run.length) flush();
 }
