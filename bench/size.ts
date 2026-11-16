@@ -4,7 +4,8 @@ import { gzipSync } from 'node:zlib';
 import { build } from 'vite-plus';
 
 const imports: Record<string, string> = {
-    'lucid-search': "export { findMatches } from '../../../index.ts';",
+    'lucid-search': "export { search, highlight } from '../../../index.ts';",
+    'lucid-search (findRanges)': "export { findRanges, toSegments } from '../../../index.ts';",
     'highlight-words-core': "export { findAll } from 'highlight-words-core';",
     'highlight-words': "export { default } from 'highlight-words';",
     spotmark: "export { createHighlighter } from 'spotmark';",

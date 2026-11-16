@@ -47,12 +47,3 @@ export const scenarios: Scenario[] = [
         needle: words.slice(0, 20).join(' ')
     }
 ];
-
-/** S3 is S2 as HTML, with search terms inside tags and attributes. Browser group only. */
-export const htmlArticle: string = text(10_000, 3)
-    .split('. ')
-    .join(' ')
-    .replace(
-        /(\S+ \S+ \S+ \S+ \S+ \S+ \S+ \S+)/g,
-        '<p class="the over"><b title="lazy">$1</b></p>'
-    );

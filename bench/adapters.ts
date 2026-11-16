@@ -9,9 +9,13 @@ import type { Scenario } from './fixtures';
 export type Adapter = (haystack: string, needle: string) => string;
 
 // Copied once: calling through the module runner's export getters would slow lucid down only.
-const { findMatches, findMatchesNormalized } = lucid;
+const { search, highlight, findRanges, toSegments } = lucid;
 
 const wrap = (text: string): string => `<span class="matched">${text}</span>`;
+const segments = (haystack: string, needle: string, normalize: boolean): string =>
+    toSegments(haystack, findRanges(haystack, needle, { normalize }))
+        .map(({ text, match }) => (match ? wrap(text) : text))
+        .join('');
 const terms = (needle: string): string[] => needle.split(' ');
 const stripAccents = (text: string): string => text.normalize('NFD').replace(/\p{M}/gu, '');
 
@@ -43,7 +47,8 @@ const folding = new AccentFolding();
 
 /** Plain-text adapters: case-insensitive, every occurrence, no accent folding. */
 const plain: Record<string, Adapter> = {
-    'lucid-search': (h, n) => findMatches(h, n).mark,
+    'lucid-search': (h, n) => highlight(h, search(h, n).matches),
+    'lucid-search (findRanges)': (h, n) => segments(h, n, false),
     'highlight-words-core': (h, n) => hwc(h, n),
     'highlight-words': (h, n) =>
         highlightWords({ text: h, query: n })
@@ -54,7 +59,8 @@ const plain: Record<string, Adapter> = {
 
 /** Accent-insensitive adapters. accent-folding takes a single search term. */
 const accents: Record<string, Adapter> = {
-    'lucid-search': (h, n) => findMatchesNormalized(h, n).mark,
+    'lucid-search': (h, n) => highlight(h, search(h, n, { normalize: true }).matches),
+    'lucid-search (findRanges)': (h, n) => segments(h, n, true),
     'highlight-words-core': (h, n) => hwc(h, n, stripAccents),
     spotmark: (h, n) => spotmarkAccents(h, n),
     'accent-folding': (h, n) => folding.highlightMatch(h, n, 'span')
