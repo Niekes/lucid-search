@@ -87,6 +87,54 @@ toSegments(haystack, findRanges(haystack, 'cafe lodz'));
 lucid-search returns positions, never HTML, so you render the matches yourself, e.g. as
 `<mark>` elements in React, and an untrusted haystack can't inject markup.
 
+## Using it from an AI agent
+
+`search` returns plain JSON with positions, plus the search terms it could not find, so an agent knows what to rephrase. `highlight` turns those matches into HTML and escapes the whole haystack.
+
+```js
+import { search, highlight } from 'lucid-search';
+
+search('The quick brown fox jumps over the lazy dog', 'The dog barks');
+/*
+{
+    matches: [
+        { start: 0, end: 3, text: 'The', term: 'The' },
+        { start: 31, end: 34, text: 'the', term: 'The' },
+        { start: 40, end: 43, text: 'dog', term: 'dog' }
+    ],
+    missing: ['barks']
+}
+*/
+```
+
+Give the model the text around each match instead of the whole document, by wrapping `search` as a tool (shape shown for the Anthropic Messages API; other frameworks are similar):
+
+```js
+const tool = {
+    name: 'find_in_text',
+    description:
+        'Find literal, case-insensitive occurrences of search terms in the document. Returns positions, short context, and terms that were not found.',
+    input_schema: {
+        type: 'object',
+        properties: { terms: { type: 'array', items: { type: 'string' } } },
+        required: ['terms']
+    }
+};
+
+function findInText({ terms }) {
+    const { matches, missing } = search(documentText, terms, { normalize: true });
+    return {
+        missing,
+        matches: matches.slice(0, 20).map((m) => ({
+            ...m,
+            context: documentText.slice(Math.max(0, m.start - 80), m.end + 80)
+        }))
+    };
+}
+```
+
+See [`llms.txt`](llms.txt) for a compact API reference for coding assistants.
+
 Everything else lives in the [documentation](https://niekes.github.io/lucid-search/): [getting started](https://niekes.github.io/lucid-search/guide/getting-started), the [API reference](https://niekes.github.io/lucid-search/api/), the [playground](https://niekes.github.io/lucid-search/playground) and [migrating from v1](https://niekes.github.io/lucid-search/guide/migration).
 
 ## Star History

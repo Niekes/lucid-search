@@ -1,6 +1,6 @@
 {
     "name": "lucid-search",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "Find matches in text and get ranges and segments to highlight them safely, with accent-insensitive matching",
     "keywords": [
         "diacritics",
@@ -26,7 +26,8 @@
         "build/lucid-search.es.js",
         "build/lucid-search.cjs",
         "build/**/*.d.ts",
-        "build/**/*.d.cts"
+        "build/**/*.d.cts",
+        "llms.txt"
     ],
     "type": "module",
     "main": "build/lucid-search.cjs",

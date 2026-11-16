@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.1.0] - 2026-11-15
+
+### Added
+
+- `search` returns every match with its position and the search terms it could not find, for AI agents and their tool calls.
+- `highlight` wraps the matches of `search` and HTML-escapes the whole haystack.
+- `score` also takes the matches of `search`, since a Match is a Range.
+- `llms.txt`, a compact API reference for coding assistants, ships in the package.
+
 ## [2.0.0] - 2026-11-15
 
 Rewritten in TypeScript, returning positions instead of HTML. See [Migrating from v1](https://niekes.github.io/lucid-search/guide/migration).

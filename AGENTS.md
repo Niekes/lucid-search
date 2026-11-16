@@ -35,7 +35,8 @@ For non-skill agents, treat the task map below as the local onboarding source: r
 ## Domain language
 
 Use the terms in `GLOSSARY.md` (haystack, query, term, range, segment,
-normalization, score) in code, tests and docs. Decisions live in `docs/adr/`.
+normalization, score, match, missing term, highlight) in code, tests and docs.
+Decisions live in `docs/adr/`.
 
 ## The gate
 
