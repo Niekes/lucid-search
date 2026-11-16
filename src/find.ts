@@ -271,7 +271,6 @@ function fuzzyFind(folded: Folded, term: string, typos: number, found: Range[]):
     // Whatever its start, a match ending at `end` covers its last `core` units.
     const core = term.length - typos;
     let run: End[] = [];
-    let fewest = typos;
     const flush = (): void => {
         // Units of the text a kept match covers, counted from the earliest start the run allows.
         const base = Math.max(0, run[0].end - term.length - typos);
@@ -281,7 +280,7 @@ function fuzzyFind(folded: Folded, term: string, typos: number, found: Range[]):
                 if (taken[unit]) return false;
             return true;
         };
-        for (let count = fewest; count <= typos; count += 1) {
+        for (let count = 0; count <= typos; count += 1) {
             const spans: Candidate[] = [];
             for (const at of run) {
                 // One that overlaps a kept match in its core is skipped before its start is searched for.
@@ -301,12 +300,10 @@ function fuzzyFind(folded: Folded, term: string, typos: number, found: Range[]):
             }
         }
         run = [];
-        fewest = typos;
     };
     scan(term, text, 0, 1, text.length, false, typos, (end, count) => {
         if (run.length && end !== run[run.length - 1].end + 1) flush();
         run.push({ end, typos: count });
-        fewest = Math.min(fewest, count);
     });
     if (run.length) flush();
 }
