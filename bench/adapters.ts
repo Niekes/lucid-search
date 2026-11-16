@@ -5,24 +5,24 @@ import AccentFolding from 'accent-folding';
 import * as lucid from '../index';
 import type { Scenario } from './fixtures';
 
-/** Turns (haystack, needle) into an HTML string with every match wrapped in a span. */
-export type Adapter = (haystack: string, needle: string) => string;
+/** Turns (haystack, query) into an HTML string with every match wrapped in a span. */
+export type Adapter = (haystack: string, query: string) => string;
 
 // Copied once: calling through the module runner's export getters would slow lucid down only.
 const { search, highlight, findRanges, toSegments } = lucid;
 
 const wrap = (text: string): string => `<span class="matched">${text}</span>`;
-const segments = (haystack: string, needle: string, normalize: boolean): string =>
-    toSegments(haystack, findRanges(haystack, needle, { normalize }))
+const segments = (haystack: string, query: string, normalize: boolean): string =>
+    toSegments(haystack, findRanges(haystack, query, { normalize }))
         .map(({ text, match }) => (match ? wrap(text) : text))
         .join('');
-const terms = (needle: string): string[] => needle.split(' ');
+const terms = (query: string): string[] => query.split(' ');
 const stripAccents = (text: string): string => text.normalize('NFD').replace(/\p{M}/gu, '');
 
-function hwc(haystack: string, needle: string, sanitize?: (text: string) => string): string {
+function hwc(haystack: string, query: string, sanitize?: (text: string) => string): string {
     return findAll({
         textToHighlight: haystack,
-        searchWords: terms(needle),
+        searchWords: terms(query),
         autoEscape: true,
         sanitize
     })
@@ -66,21 +66,21 @@ const accents: Record<string, Adapter> = {
     'accent-folding': (h, n) => folding.highlightMatch(h, n, 'span')
 };
 
-// The highlighted texts in order, so outputs with different tags can be compared.
-const highlighted = (html: string): string[] =>
-    [...html.matchAll(/<span[^>]*>(.*?)<\/span>/g)].map((m) => m[1]);
+// The whole output with every opening span reduced to `<span>`, so libraries that set other
+// attributes still compare equal, but highlighting at other places or changing the text does not.
+const canonical = (html: string): string => html.replace(/<span[^>]*>/g, '<span>');
 
 /**
  * The adapters for a scenario, split into the ones that highlight exactly the same text as
  * lucid-search (only these are timed) and the names of the ones that don't.
  */
-export function contenders({ name, haystacks, needle }: Scenario): {
+export function contenders({ haystacks, query, accents: ignoreAccents }: Scenario): {
     same: [string, Adapter][];
     skipped: string[];
 } {
-    const adapters = name.startsWith('S4') ? accents : plain;
+    const adapters = ignoreAccents ? accents : plain;
     const texts = (adapter: Adapter): string =>
-        JSON.stringify(haystacks.map((h) => highlighted(adapter(h, needle))));
+        JSON.stringify(haystacks.map((h) => canonical(adapter(h, query))));
     const expected = texts(adapters['lucid-search']);
     const same: [string, Adapter][] = [];
     const skipped: string[] = [];

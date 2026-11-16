@@ -39,7 +39,7 @@ function toTerms(needle: unknown): string[] {
 }
 
 interface Compiled {
-    /** The search terms, deduplicated ignoring case, in the caller's order. */
+    /** The terms, deduplicated ignoring case, in the caller's order. */
     terms: string[];
     /** The same terms, longest first, so the longest wins when two match at one position. */
     byLength: string[];
@@ -49,8 +49,8 @@ interface Compiled {
     perTerm: RegExp[];
 }
 
-function compile(needle: string | string[], normalize: boolean): Compiled {
-    const terms = toTerms(needle).filter(
+function compile(query: string[], normalize: boolean): Compiled {
+    const terms = query.filter(
         (t, i, all) => all.findIndex((u) => u.toLowerCase() === t.toLowerCase()) === i
     );
     const toPattern = (t: string): string =>
@@ -78,15 +78,19 @@ export function search(
     { normalize = false }: Partial<SearchOptions> = {}
 ): SearchResult {
     if (typeof haystack !== 'string') throw new TypeError('haystack must be a string');
-    // Invalid needles throw in compile, so only valid ones are ever cached.
-    const key = `${+normalize}${typeof needle === 'string' ? `s${needle}` : `a${JSON.stringify(needle)}`}`;
+    // A string query is the key as it is. An array query is checked first, so an invalid one
+    // throws before it can hit the cache, and keyed by its terms, each quoted so none can collide.
+    const split = typeof needle === 'string' ? undefined : toTerms(needle);
+    const key = `${+normalize}${split ? `a${split.map((t) => JSON.stringify(t)).join(',')}` : `s${needle}`}`;
     let compiled = cache.get(key);
     if (!compiled) {
-        // shortcut: forgets every needle after 100, upgrade to an LRU if a page cycles through more.
-        if (cache.size >= 100) cache.clear();
-        compiled = compile(needle, normalize);
-        // Long needles are rarely repeated and would keep large keys and regexes alive.
-        if (key.length < 1000) cache.set(key, compiled);
+        compiled = compile(split ?? toTerms(needle), normalize);
+        // Long queries are rarely repeated and would keep large keys and regexes alive.
+        if (key.length < 1000) {
+            // shortcut: forgets every query after 100, upgrade to an LRU if a page cycles through more.
+            if (cache.size >= 100) cache.clear();
+            cache.set(key, compiled);
+        }
     }
     const { terms, byLength, alternatives, perTerm } = compiled;
     if (!terms.length) return { matches: [], missing: [] };

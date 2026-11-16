@@ -7,15 +7,15 @@ absolute values. To run the string scenarios in your own browser, open the
 
 ## Summary
 
-- **`search` with `highlight` is the fastest or level with the fastest in four of five
+- **`search` with `highlight` is the fastest or level with the fastest in three of five
   scenarios.** It leads with many short haystacks (S1, 1.7 times spotmark) and with accents
-  (S4), ties spotmark on an article (S2) and comes close when nothing matches (S5). With 20
-  search terms in 100 kB (S6), spotmark is 1.6 times faster: `search` also returns the position
+  (S3), and ties spotmark on an article (S2). When nothing matches (S4), spotmark is 6% faster. With 20
+  search terms in 100 kB (S5), spotmark is 1.6 times faster: `search` also returns the position
   and search term of every match, about 12,000 objects here.
-- **`findRanges` with `toSegments` is mid-field on plain text** and about as fast as
-  highlight-words-core with accents. It is the path for rendering your own elements, such as in
+- **`findRanges` with `toSegments` is mid-field on plain text, but last when nothing matches
+  (S4)**, and about as fast as highlight-words-core with accents. It is the path for rendering your own elements, such as in
   React.
-- **Against mark.js, lucid-search is about 45 to 60 times faster.** mark.js walks and edits the
+- **Against mark.js, lucid-search is about 44 to 59 times faster.** mark.js walks and edits the
   DOM; lucid-search builds one string and sets it as `innerHTML` once.
 - **The imports are small:** 0.9 kB gzip for `findRanges` with `toSegments`, 1.4 kB for
   `search` with `highlight`.
@@ -35,8 +35,9 @@ compiling its regexes.
 ## String libraries (Node)
 
 Each library returns an HTML string with every match wrapped in a `span`. Before timing,
-the benchmark checks that every library highlights exactly the same text. A library that
-doesn't is left out of that scenario. lucid-search runs twice: `search` with `highlight`, and
+the benchmark checks that every library returns the same HTML as lucid-search, ignoring only
+the attributes of the `span`: the same matches at the same places, and the same text around
+them. A library that doesn't is left out of that scenario. lucid-search runs twice: `search` with `highlight`, and
 `findRanges` with `toSegments`, joined into the same HTML.
 
 ### S1: search-as-you-type, 1,000 items of 60 characters, 2 terms
@@ -61,7 +62,7 @@ One operation highlights the whole list.
 | **lucid-search (findRanges)** | 39,604 |
 | highlight-words               | 15,768 |
 
-### S4: accents, 10 kB, 1 term
+### S3: accents, 10 kB, 1 term
 
 Every library in its accent-insensitive mode. highlight-words has none.
 
@@ -73,7 +74,7 @@ Every library in its accent-insensitive mode. highlight-words has none.
 | highlight-words-core          |   5,119 |
 | accent-folding                |   2,852 |
 
-### S5: no match, 10 kB, 2 terms
+### S4: no match, 10 kB, 2 terms
 
 | Library                       |   ops/s |
 | ----------------------------- | ------: |
@@ -83,7 +84,7 @@ Every library in its accent-insensitive mode. highlight-words has none.
 | highlight-words               | 405,385 |
 | **lucid-search (findRanges)** | 210,329 |
 
-### S6: stress, 100 kB, 20 terms
+### S5: stress, 100 kB, 20 terms
 
 | Library                       | ops/s |
 | ----------------------------- | ----: |
@@ -102,7 +103,7 @@ mark.js highlights the element in place. Both highlight exactly the same text.
 | Scenario                   | **lucid-search** | mark.js |
 | -------------------------- | ---------------: | ------: |
 | S2 article, 10 kB, 3 terms |           16,271 |     372 |
-| S4 accents, 10 kB, 1 term  |           61,970 |   1,059 |
+| S3 accents, 10 kB, 1 term  |           61,970 |   1,059 |
 
 ## Bundle size
 

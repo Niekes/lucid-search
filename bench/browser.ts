@@ -3,23 +3,19 @@
 // output of highlight, mark.js highlights the element in place. Run with `pnpm bench:browser`.
 import { createRequire } from 'node:module';
 import { chromium } from 'playwright';
-import { scenarios } from './fixtures.ts';
-
-const article = scenarios.find(({ name }) => name.startsWith('S2'));
-const accents = scenarios.find(({ name }) => name.startsWith('S4'));
-if (!article || !accents) throw new Error('S2 and S4 fixtures are missing');
+import { accents, article } from './fixtures.ts';
 
 const cases = [
     {
-        name: 'S2 article: 10 kB, 3 terms',
+        name: article.name,
         haystack: article.haystacks[0],
-        needle: article.needle,
+        query: article.query,
         diacritics: false
     },
     {
-        name: 'S4 accents: 10 kB, 1 term',
+        name: accents.name,
         haystack: accents.haystacks[0],
-        needle: accents.needle,
+        query: accents.query,
         diacritics: true
     }
 ];
@@ -32,7 +28,7 @@ await page.addScriptTag({
 });
 
 for (const testCase of cases) {
-    const result = await page.evaluate(({ name, haystack, needle, diacritics }) => {
+    const result = await page.evaluate(({ name, haystack, query, diacritics }) => {
         const el = document.createElement('div');
         document.body.append(el);
         const reset = () => (el.textContent = haystack);
@@ -41,12 +37,12 @@ for (const testCase of cases) {
                 const { search, highlight } = (window as any).lucidSearch;
                 el.innerHTML = highlight(
                     haystack,
-                    search(haystack, needle, { normalize: diacritics }).matches
+                    search(haystack, query, { normalize: diacritics }).matches
                 );
             },
             'mark.js': () => {
                 reset();
-                new (window as any).Mark(el).mark(needle, {
+                new (window as any).Mark(el).mark(query, {
                     separateWordSearch: true,
                     diacritics,
                     accuracy: 'partially'

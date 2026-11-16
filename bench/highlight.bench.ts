@@ -9,7 +9,7 @@ for (const scenario of scenarios) {
             console.warn(`[${scenario.name}] ${library} skipped: highlights different text`);
         const registrations = same.map(([library, adapter]) =>
             bench(library, () => {
-                for (const haystack of scenario.haystacks) adapter(haystack, scenario.needle);
+                for (const haystack of scenario.haystacks) adapter(haystack, scenario.query);
             })
         );
         await bench.compare(...registrations);

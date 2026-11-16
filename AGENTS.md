@@ -58,7 +58,7 @@ Declared in `.fallowrc.jsonc`; a violation fails the build.
 | `docs`       | `docs/**`  | `public-api`, `bench` (the live benchmark page) |
 | `bench`      | `bench/**` | `public-api` (and `core` only through it)       |
 
-Tests and docs import from `index.ts` only. A test that imports `src/`
+Tests and docs import the library from `index.ts` only (the docs Benchmark page also imports `bench/`). A test that imports `src/`
 directly leaves the public export untested, which `coverage-gaps` reports.
 
 ## Releasing

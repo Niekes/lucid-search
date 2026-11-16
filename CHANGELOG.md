@@ -12,7 +12,7 @@
 
 ### Changed
 
-- `search` caches the regexes for its last 100 needles and reads the haystack once; `findRanges` searches ASCII haystacks without folding; `highlight` skips escaping when there is nothing to escape. Results are unchanged.
+- `search` caches the regexes for its last 100 queries and reads the haystack once; `findRanges` searches ASCII haystacks without folding; `highlight` skips escaping when there is nothing to escape. Results are unchanged.
 
 ## [2.0.0] - 2026-11-15
 

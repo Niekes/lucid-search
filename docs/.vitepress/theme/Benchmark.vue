@@ -47,7 +47,7 @@ async function start(): Promise<void> {
         for (const [library, adapter] of same) {
             status.value = `${scenario.name}: ${library}`;
             const opsPerSecondValue = await opsPerSecond(() => {
-                for (const haystack of scenario.haystacks) adapter(haystack, scenario.needle);
+                for (const haystack of scenario.haystacks) adapter(haystack, scenario.query);
             });
             result.rows.push({ library, opsPerSecond: Math.round(opsPerSecondValue) });
             result.rows.sort((a, b) => b.opsPerSecond - a.opsPerSecond);

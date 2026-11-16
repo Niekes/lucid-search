@@ -120,13 +120,13 @@ it('search does not report a term as missing when it only occurs inside a longer
     expect(result.missing).toEqual([]);
 });
 
-it('search finds the same terms when the same needle searches another haystack', () => {
+it('search finds the same terms when the same query searches another haystack', () => {
     expect(search('a dog', 'dog cat').missing).toEqual(['cat']);
     expect(search('a cat', 'dog cat').missing).toEqual(['dog']);
     expect(search('a cat', 'dog cat', { normalize: true }).matches).toHaveLength(1);
 });
 
-it('search still works after more than 100 different needles', () => {
+it('search still works after more than 100 different queries', () => {
     for (let i = 0; i < 101; i++) search('dog', `dog ${i}`);
 
     expect(search('dog 7', 'dog 7').missing).toEqual([]);
@@ -138,9 +138,22 @@ it('search returns a fresh missing list that the caller may change', () => {
     expect(search('x', 'dog').missing).toEqual(['dog']);
 });
 
-it('search finds long needles on every call', () => {
-    const needle = `dog ${'x'.repeat(1000)}`;
+it('search finds long queries on every call', () => {
+    const query = `dog ${'x'.repeat(1000)}`;
 
-    expect(search('a dog', needle).missing).toEqual(['x'.repeat(1000)]);
-    expect(search('a dog', needle).matches).toHaveLength(1);
+    expect(search('a dog', query).missing).toEqual(['x'.repeat(1000)]);
+    expect(search('a dog', query).matches).toHaveLength(1);
+});
+
+it('search still rejects invalid array queries after a similar valid one was cached', () => {
+    // eslint-disable-next-line no-sparse-arrays
+    const holes = [, 'a'] as unknown as string[];
+    expect(search('a b', holes).missing).toEqual([]);
+
+    expect(() => search('a b', [untyped(null), 'a'])).toThrow(
+        'needle must be a string or an array of strings'
+    );
+    expect(() => search('a', [untyped(1n), 'a'])).toThrow(
+        'needle must be a string or an array of strings'
+    );
 });
