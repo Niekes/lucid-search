@@ -1,0 +1,6 @@
+{
+    // The shipped code runs in browsers too: type-check it without Node or test globals.
+    "extends": "./tsconfig.json",
+    "compilerOptions": { "types": [] },
+    "include": ["index.ts", "src/**/*"]
+}

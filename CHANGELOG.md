@@ -5,11 +5,12 @@
 ### Added
 
 - `findRanges` forgives typos with `{ typos }`: an inserted, deleted or replaced letter, or two swapped adjacent letters, each count as one. A term gets at most one per 4 letters. Off by default ([ADR 0003](docs/adr/0003-typo-tolerant-findranges.md)).
-- [Benchmarks](https://niekes.github.io/lucid-search/guide/benchmarks) against Fuse.js, uFuzzy and fuzzysort, with recall next to every timing.
+- [Benchmarks](https://niekes.github.io/lucid-search/guide/performance#typos) against Fuse.js, uFuzzy and fuzzysort, with recall next to every timing.
 
 ### Changed
 
-- `findRanges` is up to 20 times faster on long haystacks, with or without typos.
+- `findRanges` is about 4 times faster on haystacks with accents: it folds only the characters outside ASCII.
+- `findRanges` with `toSegments` grows from 0.9 to 1.9 kB gzip, for the typo matching.
 
 ## [2.1.0] - 2026-11-15
 
@@ -19,6 +20,11 @@
 - `highlight` wraps the matches of `search` and HTML-escapes the whole haystack.
 - `score` also takes the matches of `search`, since a Match is a Range.
 - `llms.txt`, a compact API reference for coding assistants, ships in the package.
+- Benchmarks against other highlighting libraries, on the Performance page and as a live page in the docs.
+
+### Changed
+
+- `search` caches the regexes for its last 100 queries and reads the haystack once; `findRanges` searches ASCII haystacks without folding; `highlight` skips escaping when there is nothing to escape. Results are unchanged.
 
 ## [2.0.0] - 2026-11-15
 

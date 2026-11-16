@@ -1,17 +1,28 @@
 {
     "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
 
-    // The docs playground is a dev surface: the shipped package never imports
-    // vue, so the docs may use it while it stays a devDependency.
-    "ignoreDependencies": ["vue"],
-
     // The public entry point of the package, plus the docs site and the
-    // benchmarks, dev surfaces that reach the library through the public API only.
+    // benchmarks, which reach the library through the public API only.
     "entry": [
         "index.ts",
         "docs/.vitepress/config.ts",
         "docs/.vitepress/theme/index.ts",
-        "bench/**/*.bench.ts"
+        "bench/**/*.bench.ts",
+        "bench/browser.ts",
+        "bench/size.ts"
+    ],
+
+    // The docs site and the benchmarks never ship, so they may use these
+    // devDependencies. The shipped package (index.ts, src/) imports nothing.
+    // mark.js is loaded into the browser benchmark by path, not imported.
+    "ignoreDependencies": [
+        "vue",
+        "vite-plus",
+        "highlight-words-core",
+        "highlight-words",
+        "spotmark",
+        "accent-folding",
+        "mark.js"
     ],
 
     // Every rule that can catch a violation of the architecture is an error.
@@ -34,7 +45,7 @@
     //   index.ts   public-api  ->  core
     //   src/*      core        ->  core
     //   tests/*    tests       ->  public-api (core only through it)
-    //   docs/*     docs        ->  public-api (core only through it)
+    //   docs/*     docs        ->  public-api, bench (the live benchmark page)
     //   bench/*    bench       ->  public-api (core only through it)
     //
     // Fallow follows the re-exports of index.ts, so tests and docs must be
@@ -53,8 +64,8 @@
             { "from": "public-api", "allow": ["core"] },
             { "from": "core", "allow": ["core"] },
             { "from": "tests", "allow": ["public-api", "core"] },
-            { "from": "docs", "allow": ["public-api", "core"] },
-            { "from": "bench", "allow": ["public-api", "core"] }
+            { "from": "docs", "allow": ["public-api", "core", "bench"] },
+            { "from": "bench", "allow": ["public-api", "core", "bench"] }
         ],
         "coverage": {
             "requireAllFiles": true,

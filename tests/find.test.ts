@@ -134,3 +134,20 @@ it('findRanges with typos keeps working across many distinct terms', () => {
     const terms = Array.from({ length: 300 }, (_, i) => `term${i}`);
     expect(findRanges('a term299 here', terms, { typos: 1 })).toEqual([{ start: 2, end: 9 }]);
 });
+
+it('findRanges still matches after more than 10,000 distinct characters', () => {
+    const many = Array.from({ length: 10_001 }, (_, i) => String.fromCodePoint(0x4e00 + i)).join(
+        ''
+    );
+    findRanges(many, 'x');
+
+    expect(findRanges('Café', 'cafe')).toEqual([{ start: 0, end: 4 }]);
+});
+
+it('findRanges treats a non-boolean normalize by its truthiness without changing later calls', () => {
+    const loose = (value: string) => ({ normalize: value }) as unknown as { normalize: boolean };
+
+    expect(findRanges('Café', 'cafe', loose('yes'))).toEqual([{ start: 0, end: 4 }]);
+    expect(findRanges('é', 'e', loose('0'))).toEqual([{ start: 0, end: 1 }]);
+    expect(findRanges('é', 'e', { normalize: false })).toEqual([]);
+});

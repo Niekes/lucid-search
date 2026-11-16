@@ -45,7 +45,7 @@ findRanges('Pride and Prejudice', 'prejudcie', { typos: 1 });
 adjacent letters swapped. A term gets at most one Typo per 4 letters, because short terms with
 typos match almost anything. Each Range covers the best match, not the letters around it.
 `score` ranks a match with typos like an exact one of the same length. See the
-[benchmarks](./benchmarks) against Fuse.js, uFuzzy and fuzzysort.
+[benchmarks](./performance#typos) against Fuse.js, uFuzzy and fuzzysort.
 
 ## Render in React
 

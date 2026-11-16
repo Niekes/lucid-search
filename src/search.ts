@@ -38,6 +38,54 @@ function toTerms(needle: unknown): string[] {
     throw new TypeError('needle must be a string or an array of strings');
 }
 
+interface Compiled {
+    /** The terms, deduplicated ignoring case, in the caller's order. */
+    terms: string[];
+    /** The same terms, longest first, so the longest wins when two match at one position. */
+    byLength: string[];
+    /** One capture group per term in `byLength`, to tell which term found a match. */
+    alternatives: RegExp;
+    /** One regex per term in `terms`, to check the ones that found no match. */
+    perTerm: RegExp[];
+}
+
+function compile(query: string[], normalize: boolean): Compiled {
+    const terms = query.filter(
+        (t, i, all) => all.findIndex((u) => u.toLowerCase() === t.toLowerCase()) === i
+    );
+    const toPattern = (t: string): string =>
+        normalize ? foldAccents(escapeRegExp(t)) : escapeRegExp(t);
+    const byLength = [...terms].sort((a, b) => b.length - a.length);
+    return {
+        terms,
+        byLength,
+        alternatives: new RegExp(byLength.map((t) => `(${toPattern(t)})`).join('|'), 'gi'),
+        perTerm: terms.map((t) => new RegExp(toPattern(t), 'i'))
+    };
+}
+
+// `matchAll` copies the regex and `test` has no `g` flag, so reusing them is safe.
+const cache = new Map<string, Compiled>();
+
+/** The compiled query, from the cache when the same query was searched recently. */
+function compiledQuery(query: string | string[], normalize: boolean): Compiled {
+    // A string query is the key as it is. An array query is checked first, so an invalid one
+    // throws before it can hit the cache, and keyed by its terms, each quoted so none can collide.
+    const terms = typeof query === 'string' ? undefined : toTerms(query);
+    const key = `${normalize ? 1 : 0}${terms ? `a${terms.map((t) => JSON.stringify(t)).join(',')}` : `s${query}`}`;
+    let entry = cache.get(key);
+    if (!entry) {
+        entry = compile(terms ?? toTerms(query), normalize);
+        // Long queries are rarely repeated and would keep large keys and regexes alive.
+        if (key.length < 1000) {
+            // shortcut: forgets every query after 100, upgrade to an LRU if a page cycles through more.
+            if (cache.size >= 100) cache.clear();
+            cache.set(key, entry);
+        }
+    }
+    return entry;
+}
+
 /**
  * Find every literal, case-insensitive occurrence of the needle's search terms.
  * A string needle is split on whitespace, `.`, `-` and `_`; pass an array to choose the terms.
@@ -49,23 +97,23 @@ export function search(
     { normalize = false }: Partial<SearchOptions> = {}
 ): SearchResult {
     if (typeof haystack !== 'string') throw new TypeError('haystack must be a string');
-    const terms = toTerms(needle).filter(
-        (t, i, all) => all.findIndex((u) => u.toLowerCase() === t.toLowerCase()) === i
-    );
+    const { terms, byLength, alternatives, perTerm } = compiledQuery(needle, normalize);
     if (!terms.length) return { matches: [], missing: [] };
 
-    const toPattern = (t: string): string =>
-        normalize ? foldAccents(escapeRegExp(t)) : escapeRegExp(t);
-    // Longest term first, so it wins when two terms match at the same position.
-    const byLength = [...terms].sort((a, b) => b.length - a.length);
-    const alternatives = new RegExp(byLength.map((t) => `(${toPattern(t)})`).join('|'), 'gi');
-    const matches = [...haystack.matchAll(alternatives)].map((m) => ({
-        start: m.index,
-        end: m.index + m[0].length,
-        text: m[0],
-        term: byLength[m.slice(1).findIndex((g) => g !== undefined)]
-    }));
-    const missing = terms.filter((t) => !new RegExp(toPattern(t), 'i').test(haystack));
+    const matches: Match[] = [];
+    const found = new Set<string>();
+    for (const m of haystack.matchAll(alternatives)) {
+        let group = 1;
+        while (m[group] === undefined) group += 1;
+        const term = byLength[group - 1];
+        found.add(term);
+        matches.push({ start: m.index, end: m.index + m[0].length, text: m[0], term });
+    }
+    // Without any match no term occurs. Otherwise a term without a match of its own can still
+    // occur inside a longer term's match.
+    const missing = matches.length
+        ? terms.filter((t, i) => !found.has(t) && !perTerm[i].test(haystack))
+        : [...terms];
 
     return { matches, missing };
 }
@@ -97,11 +145,13 @@ export function highlight(
     ) {
         throw new TypeError('el must be a tag name and cssClass must not contain " < or >');
     }
+    // Checked once for the whole haystack, so text without special characters skips escaping.
+    const escape = /[&<>"']/.test(haystack) ? escapeHtml : (text: string): string => text;
     let html = '';
     let cursor = 0;
     for (const { start, end } of matches) {
-        html += `${escapeHtml(haystack.slice(cursor, start))}<${el} class="${cssClass}">${escapeHtml(haystack.slice(start, end))}</${el}>`;
+        html += `${escape(haystack.slice(cursor, start))}<${el} class="${cssClass}">${escape(haystack.slice(start, end))}</${el}>`;
         cursor = end;
     }
-    return html + escapeHtml(haystack.slice(cursor));
+    return html + escape(haystack.slice(cursor));
 }

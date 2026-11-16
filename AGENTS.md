@@ -40,7 +40,7 @@ Decisions live in `docs/adr/`.
 
 ## The gate
 
-`pnpm verify` is the whole gate: typecheck, `vp check` (format and lint),
+`pnpm verify` is the whole gate: typecheck (plus `tsconfig.lib.json`, which checks `index.ts` and `src/` without Node types), `vp check` (format and lint),
 tests with 100% coverage, fallow (`dead-code`, `health --coverage-gaps`,
 `dupes`, all with `--ci`), the library build and the docs build. It runs in CI
 on every push and pull request. Fallow's audit gates every finding in changed
@@ -50,14 +50,15 @@ files (`"audit": { "gate": "all" }` in `.fallowrc.jsonc`).
 
 Declared in `.fallowrc.jsonc`; a violation fails the build.
 
-| Zone         | Files      | May import                                |
-| ------------ | ---------- | ----------------------------------------- |
-| `public-api` | `index.ts` | `core`                                    |
-| `core`       | `src/**`   | `core`                                    |
-| `tests`      | `tests/**` | `public-api` (and `core` only through it) |
-| `docs`       | `docs/**`  | `public-api` (and `core` only through it) |
+| Zone         | Files      | May import                                      |
+| ------------ | ---------- | ----------------------------------------------- |
+| `public-api` | `index.ts` | `core`                                          |
+| `core`       | `src/**`   | `core`                                          |
+| `tests`      | `tests/**` | `public-api` (and `core` only through it)       |
+| `docs`       | `docs/**`  | `public-api`, `bench` (the live benchmark page) |
+| `bench`      | `bench/**` | `public-api` (and `core` only through it)       |
 
-Tests and docs import from `index.ts` only. A test that imports `src/`
+Tests and docs import the library from `index.ts` only (the docs Benchmark page also imports `bench/`). A test that imports `src/`
 directly leaves the public export untested, which `coverage-gaps` reports.
 
 ## Releasing
@@ -68,3 +69,16 @@ updates `CHANGELOG.md`. Merging it into `master` triggers
 the version is not on npm yet) and creates the `vX.Y.Z` GitHub release. The
 version goes live once a maintainer approves it with 2FA. Never run
 `npm publish`, `npm stage approve` or push a version tag by hand.
+
+## Benchmarks
+
+`bench/` compares lucid-search with other highlighting libraries: `pnpm bench`
+(Node), `pnpm bench:browser` (mark.js, Chromium) and `pnpm bench:size`. The docs page
+`docs/benchmark.md` runs the same string scenarios in the visitor's browser. Each
+library must highlight exactly the same text as lucid-search before it is timed.
+`bench/fuzzy.bench.ts` times `findRanges` with typos against Fuse.js, uFuzzy and
+fuzzysort, and labels each one with its recall, because those libraries find different
+things.
+The benchmarks are not part of `pnpm verify`, because timing varies between
+runs. After a run that changes the numbers, update `docs/guide/performance.md`
+with the new results and setup.

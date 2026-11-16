@@ -35,7 +35,7 @@ interface Folded {
     to: number[];
 }
 
-function foldChar(char: string, normalize: boolean): string {
+function foldCharUncached(char: string, normalize: boolean): string {
     // 'İ' lowercases to 'i' plus a combining dot, which would stop it matching 'i'.
     const lower = char === 'İ' ? 'i' : char.toLowerCase();
     if (!normalize) return lower;
@@ -46,15 +46,17 @@ function foldChar(char: string, normalize: boolean): string {
         .replace(undecomposable, (letter) => UNDECOMPOSABLE[letter]);
 }
 
-// Folding is the slow part of a search, so each non-ASCII character is folded once per process.
+// Haystacks repeat a small set of characters, so each one is folded once per mode.
 const folds = [new Map<string, string>(), new Map<string, string>()];
 
-function foldCached(char: string, normalize: boolean): string {
-    const memo = folds[Number(normalize)];
-    let text = memo.get(char);
+function foldChar(char: string, normalize: boolean): string {
+    const cache = folds[normalize ? 1 : 0];
+    let text = cache.get(char);
     if (text === undefined) {
-        text = foldChar(char, normalize);
-        memo.set(char, text);
+        text = foldCharUncached(char, normalize);
+        // shortcut: forgets every character after 10,000, upgrade to an LRU if CJK-heavy servers refold often.
+        if (cache.size >= 10_000) cache.clear();
+        cache.set(char, text);
     }
     return text;
 }
@@ -76,7 +78,7 @@ function widenLast(folded: Folded, end: number): void {
 
 function fold(input: string, normalize: boolean): Folded {
     // Most haystacks are pure ASCII: one piece, no character to fold one by one.
-    if (!/[^\0-\x7f]/.test(input)) {
+    if (/^[\0-\x7f]*$/.test(input)) {
         return { text: input.toLowerCase(), at: [0], from: [0], to: [-1] };
     }
     const folded: Folded = { text: '', at: [], from: [], to: [] };
@@ -91,7 +93,7 @@ function fold(input: string, normalize: boolean): Folded {
     for (const { 0: char, index: start } of input.matchAll(/[^\0-\x7f]/gu)) {
         if (start > index) piece(index, -1, input.slice(index, start).toLowerCase());
         const end = start + char.length;
-        const text = foldCached(char, normalize);
+        const text = foldChar(char, normalize);
         if (text) piece(start, end, text);
         else widenLast(folded, end);
         index = end;
@@ -100,8 +102,8 @@ function fold(input: string, normalize: boolean): Folded {
     return folded;
 }
 
-/** The span of the original haystack that unit `unit` of the folded text came from. */
-function source({ at, from, to }: Folded, unit: number): Range {
+/** The piece of the folded text that unit `unit` belongs to. */
+function pieceOf(at: number[], unit: number): number {
     let low = 0;
     let high = at.length - 1;
     while (low < high) {
@@ -109,9 +111,17 @@ function source({ at, from, to }: Folded, unit: number): Range {
         if (at[middle] <= unit) low = middle;
         else high = middle - 1;
     }
-    if (to[low] >= 0) return { start: from[low], end: to[low] };
-    const start = from[low] + unit - at[low];
-    return { start, end: start + 1 };
+    return low;
+}
+
+/** The Range of the original haystack that folded units `first` to `last` (inclusive) came from. */
+function toRange({ at, from, to }: Folded, first: number, last: number): Range {
+    const head = pieceOf(at, first);
+    const tail = pieceOf(at, last);
+    return {
+        start: to[head] >= 0 ? from[head] : from[head] + first - at[head],
+        end: to[tail] >= 0 ? to[tail] : from[tail] + last - at[tail] + 1
+    };
 }
 
 function merge(ranges: Range[]): Range[] {
@@ -221,7 +231,8 @@ function startOf(text: string, term: string, end: number, typos: number): number
 }
 
 /** Keeps the best match from each run of consecutive end positions within the Typo budget. */
-function fuzzyFind(text: string, term: string, typos: number, found: Range[]): void {
+function fuzzyFind(folded: Folded, term: string, typos: number, found: Range[]): void {
+    const { text } = folded;
     let run: number[] = [];
     let fewest = Infinity;
     // The last position within budget; a gap after it ends the run.
@@ -229,7 +240,10 @@ function fuzzyFind(text: string, term: string, typos: number, found: Range[]): v
     const flush = (): void => {
         const spans = run.map((end) => ({ start: startOf(text, term, end, typos), end }));
         const closest = Math.min(...spans.map((span) => shape(text, term, span)));
-        found.push(...spans.filter((span) => shape(text, term, span) === closest));
+        for (const span of spans) {
+            if (shape(text, term, span) === closest)
+                found.push(toRange(folded, span.start, span.end));
+        }
     };
     scan(term, text, 0, 1, text.length, false, typos, (at, count) => {
         if (at !== latest + 1 && run.length) {
@@ -259,8 +273,7 @@ export function findRanges(
     const normalize = options.normalize ?? true;
     const terms = typeof query === 'string' ? query.split(/\s+/) : query;
     const folded = fold(haystack, normalize);
-    // Folded spans: `start` and `end` are both inclusive here.
-    const spans: Range[] = [];
+    const ranges: Range[] = [];
     for (const term of terms) {
         const foldedTerm = fold(term, normalize).text;
         if (!foldedTerm) continue;
@@ -270,7 +283,7 @@ export function findRanges(
                 ? 0
                 : Math.min(options.typos ?? 0, Math.floor(foldedTerm.length / 4));
         if (typos > 0) {
-            fuzzyFind(folded.text, foldedTerm, typos, spans);
+            fuzzyFind(folded, foldedTerm, typos, ranges);
             continue;
         }
         for (
@@ -278,13 +291,8 @@ export function findRanges(
             at !== -1;
             at = folded.text.indexOf(foldedTerm, at + 1)
         ) {
-            spans.push({ start: at, end: at + foldedTerm.length - 1 });
+            ranges.push(toRange(folded, at, at + foldedTerm.length - 1));
         }
     }
-    return merge(
-        spans.map(({ start, end }) => ({
-            start: source(folded, start).start,
-            end: source(folded, end).end
-        }))
-    );
+    return merge(ranges);
 }
