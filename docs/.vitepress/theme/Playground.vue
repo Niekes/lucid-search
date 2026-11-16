@@ -1,35 +1,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import * as lucid from '../../../index';
+import { findRanges, score, toSegments } from '../../../index';
 
-const findFlavours = [
-    'findMatches',
-    'findMatchesHtml',
-    'findMatchesNormalized',
-    'findMatchesHtmlNormalized'
-] as const;
-const uncoverFlavours = [
-    'uncoverMatches',
-    'uncoverMatchesHtml',
-    'uncoverMatchesNormalized',
-    'uncoverMatchesHtmlNormalized'
-] as const;
-const flavours = [...findFlavours, ...uncoverFlavours];
-type FindFlavour = (typeof findFlavours)[number];
-type UncoverFlavour = (typeof uncoverFlavours)[number];
+const haystack = ref('Thé quick brown føx jumps over the låzy dog in Łódź');
+const query = ref('the fox dog lodz');
+const normalize = ref(true);
 
-const haystack = ref('Thé quick brown <strong>føx</strong> jumps over the låzy <em>dog</em>');
-const needle = ref('the fox dog strong');
-const flavour = ref<FindFlavour | UncoverFlavour>('findMatchesHtmlNormalized');
-const isUncover = (name: string): name is UncoverFlavour => name.startsWith('uncover');
-
-// The uncover flavours take search terms, so the needle is split on commas for them.
-const found = computed(() =>
-    isUncover(flavour.value)
-        ? lucid[flavour.value](haystack.value, needle.value.split(','))
-        : lucid[flavour.value](haystack.value, needle.value)
+const ranges = computed(() =>
+    findRanges(haystack.value, query.value, { normalize: normalize.value })
 );
-const score = computed(() => lucid.score(found.value.matches, haystack.value).toFixed(2));
+const segments = computed(() => toSegments(haystack.value, ranges.value));
+const rank = computed(() => score(haystack.value, ranges.value).toFixed(2));
 </script>
 
 <template>
@@ -39,20 +20,22 @@ const score = computed(() => lucid.score(found.value.matches, haystack.value).to
             <textarea v-model="haystack" rows="3" />
         </label>
         <label>
-            {{ isUncover(flavour) ? 'Search terms (comma separated)' : 'Needle' }}
-            <input v-model="needle" />
+            Query
+            <input v-model="query" />
         </label>
-        <label>
-            Flavour
-            <select v-model="flavour">
-                <option v-for="name in flavours" :key="name" :value="name">{{ name }}</option>
-            </select>
+        <label class="inline">
+            <input v-model="normalize" type="checkbox" />
+            Ignore accents (<code>normalize</code>)
         </label>
-        <!-- The haystack is your own input, so rendering the mark as HTML is safe here. -->
-        <p class="mark" v-html="found.mark" />
+        <p class="segments">
+            <template v-for="(segment, i) in segments" :key="i">
+                <mark v-if="segment.match">{{ segment.text }}</mark>
+                <template v-else>{{ segment.text }}</template>
+            </template>
+        </p>
         <p>
-            <strong>matches:</strong> <code>{{ JSON.stringify(found.matches) }}</code>
-            <strong>score:</strong> <code>{{ score }}</code>
+            <strong>ranges:</strong> <code>{{ JSON.stringify(ranges) }}</code>
+            <strong>score:</strong> <code>{{ rank }}</code>
         </p>
     </div>
 </template>
@@ -63,9 +46,13 @@ const score = computed(() => lucid.score(found.value.matches, haystack.value).to
     margin-bottom: 12px;
     font-weight: 600;
 }
+.playground label.inline {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
 .playground textarea,
-.playground input,
-.playground select {
+.playground input:not([type='checkbox']) {
     display: block;
     width: 100%;
     margin-top: 4px;
@@ -74,13 +61,15 @@ const score = computed(() => lucid.score(found.value.matches, haystack.value).to
     border-radius: 6px;
     font-weight: 400;
 }
-.mark {
+.segments {
     padding: 12px;
     border-radius: 6px;
     background: var(--vp-c-bg-soft);
+    white-space: pre-wrap;
 }
-.mark :deep(.matched) {
+.segments mark {
     background: var(--vp-c-yellow-soft);
+    color: inherit;
     border-radius: 2px;
 }
 </style>

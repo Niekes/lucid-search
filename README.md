@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>Highlight text and find matches. Zero dependencies, about 1 kB.</strong><br>
+  <strong>Find matches in text and highlight them safely. Zero dependencies, about 1 kB.</strong><br>
   Free and open source, kept alive by one maintainer and the people who sponsor the work.
 </p>
 
@@ -73,13 +73,19 @@ npm install lucid-search
 ```
 
 ```js
-import { findMatches } from 'lucid-search';
+import { findRanges, toSegments } from 'lucid-search';
 
-findMatches('The quick brown fox jumps over the lazy dog', 'The dog').mark;
-// '<span class="matched">The</span> quick brown fox jumps over <span class="matched">the</span> lazy <span class="matched">dog</span>'
+const haystack = 'Café au lait in Łódź';
+toSegments(haystack, findRanges(haystack, 'cafe lodz'));
+// [
+//   { text: 'Café', match: true },
+//   { text: ' au lait in ', match: false },
+//   { text: 'Łódź', match: true }
+// ]
 ```
 
-`mark` is not escaped. Only put it into `innerHTML` if you trust the haystack.
+lucid-search returns positions, never HTML, so you render the matches yourself, e.g. as
+`<mark>` elements in React, and an untrusted haystack can't inject markup.
 
 ## Using it from an AI agent
 

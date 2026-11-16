@@ -2,7 +2,7 @@
 
 > Zero-dependency library (ESM, CommonJS, UMD) that finds literal, case-insensitive matches in a string and returns their positions. Safe HTML highlighting and a ranking score included.
 
-import { search, highlight, score } from 'lucid-search';
+import { findRanges, toSegments, search, highlight, score } from 'lucid-search';
 
 ## search(haystack: string, needle: string | string[], options?: { normalize?: boolean })
 Returns { matches: { start, end, text, term }[], missing: string[] }.
@@ -15,14 +15,17 @@ Returns { matches: { start, end, text, term }[], missing: string[] }.
 ## highlight(haystack: string, matches: Match[], options?: { el?: string = 'span', cssClass?: string = 'matched' })
 Returns HTML: the haystack HTML-escaped, each match wrapped in <el class="cssClass">. Pass matches as search returned them.
 
-## score(matches: (Match | string)[], haystack = ''): number
-Higher = better fit. Use to sort several haystacks searched with the same needle.
+## findRanges(haystack: string, query: string | string[], options?: { normalize?: boolean = true }): { start, end }[]
+Sorted, merged Ranges into the original haystack; accent-insensitive by default. Query split on whitespace only.
+
+## toSegments(haystack: string, ranges: Range[]): { text, match }[]
+Joined, the segments rebuild the haystack exactly. Render match segments with your own elements (no HTML string).
+
+## score(haystack: string, ranges: Range[]): number
+Higher = better fit. Takes findRanges results or search matches. Use to sort several haystacks searched with the same query.
 
 ## Examples
 search('The lazy dog', 'the cat') // { matches: [{ start: 0, end: 3, text: 'The', term: 'the' }], missing: ['cat'] }
 highlight('a < dog', search('a < dog', 'dog').matches) // 'a &lt; <span class="matched">dog</span>'
-docs.sort((a, b) => score(search(b, q).matches, b) - score(search(a, q).matches, a)) // best first
+docs.sort((a, b) => score(b, findRanges(b, q)) - score(a, findRanges(a, q))) // best first
 const context = matches.map(m => text.slice(Math.max(0, m.start - 80), m.end + 80));
-
-## Older API
-The eight findMatches* / uncoverMatches* flavours return { matches: string[], mark: string } with an unescaped mark. Prefer search + highlight in new code.

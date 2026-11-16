@@ -34,8 +34,9 @@ For non-skill agents, treat the task map below as the local onboarding source: r
 
 ## Domain language
 
-Use the terms in `GLOSSARY.md` (haystack, needle, search term, match, mark, highlight,
-flavour, normalize, score) in code, tests and docs.
+Use the terms in `GLOSSARY.md` (haystack, query, term, range, segment,
+normalization, score, match, missing term, highlight) in code, tests and docs.
+Decisions live in `docs/adr/`.
 
 ## The gate
 

@@ -1,21 +1,17 @@
-import type { Match } from './search';
+import type { Range } from './find';
 
 /**
- * Sums the length of every distinct match, weighted up to 2x the closer it sits to the start of
- * the haystack. Takes the `matches` of a flavour (strings) or of `search` (Match objects).
+ * Sums the length of every distinct matched text, weighted up to 2x the closer it starts to the
+ * beginning of the haystack. Repeats of the same text (ignoring case) count once, at their first Range.
  */
-export function score(matches: ReadonlyArray<string | Match>, haystack = ''): number {
-    const firstIndex = new Map<string, number>();
-    for (const match of matches) {
-        const [text, index] =
-            typeof match === 'string'
-                ? [match, haystack.indexOf(match)]
-                : [match.text, match.start];
-        if (!firstIndex.has(text)) firstIndex.set(text, index);
+export function score(haystack: string, ranges: Range[]): number {
+    const seen = new Set<string>();
+    let total = 0;
+    for (const { start, end } of ranges) {
+        const text = haystack.slice(start, end).toLowerCase();
+        if (seen.has(text)) continue;
+        seen.add(text);
+        total += (end - start) * ((haystack.length - start) / haystack.length + 1);
     }
-    const { length } = haystack;
-    return [...firstIndex].reduce((sum, [text, index]) => {
-        const weight = index !== -1 && length ? (length - index) / length + 1 : 1;
-        return sum + text.length * weight;
-    }, 0);
+    return total;
 }

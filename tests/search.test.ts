@@ -1,4 +1,4 @@
-import { search, highlight, score } from '../index';
+import { search, highlight, score, findRanges } from '../index';
 
 const fox = 'The quick brown fox jumps over the lazy dog';
 // Agents call these from untyped JSON, so the runtime checks are part of the contract.
@@ -99,14 +99,16 @@ describe('highlight', () => {
 describe('score with matches from search', () => {
     it('weights each distinct match by length and how early it appears', () => {
         const haystack = 'The lazy dog'; // The: 3 * (12/12 + 1) = 6, dog: 3 * (3/12 + 1) = 3.75
-        expect(score(search(haystack, 'the dog').matches, haystack)).toBe(9.75);
+        expect(score(haystack, search(haystack, 'the dog').matches)).toBe(9.75);
     });
 
     it('counts a repeated match text once, at its first position', () => {
-        expect(score(search('dog dog', 'dog').matches, 'dog dog')).toBe(6);
+        expect(score('dog dog', search('dog dog', 'dog').matches)).toBe(6);
     });
 
-    it('scores the same as with the matched strings of a flavour', () => {
-        expect(score(search(fox, 'the dog').matches, fox)).toBe(score(['The', 'the', 'dog'], fox));
+    it('scores the same as with the Ranges of findRanges', () => {
+        expect(score(fox, search(fox, 'the dog').matches)).toBe(
+            score(fox, findRanges(fox, 'the dog'))
+        );
     });
 });

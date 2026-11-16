@@ -1,89 +1,98 @@
-import { normalize } from './normalize';
-
-export interface MarkOptions {
-    /** The element of every highlight. Default `span`. */
-    el: string;
-    /** The class of that element. Default `matched`. */
-    cssClass: string;
+/** A matched span of the original haystack: `start` inclusive, `end` exclusive, like `slice`. */
+export interface Range {
+    start: number;
+    end: number;
 }
 
-export interface Found {
-    /** Every match in its original casing, in search-term order. */
-    matches: string[];
-    /**
-     * The haystack with every match highlighted in `<el class="cssClass">`; matches that overlap
-     * or touch share one highlight. The haystack is not escaped: only put it into `innerHTML`
-     * if you trust it.
-     */
-    mark: string;
+export interface FindOptions {
+    /** Ignore accents and diacritics, so `cafe` matches `café`. Default `true`. */
+    normalize?: boolean;
 }
 
-type Matcher = (pattern: string) => RegExp;
+// Letters that NFD does not split into a base letter plus a combining mark.
+const UNDECOMPOSABLE: Record<string, string> = {
+    ł: 'l',
+    đ: 'd',
+    ø: 'o',
+    ı: 'i',
+    ß: 'ss',
+    æ: 'ae',
+    œ: 'oe'
+};
+const undecomposable = new RegExp(`[${Object.keys(UNDECOMPOSABLE).join('')}]`, 'g');
 
-const defaults: MarkOptions = { el: 'span', cssClass: 'matched' };
+interface Folded {
+    text: string;
+    /** For each UTF-16 unit of `text`: the span of the character it came from in the original. */
+    sources: Range[];
+}
 
-const plain: Matcher = (pattern) => new RegExp(pattern, 'gi');
-// Skips text inside tags: a match must not be followed by a `>` without a `<` before it.
-const html: Matcher = (pattern) => new RegExp(`(${pattern})(?!([^<]+)?>)`, 'gi');
+function foldChar(char: string, normalize: boolean): string {
+    // 'İ' lowercases to 'i' plus a combining dot, which would stop it matching 'i'.
+    const lower = char === 'İ' ? 'i' : char.toLowerCase();
+    if (!normalize) return lower;
+    // Strip only combining marks (\p{M}): \p{Diacritic} would also delete standalone `^` and `` ` ``.
+    return lower
+        .normalize('NFD')
+        .replace(/\p{M}/gu, '')
+        .replace(undecomposable, (letter) => UNDECOMPOSABLE[letter]);
+}
 
-const escape = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const split = (needle: string): string[] => needle.split(/[.\-_\s]/);
-
-const normalized = (term: string): string => normalize(escape(term));
-
-function find(
-    haystack: string,
-    patterns: string[],
-    options: Partial<MarkOptions>,
-    matcher: Matcher
-): Found {
-    const results = patterns.flatMap((pattern) => [...haystack.matchAll(matcher(pattern))]);
-    const matches = results.map(([match]) => match);
-    if (!matches.length) return { matches, mark: haystack };
-
-    // Matches that overlap or touch merge into one highlight.
-    const highlights: [number, number][] = [];
-    const ranges = results
-        .map(({ 0: match, index }): [number, number] => [index, index + match.length])
-        .sort(([a], [b]) => a - b);
-    for (const [from, to] of ranges) {
-        const last = highlights[highlights.length - 1];
-        if (last && from <= last[1]) last[1] = Math.max(last[1], to);
-        else highlights.push([from, to]);
+function fold(input: string, normalize: boolean): Folded {
+    const folded: Folded = { text: '', sources: [] };
+    let index = 0;
+    for (const char of input) {
+        const end = index + char.length;
+        const text = foldChar(char, normalize);
+        const previous = folded.sources[folded.sources.length - 1];
+        // A combining mark that folds away stays inside the Range of the letter before it.
+        if (!text && previous) previous.end = end;
+        for (let unit = 0; unit < text.length; unit += 1) {
+            folded.sources.push({ start: index, end });
+        }
+        folded.text += text;
+        index = end;
     }
+    return folded;
+}
 
-    const { el, cssClass } = { ...defaults, ...options };
-    let mark = '';
-    let copied = 0;
-    for (const [from, to] of highlights) {
-        mark += `${haystack.slice(copied, from)}<${el} class="${cssClass}">${haystack.slice(from, to)}</${el}>`;
-        copied = to;
+function merge(ranges: Range[]): Range[] {
+    ranges.sort((a, b) => a.start - b.start);
+    const merged: Range[] = [];
+    for (const range of ranges) {
+        const last = merged[merged.length - 1];
+        if (last && range.start <= last.end) last.end = Math.max(last.end, range.end);
+        else merged.push(range);
     }
-    return { matches, mark: mark + haystack.slice(copied) };
+    return merged;
 }
 
 /**
- * One of the eight search functions. `T` is a needle (`string`) or search terms (`string[]`).
- * The returned `mark` is not escaped: only put it into `innerHTML` if you trust the haystack.
+ * Finds every term of the query in the haystack, case-insensitively and as plain text.
+ * A string query is split on whitespace; pass an array to split it yourself.
+ * Returns Ranges into the original haystack, sorted, with overlapping or touching ones merged.
  */
-export type Flavour<T> = (haystack: string, needle: T, options?: Partial<MarkOptions>) => Found;
-
-const flavour =
-    <T>(
-        toTerms: (needle: T) => string[],
-        toPattern: (term: string) => string,
-        matcher: Matcher
-    ): Flavour<T> =>
-    (haystack, needle, options = {}) =>
-        find(haystack, toTerms(needle).filter(Boolean).map(toPattern), options, matcher);
-
-const asIs = (terms: string[]): string[] => terms;
-
-export const findMatches: Flavour<string> = flavour(split, escape, plain);
-export const findMatchesHtml: Flavour<string> = flavour(split, escape, html);
-export const findMatchesNormalized: Flavour<string> = flavour(split, normalized, plain);
-export const findMatchesHtmlNormalized: Flavour<string> = flavour(split, normalized, html);
-export const uncoverMatches: Flavour<string[]> = flavour(asIs, escape, plain);
-export const uncoverMatchesHtml: Flavour<string[]> = flavour(asIs, escape, html);
-export const uncoverMatchesNormalized: Flavour<string[]> = flavour(asIs, normalized, plain);
-export const uncoverMatchesHtmlNormalized: Flavour<string[]> = flavour(asIs, normalized, html);
+export function findRanges(
+    haystack: string,
+    query: string | string[],
+    options: FindOptions = {}
+): Range[] {
+    const normalize = options.normalize ?? true;
+    const terms = typeof query === 'string' ? query.split(/\s+/) : query;
+    const folded = fold(haystack, normalize);
+    const ranges: Range[] = [];
+    for (const term of terms) {
+        const foldedTerm = fold(term, normalize).text;
+        if (!foldedTerm) continue;
+        for (
+            let at = folded.text.indexOf(foldedTerm);
+            at !== -1;
+            at = folded.text.indexOf(foldedTerm, at + 1)
+        ) {
+            const { start } = folded.sources[at];
+            const { end } = folded.sources[at + foldedTerm.length - 1];
+            ranges.push({ start, end });
+        }
+    }
+    return merge(ranges);
+}
