@@ -69,6 +69,72 @@ it('findRanges matches accents exactly but still ignores case when normalize is 
     ]);
 });
 
+it('findRanges with typos finds a term with a missing letter', () => {
+    expect(findRanges('a search box', 'serch', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
+});
+
+it('findRanges with typos counts a replaced or an extra letter as one Typo', () => {
+    expect(findRanges('a search box', 'seaxch', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
+    expect(findRanges('a search box', 'seaarch', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
+    expect(findRanges('a search box', 'sxarxh', { typos: 1 })).toEqual([]);
+});
+
+it('findRanges with typos counts two swapped letters as one Typo', () => {
+    expect(findRanges('a search box', 'serach', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
+    expect(findRanges('a search box', 'saerch', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
+});
+
+it('findRanges allows at most one Typo per 4 letters of a term', () => {
+    expect(findRanges('cat cot', 'cat', { typos: 2 })).toEqual([{ start: 0, end: 3 }]);
+    expect(findRanges('a sxarxh box', 'search', { typos: 2 })).toEqual([]);
+    expect(findRanges('a sxarxhes box', 'searches', { typos: 2 })).toEqual([{ start: 2, end: 10 }]);
+});
+
+it('findRanges with typos returns the best match, not one padded by a letter', () => {
+    expect(findRanges('research', 'search', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
+    expect(findRanges('search searches', 'search', { typos: 1 })).toEqual([
+        { start: 0, end: 6 },
+        { start: 7, end: 13 }
+    ]);
+    expect(findRanges('aaaaaaaa', 'aaaa', { typos: 1 })).toEqual([{ start: 0, end: 8 }]);
+});
+
+it('findRanges matches terms over 32 letters exactly, and allows typos up to 32', () => {
+    const word = 'abcdefghijklmnopqrstuvwxyzabcdef';
+    expect(findRanges(`x ${word} y`, word.replace('m', 'x'), { typos: 1 })).toEqual([
+        { start: 2, end: 34 }
+    ]);
+    expect(findRanges(`x ${word}g y`, `${word}g`.replace('m', 'x'), { typos: 1 })).toEqual([]);
+});
+
+it('findRanges with typos ignores accents and points into the original haystack', () => {
+    expect(findRanges('Café au lait', 'cafee', { typos: 1 })).toEqual([{ start: 0, end: 4 }]);
+    expect(findRanges('cafe\u0301 au lait', 'kafe', { typos: 1 })).toEqual([{ start: 0, end: 5 }]);
+});
+
+it('findRanges with typos matches letters outside ASCII', () => {
+    expect(findRanges('Die Straße', 'straßee', { typos: 1, normalize: false })).toEqual([
+        { start: 4, end: 10 }
+    ]);
+});
+
+it('findRanges with typos matches emoji and other characters outside the BMP', () => {
+    expect(findRanges('I 😀 search', '😀 sarch', { typos: 1 })).toEqual([
+        { start: 2, end: 4 },
+        { start: 5, end: 11 }
+    ]);
+    expect(findRanges('pizza🍕time', 'piza🍕', { typos: 1 })).toEqual([{ start: 0, end: 7 }]);
+});
+
+it('findRanges keeps an extra combining mark inside the Range of an accented letter', () => {
+    expect(findRanges('Łódź́ city', 'lodz')).toEqual([{ start: 0, end: 5 }]);
+});
+
+it('findRanges with typos keeps working across many distinct terms', () => {
+    const terms = Array.from({ length: 300 }, (_, i) => `term${i}`);
+    expect(findRanges('a term299 here', terms, { typos: 1 })).toEqual([{ start: 2, end: 9 }]);
+});
+
 it('findRanges still matches after more than 10,000 distinct characters', () => {
     const many = Array.from({ length: 10_001 }, (_, i) => String.fromCodePoint(0x4e00 + i)).join(
         ''
@@ -84,4 +150,27 @@ it('findRanges treats a non-boolean normalize by its truthiness without changing
     expect(findRanges('Café', 'cafe', loose('yes'))).toEqual([{ start: 0, end: 4 }]);
     expect(findRanges('é', 'e', loose('0'))).toEqual([{ start: 0, end: 1 }]);
     expect(findRanges('é', 'e', { normalize: false })).toEqual([]);
+});
+
+it('findRanges matches typos only when the caller allows them', () => {
+    expect(findRanges('a search box', 'serach')).toEqual([]);
+    expect(findRanges('a search box', 'serach', { typos: 0 })).toEqual([]);
+});
+
+it('findRanges with typos keeps whole words: no space at an edge, no letter cut off', () => {
+    expect(findRanges('a cafe b', 'cafex', { typos: 1 })).toEqual([{ start: 2, end: 6 }]);
+    expect(findRanges('a cafe b', 'xcafe', { typos: 1 })).toEqual([{ start: 2, end: 6 }]);
+    expect(findRanges('a search box', 'searhc', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
+    expect(findRanges('a search box', 'esarch', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
+    expect(findRanges('searc search', 'search', { typos: 1 })).toEqual([
+        { start: 0, end: 5 },
+        { start: 6, end: 12 }
+    ]);
+    expect(findRanges('a 😀😀 b', '😀😀x', { typos: 1 })).toEqual([{ start: 2, end: 6 }]);
+});
+
+it('findRanges with typos handles a haystack that is one long run of candidates', () => {
+    expect(findRanges('a'.repeat(200_000), 'aaaa', { typos: 1 })).toEqual([
+        { start: 0, end: 200_000 }
+    ]);
 });

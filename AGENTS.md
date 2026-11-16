@@ -76,6 +76,9 @@ version goes live once a maintainer approves it with 2FA. Never run
 (Node), `pnpm bench:browser` (mark.js, Chromium) and `pnpm bench:size`. The docs page
 `docs/benchmark.md` runs the same string scenarios in the visitor's browser. Each
 library must highlight exactly the same text as lucid-search before it is timed.
+`bench/fuzzy.bench.ts` times `findRanges` with typos against Fuse.js, uFuzzy and
+fuzzysort, and labels each one with its recall, because those libraries find different
+things.
 The benchmarks are not part of `pnpm verify`, because timing varies between
 runs. After a run that changes the numbers, update `docs/guide/performance.md`
 with the new results and setup.

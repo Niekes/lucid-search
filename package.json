@@ -1,6 +1,6 @@
 {
     "name": "lucid-search",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "Find matches in text and get ranges and segments to highlight them safely, with accent-insensitive matching",
     "keywords": [
         "diacritics",
@@ -65,10 +65,13 @@
         "prepack": "pnpm build"
     },
     "devDependencies": {
+        "@leeoniya/ufuzzy": "1.0.19",
         "@types/node": "^26.6.6",
         "@vitest/coverage-v8": "5.0.5",
         "accent-folding": "^2.7.0",
         "fallow": "3.34.1",
+        "fuse.js": "7.5.0",
+        "fuzzysort": "4.0.2",
         "highlight-words": "^2.0.0",
         "highlight-words-core": "^2.0.0",
         "mark.js": "^8.11.1",

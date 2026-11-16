@@ -13,6 +13,7 @@ interface Segment {
 
 interface FindOptions {
     normalize?: boolean; // default true
+    typos?: number; // default 0
 }
 ```
 
@@ -24,6 +25,10 @@ Returns the `Range[]` of every term of the query in the haystack.
 - Matching always ignores case, and terms are plain text, never patterns.
 - With `normalize` (the default), accents and diacritics are ignored: `cafe` finds `Café`,
   `lodz` finds `Łódź`, `strasse` finds `Straße`. Standalone symbols like `^` stay searchable.
+- With `typos`, a term may differ from the text by that many typos: an inserted, deleted or
+  replaced letter, or two adjacent letters swapped. A term gets at most one typo per 4 letters,
+  so `cat` always matches exactly, and terms over 32 letters always match exactly. Emoji and
+  other characters outside the Basic Multilingual Plane count as two letters.
 - Ranges always point into the original haystack, even where a letter folds to two (`ß` → `ss`).
   They are sorted, and overlapping or touching ones are merged.
 - An empty or blank query returns `[]`.
@@ -31,6 +36,9 @@ Returns the `Range[]` of every term of the query in the haystack.
 ```js
 findRanges('Straße in Łódź', 'strasse lodz');
 // [{ start: 0, end: 6 }, { start: 10, end: 14 }]
+
+findRanges('a search box', 'serach', { typos: 1 });
+// [{ start: 2, end: 8 }]
 ```
 
 ## `toSegments(haystack, ranges)`

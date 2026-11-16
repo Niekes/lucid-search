@@ -36,6 +36,7 @@ const companies = Array.from({ length: 10_000 }, () => {
 
 const query = ref('muller cafe');
 const normalize = ref(true);
+const typos = ref(1);
 
 interface Hit {
     name: Segment[];
@@ -47,8 +48,9 @@ const found = computed(() => {
     const started = performance.now();
     const hits: Hit[] = [];
     for (const { name, url } of companies) {
-        const nameRanges = findRanges(name, query.value, { normalize: normalize.value });
-        const urlRanges = findRanges(url, query.value, { normalize: normalize.value });
+        const options = { normalize: normalize.value, typos: typos.value };
+        const nameRanges = findRanges(name, query.value, options);
+        const urlRanges = findRanges(url, query.value, options);
         if (!nameRanges.length && !urlRanges.length) continue;
         hits.push({
             name: toSegments(name, nameRanges),
@@ -74,6 +76,10 @@ const found = computed(() => {
         <label class="inline">
             <input v-model="normalize" type="checkbox" />
             <code>normalize</code>
+        </label>
+        <label class="inline">
+            <input v-model.number="typos" class="typos" type="number" min="0" max="8" />
+            <code>typos</code>
         </label>
         <p class="status" aria-live="polite">
             Searched {{ companies.length.toLocaleString('en') }} companies in
@@ -119,6 +125,14 @@ const found = computed(() => {
     gap: 8px;
     align-items: center;
     margin-top: 12px;
+}
+.typos {
+    width: 4em;
+    padding: 2px 6px;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 6px;
+    background: var(--vp-c-bg);
+    font: inherit;
 }
 .status {
     color: var(--vp-c-text-2);
