@@ -10,8 +10,8 @@ absolute values. To run the string scenarios in your own browser, open the
 - **`search` with `highlight` is the fastest or level with the fastest in three of five
   scenarios.** It leads with many short haystacks (S1, 1.7 times spotmark) and with accents
   (S3), and ties spotmark on an article (S2). When nothing matches (S4), spotmark is 6% faster. With 20
-  search terms in 100 kB (S5), spotmark is 1.6 times faster: `search` also returns the position
-  and search term of every match, about 12,000 objects here.
+  terms in 100 kB (S5), spotmark is 1.6 times faster: `search` also returns the position
+  and term of every match, about 12,000 objects here.
 - **`findRanges` with `toSegments` is mid-field on plain text, but last when nothing matches
   (S4)**, and about as fast as highlight-words-core with accents. It is the path for rendering your own elements, such as in
   React.
@@ -23,7 +23,7 @@ absolute values. To run the string scenarios in your own browser, open the
 ### Why it is fast
 
 - `search` compiles the regexes for a query once and reuses them for every haystack.
-- `search` reads the haystack once to find every match. It only checks a search term again when
+- `search` reads the haystack once to find every match. It only checks a term again when
   that term found nothing of its own but matches were found.
 - `highlight` skips HTML escaping when the haystack has nothing to escape.
 - `findRanges` searches ASCII haystacks directly. Other haystacks are folded character by

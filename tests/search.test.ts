@@ -6,7 +6,7 @@ const untyped = (value: unknown) => value as string;
 const untypedOptions = (normalize: unknown) => ({ normalize }) as { normalize: boolean };
 
 describe('search', () => {
-    it('returns each match with its position and the search term that found it', () => {
+    it('returns each match with its position and the term that found it', () => {
         expect(search(fox, 'The dog barks')).toEqual({
             matches: [
                 { start: 0, end: 3, text: 'The', term: 'The' },
@@ -23,13 +23,13 @@ describe('search', () => {
         expect(missing).toEqual(['(x']);
     });
 
-    it('lets the longer search term win at the same position', () => {
+    it('lets the longer term win at the same position', () => {
         expect(search('there', 'the there').matches).toEqual([
             { start: 0, end: 5, text: 'there', term: 'there' }
         ]);
     });
 
-    it('does not report a search term hidden by a longer overlapping match as missing', () => {
+    it('does not report a term hidden by a longer overlapping match as missing', () => {
         expect(search('the', 'he the').missing).toEqual([]);
     });
 
@@ -55,7 +55,13 @@ describe('search', () => {
         ['Cæsar', 'caesar', 'Cæsar'],
         ['İstanbul', 'istanbul', 'İstanbul'],
         ['Hà Nội', 'noi', 'Nội'],
-        ['cafe\u0301', 'cafe', 'cafe\u0301']
+        ['cafe\u0301', 'cafe', 'cafe\u0301'],
+        ['한국어', '한국', '한국'],
+        ['がっこう', 'が', 'が'],
+        ['が', 'か', 'が'],
+        ['か', 'が', 'か'],
+        ['한국어', '\u1112\u1161\u11ab', '한'],
+        ['\ufb2a', '\u05e9', '\ufb2a']
     ])('with normalize, finds %j for %j like findRanges does', (haystack, query, text) => {
         const { matches, missing } = search(haystack, query, { normalize: true });
         expect(matches.map((m) => m.text)).toEqual([text]);
@@ -90,11 +96,11 @@ describe('search', () => {
         expect(() => search(fox, untyped(['ok', 1]))).toThrow(/query must be/);
     });
 
-    it('keeps missing search terms in the order the caller gave them', () => {
+    it('keeps missing terms in the order the caller gave them', () => {
         expect(search(fox, 'yy zzz').missing).toEqual(['yy', 'zzz']);
     });
 
-    it('treats search terms differing only in case as one, spelled as first given', () => {
+    it('treats terms differing only in case as one, spelled as first given', () => {
         expect(search(fox, ['CAT', 'cat', 'Cat']).missing).toEqual(['CAT']);
     });
 });

@@ -59,7 +59,7 @@ Finds every literal, case-insensitive occurrence of the terms and returns plain 
 AI agents. A string query is split on whitespace, `.`, `-` and `_`; pass an array to choose the
 terms yourself. Matches are sorted by `start` and never overlap: the longer term wins. `missing`
 lists the terms found nowhere. `normalize` is off by default here; when on, accents are ignored
-exactly as in `findRanges`. Wrong input types throw a
+the same way as in `findRanges`. Wrong input types throw a
 `TypeError`.
 
 ```ts

@@ -27,7 +27,7 @@ interface Folded {
     sources: Range[];
 }
 
-function foldCharUncached(char: string, normalize: boolean): string {
+export function foldCharUncached(char: string, normalize: boolean): string {
     // 'İ' lowercases to 'i' plus a combining dot, which would stop it matching 'i'.
     const lower = char === 'İ' ? 'i' : char.toLowerCase();
     if (!normalize) return lower;

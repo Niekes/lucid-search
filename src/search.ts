@@ -1,18 +1,18 @@
-import { foldChar } from './find';
+import { foldChar, foldCharUncached } from './find';
 
-/** One place in the haystack where a search term was found. `haystack.slice(start, end) === text`. */
+/** One place in the haystack where a term was found. `haystack.slice(start, end) === text`. */
 export interface Match {
     start: number;
     end: number;
     text: string;
-    /** The search term (as the caller wrote it) that found this match. */
+    /** The term (as the caller wrote it) that found this match. */
     term: string;
 }
 
 export interface SearchResult {
     /** Sorted by start, never overlapping. */
     matches: Match[];
-    /** Search terms that occur nowhere in the haystack, in the caller's order. */
+    /** Terms that occur nowhere in the haystack, in the caller's order. */
     missing: string[];
 }
 
@@ -31,23 +31,18 @@ export interface HighlightOptions {
 const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // Every character that folds to something else, keyed by what it folds to: 'e' -> 'éèÉ…', 'ss' -> 'ßẞ'.
-// shortcut: covers Latin, Greek and Cyrillic, extend the blocks if a script outside them must match.
-const BLOCKS = [
-    [0x00c0, 0x024f],
-    [0x0370, 0x04ff],
-    [0x1e00, 0x1fff]
-];
+// Built once, in a few milliseconds, from the same folding as `findRanges`. Hangul syllables are
+// left out: they fold to two or three letters and match themselves instead (see `foldedPattern`).
 let variants: Map<string, string> | undefined;
 
 function variantsOf(folded: string): string {
     if (!variants) {
         variants = new Map();
-        for (const [first, last] of BLOCKS) {
-            for (let code = first; code <= last; code += 1) {
-                const char = String.fromCodePoint(code);
-                const to = foldChar(char, true);
-                if (to !== char.toLowerCase()) variants.set(to, (variants.get(to) ?? '') + char);
-            }
+        for (let code = 0xc0; code <= 0xffff; code += 1) {
+            if (code === 0xac00) code = 0xe000; // skips Hangul syllables and surrogates
+            const char = String.fromCharCode(code);
+            const to = foldCharUncached(char, true);
+            if (to !== char.toLowerCase()) variants.set(to, (variants.get(to) ?? '') + char);
         }
     }
     return variants.get(folded) ?? '';
@@ -61,16 +56,10 @@ const unit = (char: string): string => {
     return `${others ? `[${escapeClass(char + others)}]` : escapeRegExp(char)}\\p{M}*`;
 };
 
-/**
- * A pattern that matches the term the way `findRanges` folds text: ignoring case and accents,
- * with `ss` and `ß` (also `ae` and `æ`, `oe` and `œ`) matching each other.
- */
-function foldedPattern(term: string): string {
-    let folded = '';
-    for (const char of term) folded += foldChar(char, true);
+// Folded characters, with `ss`, `ae` and `oe` also matching `ß`, `æ` and `œ`.
+// shortcut: pairs are read left to right, so `sss` finds `ßs` but not `sß`; fine for real words.
+function runPattern(folded: string): string {
     const chars = Array.from(folded);
-    // A term of only combining marks folds to nothing and matches nowhere.
-    if (!chars.length) return '(?!)';
     let pattern = '';
     for (let i = 0; i < chars.length; i += 1) {
         const pair = i + 1 < chars.length ? variantsOf(chars[i] + chars[i + 1]) : '';
@@ -82,6 +71,26 @@ function foldedPattern(term: string): string {
         }
     }
     return pattern;
+}
+
+/** A pattern that matches the term the way `findRanges` folds text: ignoring case and accents. */
+function foldedPattern(term: string): string {
+    let pattern = '';
+    let run = '';
+    // Composed first, so a term typed as separate parts (`한` as three letters) is one character.
+    for (const char of term.normalize('NFC')) {
+        const folded = foldChar(char, true);
+        // A character the table leaves out also matches itself as a whole: `한` finds `한` as well
+        // as its parts.
+        if (folded && folded !== char.toLowerCase() && !variantsOf(folded).includes(char)) {
+            pattern += `${runPattern(run)}(?:${escapeRegExp(char)}\\p{M}*|${runPattern(folded)})`;
+            run = '';
+        } else {
+            run += folded;
+        }
+    }
+    // A term of only combining marks folds to nothing and matches nowhere.
+    return pattern + runPattern(run) || '(?!)';
 }
 
 function toTerms(query: unknown): string[] {
@@ -108,7 +117,8 @@ function compile(query: string[], normalize: boolean): Compiled {
         (t, i, all) => all.findIndex((u) => u.toLowerCase() === t.toLowerCase()) === i
     );
     const toPattern = normalize ? foldedPattern : escapeRegExp;
-    // `u` for `\p{M}`; without normalize the flags stay as they were, so matching does not change.
+    // `u` for `\p{M}`; it also lets ſ match s and ς match σ, which `findRanges` does not.
+    // Without normalize the flags stay as they were, so plain matching does not change.
     const flags = normalize ? 'iu' : 'i';
     const byLength = [...terms].sort((a, b) => b.length - a.length);
     return {
