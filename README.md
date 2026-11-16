@@ -89,7 +89,7 @@ lucid-search returns positions, never HTML, so you render the matches yourself, 
 
 ## Using it from an AI agent
 
-`search` returns plain JSON with positions, plus the search terms it could not find, so an agent knows what to rephrase. `highlight` turns those matches into HTML and escapes the whole haystack.
+`search` returns plain JSON with positions, plus the terms it could not find, so an agent knows what to rephrase. `highlight` turns those matches into HTML and escapes the whole haystack.
 
 ```js
 import { search, highlight } from 'lucid-search';
@@ -113,7 +113,7 @@ Give the model the text around each match instead of the whole document, by wrap
 const tool = {
     name: 'find_in_text',
     description:
-        'Find literal, case-insensitive occurrences of search terms in the document. Returns positions, short context, and terms that were not found.',
+        'Find literal, case-insensitive occurrences of terms in the document. Returns positions, short context, and terms that were not found.',
     input_schema: {
         type: 'object',
         properties: { terms: { type: 'array', items: { type: 'string' } } },

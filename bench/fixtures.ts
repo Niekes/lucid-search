@@ -5,7 +5,8 @@ const words = (
 ).split(' ');
 const accented = ['élève', 'café', 'naïve', 'über', 'señor', 'façade', 'crème', 'brûlée'];
 
-function random(seed: number): () => number {
+/** A seeded random number generator (mulberry32), also used by the docs list example. */
+export function random(seed: number): () => number {
     // mulberry32
     return () => {
         seed = (seed + 0x6d2b79f5) | 0;

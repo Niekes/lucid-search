@@ -19,7 +19,7 @@
     "author": "Stefan Nieke",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/niekes/lucid-search.git"
+        "url": "git+https://github.com/Niekes/lucid-search.git"
     },
     "files": [
         "build/lucid-search.js",

@@ -35,7 +35,7 @@ interface Folded {
     to: number[];
 }
 
-function foldCharUncached(char: string, normalize: boolean): string {
+export function foldCharUncached(char: string, normalize: boolean): string {
     // 'İ' lowercases to 'i' plus a combining dot, which would stop it matching 'i'.
     const lower = char === 'İ' ? 'i' : char.toLowerCase();
     if (!normalize) return lower;
@@ -49,7 +49,7 @@ function foldCharUncached(char: string, normalize: boolean): string {
 // Haystacks repeat a small set of characters, so each one is folded once per mode.
 const folds = [new Map<string, string>(), new Map<string, string>()];
 
-function foldChar(char: string, normalize: boolean): string {
+export function foldChar(char: string, normalize: boolean): string {
     const cache = folds[normalize ? 1 : 0];
     let text = cache.get(char);
     if (text === undefined) {
