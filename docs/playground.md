@@ -1,5 +1,5 @@
 # Playground
 
-Type a haystack and a needle and choose a flavour. The mark below updates as you type.
+Type a haystack and a query. The highlighted Segments below update as you type.
 
 <Playground />

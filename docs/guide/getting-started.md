@@ -12,37 +12,38 @@ Or load the UMD build from a CDN. It exposes the global `lucidSearch`:
 <script src="https://unpkg.com/lucid-search/build/lucid-search.js"></script>
 ```
 
-## Find and mark matches
+## Find matches
 
 ```js
-import { findMatches } from 'lucid-search';
+import { findRanges, toSegments } from 'lucid-search';
 
-const found = findMatches('The quick brown fox jumps over the lazy dog', 'The dog');
+const haystack = 'The quick brown fox jumps over the lazy dog';
+const ranges = findRanges(haystack, 'The dog');
+// [{ start: 0, end: 3 }, { start: 31, end: 34 }, { start: 40, end: 43 }]
 
-found.matches; // ['The', 'the', 'dog']
-found.mark;
-// '<span class="matched">The</span> quick brown fox jumps over
-//  <span class="matched">the</span> lazy <span class="matched">dog</span>'
+toSegments(haystack, ranges);
+// [
+//   { text: 'The', match: true },
+//   { text: ' quick brown fox jumps over ', match: false },
+//   { text: 'the', match: true },
+//   { text: ' lazy ', match: false },
+//   { text: 'dog', match: true }
+// ]
 ```
 
-The needle is split on whitespace, `.`, `-` and `_`, so each word is searched on its own.
-Matching ignores case, and regex characters in the needle are treated as plain text.
+The query is split on whitespace, so each term is searched on its own. Matching ignores case
+and accents, and terms are plain text: `c++` or `(` match themselves.
 
-## Options
+## Render in React
 
-```js
-findMatches(haystack, needle, { el: 'mark', cssClass: 'found' });
+```tsx
+import { findRanges, toSegments } from 'lucid-search';
+
+function Highlight({ text, query }: { text: string; query: string }) {
+    return toSegments(text, findRanges(text, query)).map((segment, i) =>
+        segment.match ? <mark key={i}>{segment.text}</mark> : segment.text
+    );
+}
 ```
 
-| Option     | Default   | Description                       |
-| ---------- | --------- | --------------------------------- |
-| `el`       | `span`    | The element that wraps each match |
-| `cssClass` | `matched` | The class of that element         |
-
-Options you leave out keep their default.
-
-::: warning The mark is not escaped
-`mark` is the haystack with tags added around the matches. If the haystack comes from
-somewhere you don't trust, escape it before you search it, or don't put `mark` into
-`innerHTML`.
-:::
+No HTML string is ever built, so a haystack like `<img onerror=…>` stays plain text.

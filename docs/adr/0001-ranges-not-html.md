@@ -1,0 +1,3 @@
+# Return Ranges and Segments, never an HTML string
+
+v1, and the first v2 rewrite, returned the haystack with matches wrapped in markup (`mark`). That forced React apps to use `dangerouslySetInnerHTML`, and because the haystack was never escaped, it was an XSS hole. v2 returns only Ranges (`findRanges`) and Segments (`toSegments`), and the caller renders them with its own elements, so the library never builds markup. That also means HTML haystacks are no longer supported (callers strip markup first), and the eight `findMatches*`/`uncoverMatches*` flavours are removed in 2.0.0 instead of kept as compatibility wrappers, because wrappers would keep the unsafe string-building code alive.

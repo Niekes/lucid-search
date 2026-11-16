@@ -2,7 +2,7 @@
 layout: home
 hero:
     name: lucid-search
-    tagline: Highlight text and find matches. Zero dependencies, about 1 kB.
+    tagline: Find matches in text and highlight them safely. Zero dependencies, about 1 kB.
     actions:
         - theme: brand
           text: Get started
@@ -11,10 +11,10 @@ hero:
           text: Playground
           link: /playground
 features:
-    - title: Plain text or HTML
-      details: The Html flavours never match inside tags or attributes.
+    - title: Positions, not HTML
+      details: findRanges and toSegments return plain data, so React and other frameworks render matches without dangerouslySetInnerHTML.
     - title: Accent-insensitive
-      details: The Normalized flavours let "the" match "Thé" and "dog" match "dög".
+      details: '"cafe" matches "Café", "lodz" matches "Łódź" and "strasse" matches "Straße".'
     - title: Ranked results
       details: score() ranks a haystack by how long its matches are and how early they appear.
 ---

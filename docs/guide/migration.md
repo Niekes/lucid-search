@@ -1,20 +1,29 @@
 # Migrating from v1
 
-v2 is a TypeScript rewrite. The function names are unchanged. These are the changes that can
-affect you:
+v2 returns positions instead of an HTML string. The eight v1 functions (`findMatches`,
+`findMatchesHtml`, `findMatchesNormalized`, `findMatchesHtmlNormalized` and their
+`uncoverMatches*` twins) and the `mark` string are gone.
 
-- **`uncoverMatchesNormalized` and `uncoverMatchesHtmlNormalized` now normalize.** In v1 they
-  behaved exactly like `uncoverMatches` and `uncoverMatchesHtml`.
-- **Regex characters in the needle are plain text.** In v1, `findMatches(text, '(')` threw,
-  and `a*b` matched `b`, `ab`, `aab` and so on.
-- **The longest match wins.** With the needle `e emmerich`, v1 marked `E` and `e` inside
-  `Emmerich`. v2 marks `Emmerich`.
-- **Matches that contain a comma stay whole.** v1 split them at the comma.
-- **Empty search terms are ignored.** In v1, `uncoverMatches(text, [''])` wrapped an empty
-  element between every character.
-- **Options are optional one by one.** Pass only `{ el: 'mark' }` and `cssClass` stays
-  `matched`.
-- **`normalize` is a named export of the package.** The deep import `lucid-search/src/normalize`
-  is gone.
-- **The CDN file moved** to `build/lucid-search.js`. The package now ships ESM, CommonJS and
-  UMD builds with TypeScript types.
+| v1                                         | v2                                                       |
+| ------------------------------------------ | -------------------------------------------------------- |
+| `findMatches(haystack, needle).mark`       | `toSegments(haystack, findRanges(haystack, query))`      |
+| `findMatchesNormalized(…)`                 | `findRanges(…)`: normalization is on by default          |
+| `findMatches(…)` without accents           | `findRanges(haystack, query, { normalize: false })`      |
+| `uncoverMatches(haystack, ['the', 'dog'])` | `findRanges(haystack, ['the', 'dog'])`                   |
+| `findMatchesHtml(…)`                       | Strip the markup first: HTML haystacks are not supported |
+| `{ el, cssClass }` options                 | Render the Segments with your own element and class      |
+| `score(matches, haystack)`                 | `score(haystack, ranges)`                                |
+| `normalize(term)`                          | Removed; use the `normalize` option                      |
+
+Other changes that can affect you:
+
+- **Only whitespace splits a query.** `e-mail` and `foo.bar` are one term; v1 split them.
+- **Terms are plain text.** In v1, `findMatches(text, '(')` threw.
+- **More letters ignore accents**, including `ñ`, `ł`, `ý`, `ž`, `ğ`, `ş`, and `ß` matches `ss`.
+- **The CDN file moved** to `build/lucid-search.js`. The package ships ESM, CommonJS and UMD
+  builds with TypeScript types.
+
+## Staying on v1
+
+Install `npm i lucid-search@1`. The v1 docs are in the
+[README of 1.0.16](https://www.npmjs.com/package/lucid-search/v/1.0.16).
