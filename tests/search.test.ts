@@ -17,7 +17,7 @@ describe('search', () => {
         });
     });
 
-    it('takes the needle literally: pattern characters match themselves', () => {
+    it('takes the query literally: pattern characters match themselves', () => {
         const { matches, missing } = search('I write c++ and a*b daily', ['c++', 'a*b', '(x']);
         expect(matches.map((m) => m.text)).toEqual(['c++', 'a*b']);
         expect(missing).toEqual(['(x']);
@@ -48,15 +48,46 @@ describe('search', () => {
         expect(search('Crème', 'creme').missing).toEqual(['creme']);
     });
 
-    it('finds nothing and misses nothing for an empty or blank needle', () => {
+    it.each([
+        ['Straße', 'strasse', 'Straße'],
+        ['strasse', 'straße', 'strasse'],
+        ['Timișoara', 'timisoara', 'Timișoara'],
+        ['Cæsar', 'caesar', 'Cæsar'],
+        ['İstanbul', 'istanbul', 'İstanbul'],
+        ['Hà Nội', 'noi', 'Nội'],
+        ['cafe\u0301', 'cafe', 'cafe\u0301']
+    ])('with normalize, finds %j for %j like findRanges does', (haystack, query, text) => {
+        const { matches, missing } = search(haystack, query, { normalize: true });
+        expect(matches.map((m) => m.text)).toEqual([text]);
+        expect(missing).toEqual([]);
+        expect(matches.map(({ start, end }) => ({ start, end }))).toEqual(
+            findRanges(haystack, query)
+        );
+    });
+
+    it('takes the query literally with normalize too', () => {
+        expect(search('I write C++ daily', ['c++', '(x'], { normalize: true })).toEqual({
+            matches: [{ start: 8, end: 11, text: 'C++', term: 'c++' }],
+            missing: ['(x']
+        });
+    });
+
+    it('reports a term of only combining marks as missing with normalize, as it folds to nothing', () => {
+        expect(search('café', ['\u0301'], { normalize: true })).toEqual({
+            matches: [],
+            missing: ['\u0301']
+        });
+    });
+
+    it('finds nothing and misses nothing for an empty or blank query', () => {
         expect(search(fox, '  ')).toEqual({ matches: [], missing: [] });
         expect(search(fox, ['', ' '])).toEqual({ matches: [], missing: [] });
     });
 
     it('throws a TypeError an agent can act on for wrong input types', () => {
         expect(() => search(untyped(null), 'x')).toThrow(/haystack must be a string/);
-        expect(() => search(fox, untyped(42))).toThrow(/needle must be a string or an array/);
-        expect(() => search(fox, untyped(['ok', 1]))).toThrow(/needle must be/);
+        expect(() => search(fox, untyped(42))).toThrow(/query must be a string or an array/);
+        expect(() => search(fox, untyped(['ok', 1]))).toThrow(/query must be/);
     });
 
     it('keeps missing search terms in the order the caller gave them', () => {
@@ -152,10 +183,10 @@ it('search still rejects invalid array queries after a similar valid one was cac
     expect(search('a b', holes).missing).toEqual([]);
 
     expect(() => search('a b', [untyped(null), 'a'])).toThrow(
-        'needle must be a string or an array of strings'
+        'query must be a string or an array of strings'
     );
     expect(() => search('a', [untyped(1n), 'a'])).toThrow(
-        'needle must be a string or an array of strings'
+        'query must be a string or an array of strings'
     );
 });
 

@@ -22,14 +22,14 @@ absolute values. To run the string scenarios in your own browser, open the
 
 ### Why it is fast
 
-- `search` compiles the regexes for a needle once and reuses them for every haystack.
+- `search` compiles the regexes for a query once and reuses them for every haystack.
 - `search` reads the haystack once to find every match. It only checks a search term again when
   that term found nothing of its own but matches were found.
 - `highlight` skips HTML escaping when the haystack has nothing to escape.
 - `findRanges` searches ASCII haystacks directly. Other haystacks are folded character by
   character, and each character is folded once.
 
-The benchmarks repeat one needle, like search-as-you-type. A needle used once also pays for
+The benchmarks repeat one query, like search-as-you-type. A query used once also pays for
 compiling its regexes.
 
 ## String libraries (Node)

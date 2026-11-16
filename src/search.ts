@@ -1,4 +1,4 @@
-import { normalize as foldAccents } from './normalize';
+import { foldChar } from './find';
 
 /** One place in the haystack where a search term was found. `haystack.slice(start, end) === text`. */
 export interface Match {
@@ -30,12 +30,66 @@ export interface HighlightOptions {
 
 const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-function toTerms(needle: unknown): string[] {
-    if (typeof needle === 'string') return needle.split(/[.\-_\s]+/).filter(Boolean);
-    if (Array.isArray(needle) && needle.every((t) => typeof t === 'string')) {
-        return needle.filter((t: string) => t.trim());
+// Every character that folds to something else, keyed by what it folds to: 'e' -> 'éèÉ…', 'ss' -> 'ßẞ'.
+// shortcut: covers Latin, Greek and Cyrillic, extend the blocks if a script outside them must match.
+const BLOCKS = [
+    [0x00c0, 0x024f],
+    [0x0370, 0x04ff],
+    [0x1e00, 0x1fff]
+];
+let variants: Map<string, string> | undefined;
+
+function variantsOf(folded: string): string {
+    if (!variants) {
+        variants = new Map();
+        for (const [first, last] of BLOCKS) {
+            for (let code = first; code <= last; code += 1) {
+                const char = String.fromCodePoint(code);
+                const to = foldChar(char, true);
+                if (to !== char.toLowerCase()) variants.set(to, (variants.get(to) ?? '') + char);
+            }
+        }
     }
-    throw new TypeError('needle must be a string or an array of strings');
+    return variants.get(folded) ?? '';
+}
+
+const escapeClass = (chars: string): string => chars.replace(/[\\\]^-]/g, '\\$&');
+
+// One folded character, or any character that folds to it, plus combining marks that fold away.
+const unit = (char: string): string => {
+    const others = variantsOf(char);
+    return `${others ? `[${escapeClass(char + others)}]` : escapeRegExp(char)}\\p{M}*`;
+};
+
+/**
+ * A pattern that matches the term the way `findRanges` folds text: ignoring case and accents,
+ * with `ss` and `ß` (also `ae` and `æ`, `oe` and `œ`) matching each other.
+ */
+function foldedPattern(term: string): string {
+    let folded = '';
+    for (const char of term) folded += foldChar(char, true);
+    const chars = Array.from(folded);
+    // A term of only combining marks folds to nothing and matches nowhere.
+    if (!chars.length) return '(?!)';
+    let pattern = '';
+    for (let i = 0; i < chars.length; i += 1) {
+        const pair = i + 1 < chars.length ? variantsOf(chars[i] + chars[i + 1]) : '';
+        if (pair) {
+            pattern += `(?:${unit(chars[i])}${unit(chars[i + 1])}|[${escapeClass(pair)}]\\p{M}*)`;
+            i += 1;
+        } else {
+            pattern += unit(chars[i]);
+        }
+    }
+    return pattern;
+}
+
+function toTerms(query: unknown): string[] {
+    if (typeof query === 'string') return query.split(/[.\-_\s]+/).filter(Boolean);
+    if (Array.isArray(query) && query.every((t) => typeof t === 'string')) {
+        return query.filter((t: string) => t.trim());
+    }
+    throw new TypeError('query must be a string or an array of strings');
 }
 
 interface Compiled {
@@ -53,14 +107,15 @@ function compile(query: string[], normalize: boolean): Compiled {
     const terms = query.filter(
         (t, i, all) => all.findIndex((u) => u.toLowerCase() === t.toLowerCase()) === i
     );
-    const toPattern = (t: string): string =>
-        normalize ? foldAccents(escapeRegExp(t)) : escapeRegExp(t);
+    const toPattern = normalize ? foldedPattern : escapeRegExp;
+    // `u` for `\p{M}`; without normalize the flags stay as they were, so matching does not change.
+    const flags = normalize ? 'iu' : 'i';
     const byLength = [...terms].sort((a, b) => b.length - a.length);
     return {
         terms,
         byLength,
-        alternatives: new RegExp(byLength.map((t) => `(${toPattern(t)})`).join('|'), 'gi'),
-        perTerm: terms.map((t) => new RegExp(toPattern(t), 'i'))
+        alternatives: new RegExp(byLength.map((t) => `(${toPattern(t)})`).join('|'), `g${flags}`),
+        perTerm: terms.map((t) => new RegExp(toPattern(t), flags))
     };
 }
 
@@ -87,17 +142,18 @@ function compiledQuery(query: string | string[], normalize: boolean): Compiled {
 }
 
 /**
- * Find every literal, case-insensitive occurrence of the needle's search terms.
- * A string needle is split on whitespace, `.`, `-` and `_`; pass an array to choose the terms.
- * @throws TypeError when haystack is not a string or needle is not a string / string[].
+ * Find every literal, case-insensitive occurrence of the query's terms.
+ * A string query is split on whitespace, `.`, `-` and `_`; pass an array to choose the terms.
+ * With `normalize`, accents are ignored the same way `findRanges` ignores them.
+ * @throws TypeError when haystack is not a string or query is not a string / string[].
  */
 export function search(
     haystack: string,
-    needle: string | string[],
+    query: string | string[],
     { normalize = false }: Partial<SearchOptions> = {}
 ): SearchResult {
     if (typeof haystack !== 'string') throw new TypeError('haystack must be a string');
-    const { terms, byLength, alternatives, perTerm } = compiledQuery(needle, normalize);
+    const { terms, byLength, alternatives, perTerm } = compiledQuery(query, normalize);
     if (!terms.length) return { matches: [], missing: [] };
 
     const matches: Match[] = [];

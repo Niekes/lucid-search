@@ -4,7 +4,7 @@
 
 ### Added
 
-- `search` returns every match with its position and the search terms it could not find, for AI agents and their tool calls.
+- `search` returns every match with its position and the terms it could not find, for AI agents and their tool calls. With `normalize`, it ignores accents exactly as `findRanges` does, so `strasse` finds `Straße` and `timisoara` finds `Timișoara`.
 - `highlight` wraps the matches of `search` and HTML-escapes the whole haystack.
 - `score` also takes the matches of `search`, since a Match is a Range.
 - `llms.txt`, a compact API reference for coding assistants, ships in the package.
