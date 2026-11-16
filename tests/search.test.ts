@@ -112,3 +112,28 @@ describe('score with matches from search', () => {
         );
     });
 });
+
+it('search does not report a term as missing when it only occurs inside a longer match', () => {
+    const result = search('the theory', ['theory', 'heo']);
+
+    expect(result.matches.map((m) => m.term)).toEqual(['theory']);
+    expect(result.missing).toEqual([]);
+});
+
+it('search finds the same terms when the same needle searches another haystack', () => {
+    expect(search('a dog', 'dog cat').missing).toEqual(['cat']);
+    expect(search('a cat', 'dog cat').missing).toEqual(['dog']);
+    expect(search('a cat', 'dog cat', { normalize: true }).matches).toHaveLength(1);
+});
+
+it('search still works after more than 100 different needles', () => {
+    for (let i = 0; i < 101; i++) search('dog', `dog ${i}`);
+
+    expect(search('dog 7', 'dog 7').missing).toEqual([]);
+});
+
+it('search returns a fresh missing list that the caller may change', () => {
+    search('x', 'dog').missing.push('cat');
+
+    expect(search('x', 'dog').missing).toEqual(['dog']);
+});

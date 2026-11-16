@@ -34,6 +34,6 @@ for (const [library, code] of Object.entries(imports)) {
 }
 for (const [library, min, gz] of rows.sort((a, b) => a[2] - b[2])) {
     console.log(
-        `${library.padEnd(22)} ${(min / 1024).toFixed(1).padStart(6)} kB min  ${(gz / 1024).toFixed(1).padStart(5)} kB gzip`
+        `${library.padEnd(26)} ${(min / 1024).toFixed(1).padStart(6)} kB min  ${(gz / 1024).toFixed(1).padStart(5)} kB gzip`
     );
 }

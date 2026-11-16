@@ -27,7 +27,7 @@ interface Folded {
     sources: Range[];
 }
 
-function foldChar(char: string, normalize: boolean): string {
+function foldCharUncached(char: string, normalize: boolean): string {
     // 'İ' lowercases to 'i' plus a combining dot, which would stop it matching 'i'.
     const lower = char === 'İ' ? 'i' : char.toLowerCase();
     if (!normalize) return lower;
@@ -36,6 +36,19 @@ function foldChar(char: string, normalize: boolean): string {
         .normalize('NFD')
         .replace(/\p{M}/gu, '')
         .replace(undecomposable, (letter) => UNDECOMPOSABLE[letter]);
+}
+
+// Haystacks repeat a small set of characters, so each one is folded once per mode.
+const folds = [new Map<string, string>(), new Map<string, string>()];
+
+function foldChar(char: string, normalize: boolean): string {
+    const cache = folds[+normalize];
+    let text = cache.get(char);
+    if (text === undefined) {
+        text = foldCharUncached(char, normalize);
+        cache.set(char, text);
+    }
+    return text;
 }
 
 function fold(input: string, normalize: boolean): Folded {
@@ -79,19 +92,21 @@ export function findRanges(
 ): Range[] {
     const normalize = options.normalize ?? true;
     const terms = typeof query === 'string' ? query.split(/\s+/) : query;
-    const folded = fold(haystack, normalize);
+    // ASCII folds to its lowercase, one unit per unit, so positions need no mapping.
+    const ascii = /^[\x00-\x7f]*$/.test(haystack);
+    const folded = ascii ? undefined : fold(haystack, normalize);
+    const text = folded ? folded.text : haystack.toLowerCase();
     const ranges: Range[] = [];
     for (const term of terms) {
         const foldedTerm = fold(term, normalize).text;
         if (!foldedTerm) continue;
-        for (
-            let at = folded.text.indexOf(foldedTerm);
-            at !== -1;
-            at = folded.text.indexOf(foldedTerm, at + 1)
-        ) {
-            const { start } = folded.sources[at];
-            const { end } = folded.sources[at + foldedTerm.length - 1];
-            ranges.push({ start, end });
+        for (let at = text.indexOf(foldedTerm); at !== -1; at = text.indexOf(foldedTerm, at + 1)) {
+            const last = at + foldedTerm.length - 1;
+            ranges.push(
+                folded
+                    ? { start: folded.sources[at].start, end: folded.sources[last].end }
+                    : { start: at, end: last + 1 }
+            );
         }
     }
     return merge(ranges);

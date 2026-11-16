@@ -2,106 +2,126 @@
 
 How lucid-search compares with other highlighting libraries. Higher ops/s is faster. All
 numbers are from one machine (see [Setup](#setup)), so compare the ratios rather than the
-absolute values.
+absolute values. To run the string scenarios in your own browser, open the
+[Benchmark](/benchmark) page.
 
 ## Summary
 
-- **Against string libraries, lucid-search is mid-field.** spotmark is the fastest in every
-  scenario. highlight-words-core is faster than lucid-search in S1 and S2. lucid-search beats
-  highlight-words-core with many search terms (S6) and is 28 times faster with accents (S4).
-  Without matches (S5) they tie.
-- **Against mark.js, lucid-search is about 20 to 65 times faster.** mark.js walks and edits the DOM;
-  lucid-search builds one string and sets it as `innerHTML` once.
-- **lucid-search is the smallest import**, at 0.4 kB gzip for `findMatches`.
-- **Only lucid-search and mark.js handle HTML haystacks.** spotmark puts tags inside
-  attributes, and the others work on plain text only.
+- **`search` with `highlight` is the fastest or level with the fastest in four of five
+  scenarios.** It leads with many short haystacks (S1, 1.7 times spotmark) and with accents
+  (S4), ties spotmark on an article (S2) and comes close when nothing matches (S5). With 20
+  search terms in 100 kB (S6), spotmark is 1.6 times faster: `search` also returns the position
+  and search term of every match, about 12,000 objects here.
+- **`findRanges` with `toSegments` is mid-field on plain text** and about as fast as
+  highlight-words-core with accents. It is the path for rendering your own elements, such as in
+  React.
+- **Against mark.js, lucid-search is about 45 to 60 times faster.** mark.js walks and edits the
+  DOM; lucid-search builds one string and sets it as `innerHTML` once.
+- **The imports are small:** 0.9 kB gzip for `findRanges` with `toSegments`, 1.4 kB for
+  `search` with `highlight`.
+
+### Why it is fast
+
+- `search` compiles the regexes for a needle once and reuses them for every haystack.
+- `search` reads the haystack once to find every match. It only checks a search term again when
+  that term found nothing of its own but matches were found.
+- `highlight` skips HTML escaping when the haystack has nothing to escape.
+- `findRanges` searches ASCII haystacks directly. Other haystacks are folded character by
+  character, and each character is folded once.
+
+The benchmarks repeat one needle, like search-as-you-type. A needle used once also pays for
+compiling its regexes.
 
 ## String libraries (Node)
 
-To run these scenarios in your own browser, open the [Benchmark](/benchmark) page.
-
 Each library returns an HTML string with every match wrapped in a `span`. Before timing,
 the benchmark checks that every library highlights exactly the same text. A library that
-doesn't is left out of that scenario.
+doesn't is left out of that scenario. lucid-search runs twice: `search` with `highlight`, and
+`findRanges` with `toSegments`, joined into the same HTML.
 
 ### S1: search-as-you-type, 1,000 items of 60 characters, 2 terms
 
 One operation highlights the whole list.
 
-| Library              | ops/s |
-| -------------------- | ----: |
-| spotmark             | 2,389 |
-| highlight-words-core | 2,184 |
-| **lucid-search**     | 1,579 |
-| highlight-words      | 1,478 |
+| Library                       | ops/s |
+| ----------------------------- | ----: |
+| **lucid-search**              | 3,932 |
+| **lucid-search (findRanges)** | 2,746 |
+| spotmark                      | 2,373 |
+| highlight-words-core          | 2,202 |
+| highlight-words               | 1,451 |
 
 ### S2: article, 10 kB, 3 terms
 
-| Library              |  ops/s |
-| -------------------- | -----: |
-| spotmark             | 58,376 |
-| highlight-words-core | 52,829 |
-| **lucid-search**     | 36,890 |
-| highlight-words      | 17,054 |
+| Library                       |  ops/s |
+| ----------------------------- | -----: |
+| spotmark                      | 59,437 |
+| **lucid-search**              | 58,911 |
+| highlight-words-core          | 54,926 |
+| **lucid-search (findRanges)** | 39,604 |
+| highlight-words               | 15,768 |
 
 ### S4: accents, 10 kB, 1 term
 
 Every library in its accent-insensitive mode. highlight-words has none.
 
-| Library              |   ops/s |
-| -------------------- | ------: |
-| spotmark             | 221,863 |
-| **lucid-search**     | 140,137 |
-| highlight-words-core |   4,986 |
-| accent-folding       |   2,844 |
+| Library                       |   ops/s |
+| ----------------------------- | ------: |
+| **lucid-search**              | 254,626 |
+| spotmark                      | 222,668 |
+| **lucid-search (findRanges)** |   5,181 |
+| highlight-words-core          |   5,119 |
+| accent-folding                |   2,852 |
 
 ### S5: no match, 10 kB, 2 terms
 
-| Library              |   ops/s |
-| -------------------- | ------: |
-| spotmark             | 695,592 |
-| **lucid-search**     | 425,270 |
-| highlight-words-core | 416,669 |
-| highlight-words      | 396,629 |
+| Library                       |   ops/s |
+| ----------------------------- | ------: |
+| spotmark                      | 703,032 |
+| **lucid-search**              | 661,031 |
+| highlight-words-core          | 425,491 |
+| highlight-words               | 405,385 |
+| **lucid-search (findRanges)** | 210,329 |
 
 ### S6: stress, 100 kB, 20 terms
 
-| Library              | ops/s |
-| -------------------- | ----: |
-| spotmark             | 1,176 |
-| **lucid-search**     |   460 |
-| highlight-words-core |   401 |
-| highlight-words      |   231 |
+| Library                       | ops/s |
+| ----------------------------- | ----: |
+| spotmark                      | 1,192 |
+| **lucid-search**              |   752 |
+| **lucid-search (findRanges)** |   437 |
+| highlight-words-core          |   408 |
+| highlight-words               |   251 |
 
 ## Against mark.js (Chromium)
 
 mark.js highlights DOM elements, so it runs in a real browser. Both libraries end with the
-highlighted text on the page: lucid-search sets `innerHTML` to its mark, and mark.js
-highlights the element in place. Both highlight exactly the same text.
+highlighted text on the page: lucid-search sets `innerHTML` to the output of `highlight`, and
+mark.js highlights the element in place. Both highlight exactly the same text.
 
-| Scenario                        | **lucid-search** | mark.js |
-| ------------------------------- | ---------------: | ------: |
-| S2 article, 10 kB, 3 terms      |           16,708 |     372 |
-| S3 HTML article, 10 kB, 3 terms |            7,171 |     339 |
-| S4 accents, 10 kB, 1 term       |           58,733 |     891 |
+| Scenario                   | **lucid-search** | mark.js |
+| -------------------------- | ---------------: | ------: |
+| S2 article, 10 kB, 3 terms |           16,271 |     372 |
+| S4 accents, 10 kB, 1 term  |           61,970 |   1,059 |
 
 ## Bundle size
 
-Minified and gzipped size of the main function's import, after tree-shaking.
+Minified and gzipped size of the import, after tree-shaking.
 
-| Library              | min (kB) | gzip (kB) |
-| -------------------- | -------: | --------: |
-| **lucid-search**     |      0.7 |       0.4 |
-| highlight-words      |      1.8 |       0.9 |
-| highlight-words-core |      3.1 |       1.3 |
-| spotmark             |      2.4 |       1.3 |
-| accent-folding       |      9.6 |       3.3 |
-| mark.js              |     23.4 |       6.6 |
+| Library                                       | min (kB) | gzip (kB) |
+| --------------------------------------------- | -------: | --------: |
+| highlight-words                               |      1.8 |       0.9 |
+| **lucid-search** (`findRanges`, `toSegments`) |      1.8 |       0.9 |
+| highlight-words-core                          |      3.1 |       1.3 |
+| spotmark                                      |      2.4 |       1.3 |
+| **lucid-search** (`search`, `highlight`)      |      2.6 |       1.4 |
+| accent-folding                                |      9.6 |       3.3 |
+| mark.js                                       |     23.4 |       6.6 |
 
 ## Setup
 
-Measured on 2026-11-15 on an Apple M5, Node 26.13.1, Chromium from Playwright 1.65.1, with
-lucid-search 2.0.0, highlight-words-core 2.0.0, highlight-words 2.0.0, spotmark 1.1.1,
+Measured on 2026-11-16 on an Apple M5, Node 26.13.1, Chromium from Playwright 1.65.1, with
+lucid-search 2.1.0, highlight-words-core 2.0.0, highlight-words 2.0.0, spotmark 1.1.1,
 accent-folding 2.7.0 and mark.js 8.11.1.
 
 - **Node:** Vitest benchmarks, 5 seconds per library and scenario.

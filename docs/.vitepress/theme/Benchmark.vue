@@ -82,7 +82,7 @@ const width = (row: Row, rows: Row[]): string =>
                     <tr
                         v-for="row in result.rows"
                         :key="row.library"
-                        :class="{ lucid: row.library === 'lucid-search' }"
+                        :class="{ lucid: row.library.startsWith('lucid-search') }"
                     >
                         <td>{{ row.library }}</td>
                         <td class="ops">{{ row.opsPerSecond.toLocaleString('en-US') }}</td>
