@@ -1,10 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [2.2.1] - 2026-11-16
 
 ### Fixed
 
-- `findRanges` throws a `TypeError` that names the bad argument when the haystack or query has the wrong type, like `search` does, instead of `e.toLowerCase is not a function`.
+- `findRanges` throws a `TypeError` that names the bad argument when the haystack or query has the wrong type, like `search` does, instead of `e.toLowerCase is not a function`. A sparse array query skips its holes, as in `search`.
+- The README and docs said about 1 kB; the imports are 1.7 kB (`search` with `highlight`) and 2.2 kB (`findRanges` with `toSegments`) gzip. The README now shows the `typos` option.
 
 ## [2.2.0] - 2026-11-16
 
