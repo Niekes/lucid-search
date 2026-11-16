@@ -201,10 +201,21 @@ function scan(
     }
 }
 
-// How far a candidate is from the Term's shape: an end on a letter the Term does not end on, then its length.
-const shape = (text: string, term: string, { start, end }: Range): number =>
-    (Number(text[start] !== term[0]) + Number(text[end] !== term[term.length - 1])) * 64 +
-    Math.abs(end - start + 1 - term.length);
+// Haystack edges, whitespace and punctuation separate words.
+const isGap = (char: string | undefined): boolean => char === undefined || /[\s\p{P}]/u.test(char);
+
+/**
+ * How far a candidate is from the Term's shape, lowest first: an edge that cuts a word or sits on a
+ * gap the Term does not have, then an edge on a letter the Term does not start or end with, then
+ * the difference in length.
+ */
+function shape(text: string, term: string, { start, end }: Range): number {
+    const cuts =
+        Number(!isGap(text[start - 1]) || isGap(text[start]) !== isGap(term[0])) +
+        Number(!isGap(text[end + 1]) || isGap(text[end]) !== isGap(term[term.length - 1]));
+    const letters = Number(text[start] !== term[0]) + Number(text[end] !== term[term.length - 1]);
+    return cuts * 128 + letters * 32 + Math.abs(end - start + 1 - term.length);
+}
 
 /** The start of the best match of `term` ending at `end`: fewest Typos, then the closest shape. */
 function startOf(text: string, term: string, end: number, typos: number): number {
@@ -230,31 +241,35 @@ function startOf(text: string, term: string, end: number, typos: number): number
     return best.start;
 }
 
-/** Keeps the best match from each run of consecutive end positions within the Typo budget. */
+interface Candidate extends Range {
+    rank: number;
+}
+
+/**
+ * Finds the matches of `term` within the Typo budget. Neighbouring end positions are variants of
+ * the same few matches, so each run of them keeps every exact match, then the best of the rest
+ * that overlap nothing kept: fewest Typos, then the closest shape.
+ */
 function fuzzyFind(folded: Folded, term: string, typos: number, found: Range[]): void {
     const { text } = folded;
-    let run: number[] = [];
-    let fewest = Infinity;
-    // The last position within budget; a gap after it ends the run.
-    let latest = -2;
+    let run: Candidate[] = [];
     const flush = (): void => {
-        const spans = run.map((end) => ({ start: startOf(text, term, end, typos), end }));
-        const closest = Math.min(...spans.map((span) => shape(text, term, span)));
-        for (const span of spans) {
-            if (shape(text, term, span) === closest)
-                found.push(toRange(folded, span.start, span.end));
+        // Units of the text a kept match covers, counted from the earliest start the run allows.
+        const base = Math.max(0, run[0].end - term.length - typos);
+        const taken = new Uint8Array(run[run.length - 1].end - base + 1);
+        const free = ({ start, end }: Range): boolean =>
+            taken.subarray(start - base, end - base + 1).every((unit) => !unit);
+        for (const candidate of run.sort((a, b) => a.rank - b.rank)) {
+            if (candidate.rank >= 1024 && !free(candidate)) continue;
+            taken.fill(1, candidate.start - base, candidate.end - base + 1);
+            found.push(toRange(folded, candidate.start, candidate.end));
         }
+        run = [];
     };
-    scan(term, text, 0, 1, text.length, false, typos, (at, count) => {
-        if (at !== latest + 1 && run.length) {
-            flush();
-            run = [];
-            fewest = Infinity;
-        }
-        latest = at;
-        if (count < fewest) run = [];
-        if (count <= fewest) run.push(at);
-        fewest = Math.min(fewest, count);
+    scan(term, text, 0, 1, text.length, false, typos, (end, count) => {
+        if (run.length && end !== run[run.length - 1].end + 1) flush();
+        const span = { start: startOf(text, term, end, typos), end };
+        run.push({ ...span, rank: count * 1024 + shape(text, term, span) });
     });
     if (run.length) flush();
 }

@@ -151,3 +151,26 @@ it('findRanges treats a non-boolean normalize by its truthiness without changing
     expect(findRanges('é', 'e', loose('0'))).toEqual([{ start: 0, end: 1 }]);
     expect(findRanges('é', 'e', { normalize: false })).toEqual([]);
 });
+
+it('findRanges matches typos only when the caller allows them', () => {
+    expect(findRanges('a search box', 'serach')).toEqual([]);
+    expect(findRanges('a search box', 'serach', { typos: 0 })).toEqual([]);
+});
+
+it('findRanges with typos keeps whole words: no space at an edge, no letter cut off', () => {
+    expect(findRanges('a cafe b', 'cafex', { typos: 1 })).toEqual([{ start: 2, end: 6 }]);
+    expect(findRanges('a cafe b', 'xcafe', { typos: 1 })).toEqual([{ start: 2, end: 6 }]);
+    expect(findRanges('a search box', 'searhc', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
+    expect(findRanges('a search box', 'esarch', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
+    expect(findRanges('searc search', 'search', { typos: 1 })).toEqual([
+        { start: 0, end: 5 },
+        { start: 6, end: 12 }
+    ]);
+    expect(findRanges('a 😀😀 b', '😀😀x', { typos: 1 })).toEqual([{ start: 2, end: 6 }]);
+});
+
+it('findRanges with typos handles a haystack that is one long run of candidates', () => {
+    expect(findRanges('a'.repeat(200_000), 'aaaa', { typos: 1 })).toEqual([
+        { start: 0, end: 200_000 }
+    ]);
+});

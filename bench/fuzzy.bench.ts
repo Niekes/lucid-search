@@ -70,28 +70,28 @@ const corpora: Record<string, string[]> = {
     'one 200 KB haystack': [book]
 };
 
-// Each query targets one word; `expected` is that word's exact occurrences.
+// Each query's `target` is the text it should find; its exact occurrences are the expected matches.
 const queries = [
-    { label: 'exact', term: 'Netherfield', word: 'Netherfield' },
-    { label: '1 typo (swap)', term: 'Netherfeild', word: 'Netherfield' },
-    { label: '2 typos', term: 'Nethrfeeld', word: 'Netherfield' },
+    { label: 'exact', term: 'Netherfield', target: 'Netherfield' },
+    { label: '1 typo (swap)', term: 'Netherfeild', target: 'Netherfield' },
+    { label: '2 typos', term: 'Nethrfeeld', target: 'Netherfield' },
     {
         label: '1 typo, 38 letters',
         term: 'truth universally acknowledgde, that a',
-        word: 'truth universally acknowledged, that a'
+        target: 'truth universally acknowledged, that a'
     }
 ];
 
 const overlaps = (a: Range, b: Range): boolean => a.start < b.end && b.start < a.end;
 
-function quality(finder: Finder, haystacks: string[], term: string, word: string): string {
+function quality(finder: Finder, haystacks: string[], term: string, target: string): string {
     const got = finder(haystacks, term);
     let expected = 0;
     let hit = 0;
     let returned = 0;
     let relevant = 0;
     haystacks.forEach((haystack, i) => {
-        const wanted = findRanges(haystack, [word]);
+        const wanted = findRanges(haystack, [target]);
         expected += wanted.length;
         hit += wanted.filter((w) => got[i].some((g) => overlaps(g, w))).length;
         returned += got[i].length;
@@ -103,11 +103,11 @@ function quality(finder: Finder, haystacks: string[], term: string, word: string
 }
 
 for (const [corpus, haystacks] of Object.entries(corpora)) {
-    for (const { label, term, word } of queries) {
+    for (const { label, term, target } of queries) {
         test(`${corpus}: ${label}`, async ({ bench }) => {
             await bench.compare(
                 ...Object.entries(finders).map(([name, finder]) =>
-                    bench(`${name} (${quality(finder, haystacks, term, word)})`, () => {
+                    bench(`${name} (${quality(finder, haystacks, term, target)})`, () => {
                         finder(haystacks, term);
                     })
                 )

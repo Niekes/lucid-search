@@ -41,9 +41,9 @@ findRanges('Pride and Prejudice', 'prejudcie', { typos: 1 });
 // [{ start: 10, end: 19 }]
 ```
 
-`typos` is the most Typos a term may have: an inserted, deleted or replaced letter, or two
-adjacent letters swapped. A term gets at most one Typo per 4 letters, because short terms with
-typos match almost anything. Each Range covers the best match, not the letters around it.
+`typos` is the most typos a term may have: an inserted, deleted or replaced letter, or two
+adjacent letters swapped. A term gets at most one typo per 4 letters, because short terms with
+typos match almost anything. Each Range covers the best match: whole words, without the space or letters around them.
 `score` ranks a match with typos like an exact one of the same length. See the
 [benchmarks](./performance#typos) against Fuse.js, uFuzzy and fuzzysort.
 

@@ -10,10 +10,10 @@ absolute values. To run the string scenarios in your own browser, open the
 - **`search` with `highlight` is the fastest or level with the fastest in three of five
   scenarios.** It leads with many short haystacks (S1, 1.7 times spotmark) and with accents
   (S3), and ties spotmark on an article (S2). When nothing matches (S4), spotmark is 6% faster. With 20
-  search terms in 100 kB (S5), spotmark is 1.6 times faster: `search` also returns the position
-  and search term of every match, about 12,000 objects here.
+  terms in 100 kB (S5), spotmark is 1.6 times faster: `search` also returns the position
+  and term of every match, about 12,000 objects here.
 - **`findRanges` with `toSegments` is mid-field on plain text, but last when nothing matches
-  (S4)**, and 4.5 times as fast as highlight-words-core with accents (S3). It is the path for
+  (S4)**, and 4.3 times as fast as highlight-words-core with accents (S3). It is the path for
   rendering your own elements, such as in React.
 - **With [typos](#typos), `findRanges` is the only library that finds every occurrence**, and
   the fastest that does on a single haystack.
@@ -24,8 +24,8 @@ absolute values. To run the string scenarios in your own browser, open the
 
 ### Why it is fast
 
-- `search` compiles the regexes for a needle once and reuses them for every haystack.
-- `search` reads the haystack once to find every match. It only checks a search term again when
+- `search` compiles the regexes for a query once and reuses them for every haystack.
+- `search` reads the haystack once to find every match. It only checks a term again when
   that term found nothing of its own but matches were found.
 - `highlight` skips HTML escaping when the haystack has nothing to escape.
 - `findRanges` searches ASCII haystacks directly. In other haystacks it folds only the
@@ -33,7 +33,7 @@ absolute values. To run the string scenarios in your own browser, open the
 - With typos, `findRanges` runs Myers' bit-vector algorithm: one pass over the haystack, with a
   whole term held in one 32-bit integer.
 
-The benchmarks repeat one needle, like search-as-you-type. A needle used once also pays for
+The benchmarks repeat one query, like search-as-you-type. A query used once also pays for
 compiling its regexes.
 
 ## String libraries (Node)
@@ -106,26 +106,28 @@ lucid-search with `typos: 2` against [Fuse.js](https://www.fusejs.io) 7.5.0,
 finds less, so every cell shows **recall** after the ops/s: the share of the expected words the
 library found. Its precision was 100% wherever it found anything. The haystacks are the first
 200 kB of _Pride and Prejudice_; the term targets `Netherfield` exactly, with one swap
-(`Netherfeild`) and with two Typos (`Nethrfeeld`).
+(`Netherfeild`) and with two typos (`Nethrfeeld`). The
+last row targets a 38-letter phrase with one typo.
 
-| Haystack            | Term          | **lucid-search** | Fuse.js          | uFuzzy        | fuzzysort        |
-| ------------------- | ------------- | ---------------- | ---------------- | ------------- | ---------------- |
-| one short line      | exact         | 1,342,289 · 100% | 1,009,826 · 100% | 89,382 · 100% | 3,191,240 · 100% |
-| one short line      | 1 Typo (swap) | 1,354,346 · 100% | 547,508 · 100%   | 87,789 · 100% | finds nothing    |
-| one short line      | 2 Typos       | 1,413,148 · 100% | finds nothing    | finds nothing | finds nothing    |
-| 2,928 short lines   | exact         | 519 · 100%       | 94 · 100%        | 3,577 · 100%  | 7,747 · 29%      |
-| 2,928 short lines   | 1 Typo (swap) | 524 · 100%       | 95 · 100%        | 3,402 · 100%  | finds nothing    |
-| 2,928 short lines   | 2 Typos       | 537 · 100%       | finds nothing    | finds nothing | finds nothing    |
-| one 200 kB haystack | exact         | 565 · 100%       | 316 · 100%       | 4,859 · 3%    | finds nothing    |
-| one 200 kB haystack | 1 Typo (swap) | 527 · 100%       | 135 · 3%         | 4,775 · 3%    | finds nothing    |
-| one 200 kB haystack | 2 Typos       | 581 · 100%       | finds nothing    | finds nothing | finds nothing    |
+| Haystack            | Term               | **lucid-search** | Fuse.js          | uFuzzy        | fuzzysort        |
+| ------------------- | ------------------ | ---------------- | ---------------- | ------------- | ---------------- |
+| one short line      | exact              | 1,342,289 · 100% | 1,009,826 · 100% | 89,382 · 100% | 3,191,240 · 100% |
+| one short line      | 1 typo (swap)      | 1,354,346 · 100% | 547,508 · 100%   | 87,789 · 100% | finds nothing    |
+| one short line      | 2 typos            | 1,413,148 · 100% | finds nothing    | finds nothing | finds nothing    |
+| 2,928 short lines   | exact              | 519 · 100%       | 94 · 100%        | 3,577 · 100%  | 7,747 · 29%      |
+| 2,928 short lines   | 1 typo (swap)      | 524 · 100%       | 95 · 100%        | 3,402 · 100%  | finds nothing    |
+| 2,928 short lines   | 2 typos            | 537 · 100%       | finds nothing    | finds nothing | finds nothing    |
+| one 200 kB haystack | exact              | 565 · 100%       | 316 · 100%       | 4,859 · 3%    | finds nothing    |
+| one 200 kB haystack | 1 typo (swap)      | 527 · 100%       | 135 · 3%         | 4,775 · 3%    | finds nothing    |
+| one 200 kB haystack | 2 typos            | 581 · 100%       | finds nothing    | finds nothing | finds nothing    |
+| one 200 kB haystack | 1 typo, 38 letters | finds nothing    | finds nothing    | 6,008 · 100%  | finds nothing    |
 
 - lucid-search is the only library that finds every occurrence in every row.
-- On a list of short lines, uFuzzy is about 6.5 times faster with up to one Typo: a regular
-  expression rejects most lines before it looks closer. It finds nothing with two Typos.
+- On a list of short lines, uFuzzy is about 6.5 times faster with up to one typo: a regular
+  expression rejects most lines before it looks closer. It finds nothing with two typos.
 - On a long haystack, uFuzzy and Fuse.js report only the first occurrence.
-- fuzzysort matches subsequences (`fnr` finds `findRanges`), not Typos.
-- A term over 32 letters matches exactly in lucid-search. With one Typo in a 38-letter term,
+- fuzzysort matches subsequences (`fnr` finds `findRanges`), not typos.
+- A term over 32 letters matches exactly in lucid-search. With one typo in a 38-letter term,
   only uFuzzy finds it.
 
 ## Against mark.js (Chromium)
