@@ -1,7 +1,7 @@
 import { normalize } from './normalize';
 
 export interface MarkOptions {
-    /** The element that wraps every match. Default `span`. */
+    /** The element of every highlight. Default `span`. */
     el: string;
     /** The class of that element. Default `matched`. */
     cssClass: string;
@@ -11,8 +11,9 @@ export interface Found {
     /** Every match in its original casing, in search-term order. */
     matches: string[];
     /**
-     * The haystack with every match wrapped in `<el class="cssClass">`. The haystack is not
-     * escaped: only put it into `innerHTML` if you trust it.
+     * The haystack with every match highlighted in `<el class="cssClass">`; matches that overlap
+     * or touch share one highlight. The haystack is not escaped: only put it into `innerHTML`
+     * if you trust it.
      */
     mark: string;
 }
@@ -36,17 +37,29 @@ function find(
     options: Partial<MarkOptions>,
     matcher: Matcher
 ): Found {
-    const matches = patterns.flatMap((pattern) => haystack.match(matcher(pattern)) ?? []);
+    const results = patterns.flatMap((pattern) => [...haystack.matchAll(matcher(pattern))]);
+    const matches = results.map(([match]) => match);
     if (!matches.length) return { matches, mark: haystack };
 
+    // Matches that overlap or touch merge into one highlight.
+    const highlights: [number, number][] = [];
+    const ranges = results
+        .map(({ 0: match, index }): [number, number] => [index, index + match.length])
+        .sort(([a], [b]) => a - b);
+    for (const [from, to] of ranges) {
+        const last = highlights[highlights.length - 1];
+        if (last && from <= last[1]) last[1] = Math.max(last[1], to);
+        else highlights.push([from, to]);
+    }
+
     const { el, cssClass } = { ...defaults, ...options };
-    // Longest first, so a short match never splits a longer one it is part of.
-    const alternatives = [...new Set(matches)].sort((a, b) => b.length - a.length);
-    const mark = haystack.replace(
-        matcher(alternatives.map(escape).join('|')),
-        (match) => `<${el} class="${cssClass}">${match}</${el}>`
-    );
-    return { matches, mark };
+    let mark = '';
+    let copied = 0;
+    for (const [from, to] of highlights) {
+        mark += `${haystack.slice(copied, from)}<${el} class="${cssClass}">${haystack.slice(from, to)}</${el}>`;
+        copied = to;
+    }
+    return { matches, mark: mark + haystack.slice(copied) };
 }
 
 /**

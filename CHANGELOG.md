@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Matches that overlap or touch share one highlight: the needle `ove ver` highlights all of `over`, not just `ove`.
+
 ## [2.1.0] - 2026-11-15
 
 ### Added

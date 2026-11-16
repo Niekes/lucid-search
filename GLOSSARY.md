@@ -10,7 +10,7 @@
 
 **Missing search term**: a search term that occurs nowhere in the haystack. One covered by a longer overlapping match still occurs, so it is not missing. Tells an agent which part of its needle to rephrase.
 
-**Mark**: the haystack returned with every match wrapped in a highlight element. The flavours return it unescaped.
+**Mark**: the haystack returned with every match wrapped in a highlight element. The flavours return it unescaped. In the flavours, matches that overlap or touch share one highlight element (`"ove ver"` highlights all of `"over"`), and a highlight element never reaches past its matches: searching `"o"` highlights only the `o`, not the rest of the word.
 
 **Highlight**: build a mark from the matches of `search`, HTML-escaping the whole haystack. Separate from searching; `search` never produces display output.
 
