@@ -20,8 +20,10 @@ const el = ref('mark');
 const cssClass = ref('matched');
 const editing = ref(false);
 
-// One JSON line per item, like console output. The summary line goes first, so scrolling never hides it.
-const lines = (items: object[]): string[] => items.map((item) => JSON.stringify(item));
+// One JSON line per item, like console output, each after a line break so they follow the summary.
+// One string, not an element per line, so long results stay fast.
+const lines = (items: object[]): string =>
+    items.map((item) => `\n${JSON.stringify(item)}`).join('');
 
 const result = computed(() => {
     try {
@@ -31,20 +33,19 @@ const result = computed(() => {
             });
             return {
                 lines: lines(matches),
-                summary: `missing: ${JSON.stringify(missing)}`,
+                summary: `${matches.length} matches · missing: ${JSON.stringify(missing)}`,
                 html: highlight(haystack.value, matches, { el: el.value, cssClass: cssClass.value })
             };
         }
         const ranges = findRanges(haystack.value, query.value, { normalize: normalize.value });
         return {
             lines: lines(ranges),
-            summary: `score: ${score(haystack.value, ranges).toFixed(2)}`,
+            summary: `${ranges.length} ranges · score: ${score(haystack.value, ranges).toFixed(2)}`,
             segments: toSegments(haystack.value, ranges)
         };
     } catch (error) {
         // The haystack stays readable, unhighlighted, while the options are invalid.
         return {
-            lines: [],
             error: String(error),
             segments: [{ text: haystack.value, match: false }]
         };
@@ -82,10 +83,7 @@ const result = computed(() => {
 
         <pre
             class="terminal"
-            aria-live="polite"
-        ><template v-if="result.error"><span class="error">{{ result.error }}</span></template><template v-else><span class="summary">{{ result.lines.length }} {{ mode === 'search' ? 'matches' : 'ranges' }} · {{ result.summary }}
-</span><span v-for="(line, i) in result.lines" :key="i">{{ line }}
-</span></template></pre>
+        ><!-- One live region that always exists, so screen readers announce the summary or the error, never the lines. --><span :class="result.error ? 'error' : 'summary'" aria-live="polite">{{ result.error ?? result.summary }}</span>{{ result.lines }}</pre>
 
         <div class="text-header">
             <strong>Haystack</strong>
