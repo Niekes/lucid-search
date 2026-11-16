@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>Find matches in text and highlight them safely. Zero dependencies, about 1 kB.</strong><br>
+  <strong>Find matches in text and highlight them safely. Zero dependencies, about 2 kB.</strong><br>
   Free and open source, kept alive by one maintainer and the people who sponsor the work.
 </p>
 
@@ -82,6 +82,10 @@ toSegments(haystack, findRanges(haystack, 'cafe lodz'));
 //   { text: ' au lait in ', match: false },
 //   { text: 'Łódź', match: true }
 // ]
+
+// Forgive one typo per term (terms under 4 letters still match exactly).
+findRanges('Pride and Prejudice', 'prejudcie', { typos: 1 });
+// [{ start: 10, end: 19 }]
 ```
 
 lucid-search returns positions, never HTML, so you render the matches yourself, e.g. as

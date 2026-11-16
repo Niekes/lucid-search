@@ -31,7 +31,7 @@ Returns the `Range[]` of every term of the query in the haystack.
   other characters outside the Basic Multilingual Plane count as two letters.
 - Ranges always point into the original haystack, even where a letter folds to two (`ß` → `ss`).
   They are sorted, and overlapping or touching ones are merged.
-- An empty or blank query returns `[]`.
+- An empty or blank query returns `[]`. Wrong input types throw a `TypeError`.
 
 ```js
 findRanges('Straße in Łódź', 'strasse lodz');

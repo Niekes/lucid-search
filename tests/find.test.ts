@@ -174,3 +174,13 @@ it('findRanges with typos handles a haystack that is one long run of candidates'
         { start: 0, end: 200_000 }
     ]);
 });
+
+it('findRanges throws a TypeError an agent can act on for wrong input types', () => {
+    const untyped = (value: unknown) => value as string;
+    expect(() => findRanges(untyped(null), 'x')).toThrow(/haystack must be a string/);
+    expect(() => findRanges('a 1 b', untyped([1]))).toThrow(/query must be a string or an array/);
+    expect(() => findRanges('a', untyped(42))).toThrow(/query must be/);
+    const holes = new Array<string>(2);
+    holes[1] = 'a';
+    expect(findRanges('a b', holes)).toEqual([{ start: 0, end: 1 }]);
+});

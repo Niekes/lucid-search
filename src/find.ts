@@ -124,6 +124,17 @@ function toRange({ at, from, to }: Folded, first: number, last: number): Range {
     };
 }
 
+/** Throws a TypeError an untyped caller, such as an agent sending JSON, can act on. */
+export function checkInput(haystack: unknown, query: unknown): void {
+    if (typeof haystack !== 'string') throw new TypeError('haystack must be a string');
+    if (
+        typeof query !== 'string' &&
+        !(Array.isArray(query) && query.every((term) => typeof term === 'string'))
+    ) {
+        throw new TypeError('query must be a string or an array of strings');
+    }
+}
+
 function merge(ranges: Range[]): Range[] {
     ranges.sort((a, b) => a.start - b.start);
     const merged: Range[] = [];
@@ -319,8 +330,10 @@ export function findRanges(
     query: string | string[],
     options: FindOptions = {}
 ): Range[] {
+    checkInput(haystack, query);
     const normalize = options.normalize ?? true;
-    const terms = typeof query === 'string' ? query.split(/\s+/) : query;
+    // `filter` also drops the holes of a sparse array, as `search` does.
+    const terms = typeof query === 'string' ? query.split(/\s+/) : query.filter(() => true);
     const folded = fold(haystack, normalize);
     const ranges: Range[] = [];
     for (const term of terms) {
