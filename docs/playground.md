@@ -10,6 +10,7 @@ own haystack.
 
 A search box over 10,000 made-up companies. Every company's name and URL go through
 `findRanges`, and `score` ranks the results, with a match in the name counting five times as
-much as one in the URL. The top ten are shown, highlighted with `toSegments`.
+much as one in the URL. The top ten are shown, highlighted with `toSegments`. With `typos` at 1, `mulelr`
+still finds Müller; set it to 0 for exact matches only.
 
 <CompanySearch />
