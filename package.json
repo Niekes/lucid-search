@@ -1,6 +1,6 @@
 {
     "name": "lucid-search",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "Highlight text and find matches",
     "keywords": [
         "highlight",
@@ -23,7 +23,8 @@
         "build/lucid-search.es.js",
         "build/lucid-search.cjs",
         "build/**/*.d.ts",
-        "build/**/*.d.cts"
+        "build/**/*.d.cts",
+        "llms.txt"
     ],
     "type": "module",
     "main": "build/lucid-search.cjs",

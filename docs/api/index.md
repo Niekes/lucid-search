@@ -1,5 +1,38 @@
 # API
 
+## `search(haystack, needle, options?)`
+
+Finds every literal, case-insensitive occurrence of the search terms and returns plain data, built
+for AI agents. A string needle is split on whitespace, `.`, `-` and `_`; pass an array to choose
+the search terms yourself. Matches are sorted by `start` and never overlap: the longer search term
+wins. `missing` lists the search terms found nowhere. Wrong input types throw a `TypeError`.
+
+```ts
+interface Match {
+    start: number; // haystack.slice(start, end) === text
+    end: number;
+    text: string;
+    term: string; // the search term that found it
+}
+
+search('The lazy dog', 'the cat');
+// { matches: [{ start: 0, end: 3, text: 'The', term: 'the' }], missing: ['cat'] }
+
+search('Crème', 'creme', { normalize: true }).matches; // [{ start: 0, end: 5, text: 'Crème', term: 'creme' }]
+```
+
+## `highlight(haystack, matches, options?)`
+
+Wraps the matches of `search` in `<el class="cssClass">` (default `span` and `matched`) and
+HTML-escapes the whole haystack, so the result is safe for `innerHTML`.
+
+```js
+highlight('a < dog', search('a < dog', 'dog').matches);
+// 'a &lt; <span class="matched">dog</span>'
+```
+
+## Flavours
+
 Every flavour has the same shape and returns a `Found` object:
 
 ```ts
@@ -13,8 +46,6 @@ interface MarkOptions {
     cssClass: string; // default 'matched'
 }
 ```
-
-## Flavours
 
 Each flavour combines three choices: whether it takes a needle or search terms, whether the
 haystack is plain text or HTML, and whether search terms match accented letters.
@@ -105,15 +136,15 @@ Ranks how well a haystack matched. Every distinct match adds its length, weighte
 closer it sits to the start of the haystack. Without a haystack, every match counts 1×.
 
 ```js
-const { matches } = findMatches(haystack, needle);
-score(matches, haystack);
+score(findMatches(haystack, needle).matches, haystack);
+score(search(haystack, needle).matches, haystack); // the same number
 ```
 
 ## `normalize(term)`
 
 Turns every letter that has accented variants into a regex character class. The Normalized
-flavours use it.
+flavours and `search` with `normalize: true` use it.
 
 ```js
-normalize('dog'); // 'd[oœöóõôòøō]g'
+normalize('dog'); // '[dđď][oœöóõôòøō][gğ]'
 ```

@@ -6,6 +6,19 @@
 
 - Matches that overlap or touch share one highlight: the needle `ove ver` highlights all of `over`, not just `ove`.
 
+## [2.1.0] - 2026-11-15
+
+### Added
+
+- `search` returns every match with its position and the search terms it could not find, for AI agents and their tool calls.
+- `highlight` wraps the matches of `search` and HTML-escapes the whole haystack.
+- `score` also takes the matches of `search`.
+- `llms.txt`, a compact API reference for coding assistants, ships in the package.
+
+### Changed
+
+- `normalize` also covers `d`, `g`, `l`, `n`, `r`, `y`, `z`, `ą`, `ę` and `ů`, so the Normalized flavours find more accented text.
+
 ## [2.0.0] - 2026-11-15
 
 Rewritten in TypeScript. See [Migrating from v1](https://niekes.github.io/lucid-search/guide/migration).

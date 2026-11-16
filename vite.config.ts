@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite-plus';
 import type { UserConfig } from 'vite-plus';
 
-// .github/badges is written by CI.
+// The badges are written by CI, unformatted.
 const ignorePatterns = ['docs/.vitepress/cache/**', 'docs/.vitepress/dist/**', '.github/badges/**'];
 const fileNames: Record<string, string> = { umd: 'lucid-search.js', cjs: 'lucid-search.cjs' };
 

@@ -1,0 +1,28 @@
+# lucid-search
+
+> Zero-dependency library (ESM, CommonJS, UMD) that finds literal, case-insensitive matches in a string and returns their positions. Safe HTML highlighting and a ranking score included.
+
+import { search, highlight, score } from 'lucid-search';
+
+## search(haystack: string, needle: string | string[], options?: { normalize?: boolean })
+Returns { matches: { start, end, text, term }[], missing: string[] }.
+- haystack.slice(start, end) === text. Matches are sorted by start and never overlap; the longer term wins.
+- needle is literal (no regex). A string is split on whitespace . - _ into terms; pass an array to keep terms intact.
+- missing = terms found nowhere, in the caller's order. Array terms are used exactly as given (spaces included); case-only duplicates collapse to the first spelling.
+- normalize: true makes plain letters match accented ones (creme -> Crème) without shifting positions.
+- Throws TypeError on non-string haystack or invalid needle. Empty needle -> { matches: [], missing: [] }.
+
+## highlight(haystack: string, matches: Match[], options?: { el?: string = 'span', cssClass?: string = 'matched' })
+Returns HTML: the haystack HTML-escaped, each match wrapped in <el class="cssClass">. Pass matches as search returned them.
+
+## score(matches: (Match | string)[], haystack = ''): number
+Higher = better fit. Use to sort several haystacks searched with the same needle.
+
+## Examples
+search('The lazy dog', 'the cat') // { matches: [{ start: 0, end: 3, text: 'The', term: 'the' }], missing: ['cat'] }
+highlight('a < dog', search('a < dog', 'dog').matches) // 'a &lt; <span class="matched">dog</span>'
+docs.sort((a, b) => score(search(b, q).matches, b) - score(search(a, q).matches, a)) // best first
+const context = matches.map(m => text.slice(Math.max(0, m.start - 80), m.end + 80));
+
+## Older API
+The eight findMatches* / uncoverMatches* flavours return { matches: string[], mark: string } with an unescaped mark. Prefer search + highlight in new code.
