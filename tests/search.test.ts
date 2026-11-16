@@ -137,3 +137,10 @@ it('search returns a fresh missing list that the caller may change', () => {
 
     expect(search('x', 'dog').missing).toEqual(['dog']);
 });
+
+it('search finds long needles on every call', () => {
+    const needle = `dog ${'x'.repeat(1000)}`;
+
+    expect(search('a dog', needle).missing).toEqual(['x'.repeat(1000)]);
+    expect(search('a dog', needle).matches).toHaveLength(1);
+});

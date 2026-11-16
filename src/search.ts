@@ -85,7 +85,8 @@ export function search(
         // shortcut: forgets every needle after 100, upgrade to an LRU if a page cycles through more.
         if (cache.size >= 100) cache.clear();
         compiled = compile(needle, normalize);
-        cache.set(key, compiled);
+        // Long needles are rarely repeated and would keep large keys and regexes alive.
+        if (key.length < 1000) cache.set(key, compiled);
     }
     const { terms, byLength, alternatives, perTerm } = compiled;
     if (!terms.length) return { matches: [], missing: [] };

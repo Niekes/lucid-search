@@ -68,3 +68,12 @@ it('findRanges matches accents exactly but still ignores case when normalize is 
         { start: 0, end: 8 }
     ]);
 });
+
+it('findRanges still matches after more than 10,000 distinct characters', () => {
+    const many = Array.from({ length: 10_001 }, (_, i) => String.fromCodePoint(0x4e00 + i)).join(
+        ''
+    );
+    findRanges(many, 'x');
+
+    expect(findRanges('Café', 'cafe')).toEqual([{ start: 0, end: 4 }]);
+});

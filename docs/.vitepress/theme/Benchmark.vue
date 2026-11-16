@@ -54,7 +54,7 @@ async function start(): Promise<void> {
             results.value = [...results.value];
         }
     }
-    status.value = `Done in ${navigator.userAgent.match(/(Firefox|Edg|Chrome|Safari)\/[\d.]+/)?.[0] ?? 'this browser'}.`;
+    status.value = 'Done.';
     running.value = false;
 }
 

@@ -1,3 +1,4 @@
+/// <reference types="node" />
 // Lucid vs mark.js in Chromium. Both end with highlighted DOM: lucid sets innerHTML to the
 // output of highlight, mark.js highlights the element in place. Run with `pnpm bench:browser`.
 import { createRequire } from 'node:module';

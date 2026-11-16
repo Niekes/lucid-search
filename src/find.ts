@@ -46,6 +46,8 @@ function foldChar(char: string, normalize: boolean): string {
     let text = cache.get(char);
     if (text === undefined) {
         text = foldCharUncached(char, normalize);
+        // shortcut: forgets every character after 10,000, upgrade to an LRU if CJK-heavy servers refold often.
+        if (cache.size >= 10_000) cache.clear();
         cache.set(char, text);
     }
     return text;

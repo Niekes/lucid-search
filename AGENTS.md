@@ -40,7 +40,7 @@ Decisions live in `docs/adr/`.
 
 ## The gate
 
-`pnpm verify` is the whole gate: typecheck, `vp check` (format and lint),
+`pnpm verify` is the whole gate: typecheck (plus `tsconfig.lib.json`, which checks `index.ts` and `src/` without Node types), `vp check` (format and lint),
 tests with 100% coverage, fallow (`dead-code`, `health --coverage-gaps`,
 `dupes`, all with `--ci`), the library build and the docs build. It runs in CI
 on every push and pull request. Fallow's audit gates every finding in changed

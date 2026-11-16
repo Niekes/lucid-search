@@ -1,3 +1,4 @@
+/// <reference types="node" />
 // Min + gzip size of what a user bundles for the import below. Run with `pnpm bench:size`.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';

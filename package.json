@@ -47,7 +47,7 @@
     },
     "scripts": {
         "clean": "rm -rf build",
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.lib.json",
         "build": "pnpm clean && pnpm typecheck && vp pack",
         "check": "vp check",
         "test": "vp test run",

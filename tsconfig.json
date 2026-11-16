@@ -15,7 +15,7 @@
         "noUnusedParameters": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
-        "types": ["vitest/globals", "node"]
+        "types": ["vitest/globals"]
     },
     "include": [
         "index.ts",
