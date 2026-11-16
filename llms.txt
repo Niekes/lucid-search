@@ -18,6 +18,7 @@ Returns HTML: the haystack HTML-escaped, each match wrapped in <el class="cssCla
 ## findRanges(haystack: string, query: string | string[], options?: { normalize?: boolean = true, typos?: number = 0 }): { start, end }[]
 Sorted, merged Ranges into the original haystack; accent-insensitive by default. Query split on whitespace only.
 typos: max Typos per term (insert, delete, replace, or swap of two adjacent letters), capped at one per 4 letters; terms over 32 letters match exactly.
+Throws TypeError on non-string haystack or invalid query.
 
 ## toSegments(haystack: string, ranges: Range[]): { text, match }[]
 Joined, the segments rebuild the haystack exactly. Render match segments with your own elements (no HTML string).

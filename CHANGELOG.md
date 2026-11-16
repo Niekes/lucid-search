@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- `findRanges` throws a `TypeError` that names the bad argument when the haystack or query has the wrong type, like `search` does, instead of `e.toLowerCase is not a function`.
+
 ## [2.2.0] - 2026-11-16
 
 ### Added

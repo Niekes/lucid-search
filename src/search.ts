@@ -1,4 +1,4 @@
-import { foldChar, foldCharUncached } from './find';
+import { checkInput, foldChar, foldCharUncached } from './find';
 
 /** One place in the haystack where a term was found. `haystack.slice(start, end) === text`. */
 export interface Match {
@@ -93,12 +93,10 @@ function foldedPattern(term: string): string {
     return pattern + runPattern(run) || '(?!)';
 }
 
-function toTerms(query: unknown): string[] {
-    if (typeof query === 'string') return query.split(/[.\-_\s]+/).filter(Boolean);
-    if (Array.isArray(query) && query.every((t) => typeof t === 'string')) {
-        return query.filter((t: string) => t.trim());
-    }
-    throw new TypeError('query must be a string or an array of strings');
+function toTerms(query: string | string[]): string[] {
+    return typeof query === 'string'
+        ? query.split(/[.\-_\s]+/).filter(Boolean)
+        : query.filter((t) => t.trim());
 }
 
 interface Compiled {
@@ -134,8 +132,8 @@ const cache = new Map<string, Compiled>();
 
 /** The compiled query, from the cache when the same query was searched recently. */
 function compiledQuery(query: string | string[], normalize: boolean): Compiled {
-    // A string query is the key as it is. An array query is checked first, so an invalid one
-    // throws before it can hit the cache, and keyed by its terms, each quoted so none can collide.
+    // A string query is the key as it is; an array query is keyed by its terms, each quoted so
+    // none can collide.
     const terms = typeof query === 'string' ? undefined : toTerms(query);
     const key = `${normalize ? 1 : 0}${terms ? `a${terms.map((t) => JSON.stringify(t)).join(',')}` : `s${query}`}`;
     let entry = cache.get(key);
@@ -162,7 +160,7 @@ export function search(
     query: string | string[],
     { normalize = false }: Partial<SearchOptions> = {}
 ): SearchResult {
-    if (typeof haystack !== 'string') throw new TypeError('haystack must be a string');
+    checkInput(haystack, query);
     const { terms, byLength, alternatives, perTerm } = compiledQuery(query, normalize);
     if (!terms.length) return { matches: [], missing: [] };
 
