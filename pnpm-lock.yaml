@@ -179,12 +179,21 @@ importers:
 
   .:
     devDependencies:
+      '@leeoniya/ufuzzy':
+        specifier: 1.0.19
+        version: 1.0.19
       '@vitest/coverage-v8':
         specifier: 5.0.5
         version: 5.0.5(@vitest/browser@5.0.5)(vitest@5.0.5)
       fallow:
         specifier: 3.34.1
         version: 3.34.1
+      fuse.js:
+        specifier: 7.5.0
+        version: 7.5.0
+      fuzzysort:
+        specifier: 4.0.2
+        version: 4.0.2
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -196,7 +205,7 @@ importers:
         version: 1.3.0(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(typescript@7.0.2)
       vitepress:
         specifier: 2.0.0-alpha.21
-        version: 2.0.0-alpha.21(postcss@8.5.33)(typescript@7.0.2)
+        version: 2.0.0-alpha.21(fuse.js@7.5.0)(postcss@8.5.33)(typescript@7.0.2)
       vitest:
         specifier: 5.0.5
         version: 5.0.5(@vitest/browser-preview@5.0.5)(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(@voidzero-dev/vite-plus-core@1.3.0(typescript@7.0.2))
@@ -302,6 +311,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@leeoniya/ufuzzy@1.0.19':
+    resolution: {integrity: sha512-0pikDeYt0IHEUPza5RTCDXc/17S1pTrYnReEMp8Aa6k1ovzw5QdZLwicW8TjljwEZRb6oYag0xmALohrcq/yOQ==}
 
   '@oxc-project/runtime@0.154.0':
     resolution: {integrity: sha512-cBQNGoh659BNgvA8OC/e4BNDtFkv03dJaYdkp2adgOQNtISNAPQ+nB4S8XvWtNk7Xl+0g+7aa+iRGR25Xycd1Q==}
@@ -1249,6 +1261,13 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
+  fuse.js@7.5.0:
+    resolution: {integrity: sha512-sQtrEfA+ez/3G0cCZecF70oqpCRttCexYUG4mUrtWL49ULUzUyxokt5kyqwtKzj1270RaKih+hcP3qLcumccow==}
+    engines: {node: '>=10'}
+
+  fuzzysort@4.0.2:
+    resolution: {integrity: sha512-3c7yD6rK1EXIsqpcu1ZVzXJugODWNMzvUij6yTiziaAHrpNS8kzFOI9mJLE8pmG4K9JOaVgzQRgklfOEk8f4Tg==}
+
   hast-util-to-html@9.0.6:
     resolution: {integrity: sha512-1SZUxCN3TtJAE7e2BQN2MBHsoZ1gnmi9GoCP5Di59CSWptIezSAW09yDZyVbanb78V9eCwrKqdQsjtfVTxYHWA==}
 
@@ -1723,6 +1742,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.3
       '@jridgewell/sourcemap-codec': 1.6.0
+
+  '@leeoniya/ufuzzy@1.0.19': {}
 
   '@oxc-project/runtime@0.154.0': {}
 
@@ -2231,13 +2252,14 @@ snapshots:
       '@vueuse/shared': 15.0.0(vue@3.5.45(typescript@7.0.2))
       vue: 3.5.45(typescript@7.0.2)
 
-  '@vueuse/integrations@15.0.0(focus-trap@8.2.4)(vue@3.5.45(typescript@7.0.2))':
+  '@vueuse/integrations@15.0.0(focus-trap@8.2.4)(fuse.js@7.5.0)(vue@3.5.45(typescript@7.0.2))':
     dependencies:
       '@vueuse/core': 15.0.0(vue@3.5.45(typescript@7.0.2))
       '@vueuse/shared': 15.0.0(vue@3.5.45(typescript@7.0.2))
       vue: 3.5.45(typescript@7.0.2)
     optionalDependencies:
       focus-trap: 8.2.4
+      fuse.js: 7.5.0
 
   '@vueuse/metadata@15.0.0': {}
 
@@ -2370,6 +2392,10 @@ snapshots:
 
   fsevents@2.3.3:
     optional: true
+
+  fuse.js@7.5.0: {}
+
+  fuzzysort@4.0.2: {}
 
   hast-util-to-html@9.0.6:
     dependencies:
@@ -2766,7 +2792,7 @@ snapshots:
       - vue-tsc
       - yaml
 
-  vitepress@2.0.0-alpha.21(postcss@8.5.33)(typescript@7.0.2):
+  vitepress@2.0.0-alpha.21(fuse.js@7.5.0)(postcss@8.5.33)(typescript@7.0.2):
     dependencies:
       '@docsearch/css': 4.7.1
       '@docsearch/js': 4.7.1
@@ -2778,7 +2804,7 @@ snapshots:
       '@vue/devtools-api': 8.2.1
       '@vue/shared': 3.5.45
       '@vueuse/core': 15.0.0(vue@3.5.45(typescript@7.0.2))
-      '@vueuse/integrations': 15.0.0(focus-trap@8.2.4)(vue@3.5.45(typescript@7.0.2))
+      '@vueuse/integrations': 15.0.0(focus-trap@8.2.4)(fuse.js@7.5.0)(vue@3.5.45(typescript@7.0.2))
       focus-trap: 8.2.4
       mark.js: 8.11.1
       minisearch: 7.2.0

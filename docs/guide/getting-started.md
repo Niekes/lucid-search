@@ -34,6 +34,19 @@ toSegments(haystack, ranges);
 The query is split on whitespace, so each term is searched on its own. Matching ignores case
 and accents, and terms are plain text: `c++` or `(` match themselves.
 
+## Forgive typos
+
+```js
+findRanges('Pride and Prejudice', 'prejudcie', { typos: 1 });
+// [{ start: 10, end: 19 }]
+```
+
+`typos` is the most Typos a term may have: an inserted, deleted or replaced letter, or two
+adjacent letters swapped. A term gets at most one Typo per 4 letters, because short terms with
+typos match almost anything. Each Range covers the best match, not the letters around it.
+`score` ranks a match with typos like an exact one of the same length. See the
+[benchmarks](./benchmarks) against Fuse.js, uFuzzy and fuzzysort.
+
 ## Render in React
 
 ```tsx

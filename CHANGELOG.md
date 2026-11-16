@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.2.0] - 2026-11-16
+
+### Added
+
+- `findRanges` forgives typos with `{ typos }`: an inserted, deleted or replaced letter, or two swapped adjacent letters, each count as one. A term gets at most one per 4 letters. Off by default ([ADR 0003](docs/adr/0003-typo-tolerant-findranges.md)).
+- [Benchmarks](https://niekes.github.io/lucid-search/guide/benchmarks) against Fuse.js, uFuzzy and fuzzysort, with recall next to every timing.
+
+### Changed
+
+- `findRanges` is up to 20 times faster on long haystacks, with or without typos.
+
 ## [2.1.0] - 2026-11-15
 
 ### Added

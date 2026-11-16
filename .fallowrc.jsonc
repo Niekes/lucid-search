@@ -5,9 +5,14 @@
     // vue, so the docs may use it while it stays a devDependency.
     "ignoreDependencies": ["vue"],
 
-    // The public entry point of the package, plus the docs site, which is a
-    // dev surface that reaches the library through the public API only.
-    "entry": ["index.ts", "docs/.vitepress/config.ts", "docs/.vitepress/theme/index.ts"],
+    // The public entry point of the package, plus the docs site and the
+    // benchmarks, dev surfaces that reach the library through the public API only.
+    "entry": [
+        "index.ts",
+        "docs/.vitepress/config.ts",
+        "docs/.vitepress/theme/index.ts",
+        "bench/**/*.bench.ts"
+    ],
 
     // Every rule that can catch a violation of the architecture is an error.
     "rules": {
@@ -30,6 +35,7 @@
     //   src/*      core        ->  core
     //   tests/*    tests       ->  public-api (core only through it)
     //   docs/*     docs        ->  public-api (core only through it)
+    //   bench/*    bench       ->  public-api (core only through it)
     //
     // Fallow follows the re-exports of index.ts, so tests and docs must be
     // allowed to reach core. They still import from index.ts only: a test
@@ -40,13 +46,15 @@
             { "name": "public-api", "patterns": ["index.ts"] },
             { "name": "core", "patterns": ["src/**/*.ts"] },
             { "name": "tests", "patterns": ["tests/**"] },
-            { "name": "docs", "patterns": ["docs/**"] }
+            { "name": "docs", "patterns": ["docs/**"] },
+            { "name": "bench", "patterns": ["bench/**"] }
         ],
         "rules": [
             { "from": "public-api", "allow": ["core"] },
             { "from": "core", "allow": ["core"] },
             { "from": "tests", "allow": ["public-api", "core"] },
-            { "from": "docs", "allow": ["public-api", "core"] }
+            { "from": "docs", "allow": ["public-api", "core"] },
+            { "from": "bench", "allow": ["public-api", "core"] }
         ],
         "coverage": {
             "requireAllFiles": true,
@@ -60,6 +68,6 @@
     // exempt: a finding anywhere in a changed file fails the audit.
     "audit": { "gate": "all" },
     "health": {
-        "ignore": ["tests/**", "docs/**"]
+        "ignore": ["tests/**", "docs/**", "bench/**"]
     }
 }

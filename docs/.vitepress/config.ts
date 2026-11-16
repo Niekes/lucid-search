@@ -16,7 +16,8 @@ const config: UserConfig = defineConfig({
                 text: 'Guide',
                 items: [
                     { text: 'Getting started', link: '/guide/getting-started' },
-                    { text: 'Migrating from v1', link: '/guide/migration' }
+                    { text: 'Migrating from v1', link: '/guide/migration' },
+                    { text: 'Benchmarks', link: '/guide/benchmarks' }
                 ]
             },
             { text: 'API', items: [{ text: 'Reference', link: '/api/' }] },

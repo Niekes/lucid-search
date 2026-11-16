@@ -12,6 +12,8 @@
 
 **Normalization**: matching that ignores accents and diacritics, so `e` matches `é`, `l` matches `ł`, and `ss` matches `ß`. On by default. Matching always ignores case, whether normalization is on or not.
 
+**Typo**: one inserted, deleted or replaced character, or two adjacent characters swapped. `serach` is one typo away from `search`. Off by default: `findRanges` matches a term exactly unless the caller allows typos.
+
 **Match**: one occurrence found by `search`, as `{ start, end, text, term }`, so `haystack.slice(start, end) === text`. A Match is also a Range. `search` splits a string query on whitespace, `.`, `-` and `_`, and its matches never overlap: the longer term wins.
 
 **Missing term**: a term `search` finds nowhere in the haystack. One covered by a longer overlapping match still occurs, so it is not missing. Tells an agent which part of its query to rephrase.
