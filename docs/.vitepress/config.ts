@@ -9,18 +9,21 @@ const config: UserConfig = defineConfig({
         nav: [
             { text: 'Guide', link: '/guide/getting-started' },
             { text: 'API', link: '/api/' },
-            { text: 'Playground', link: '/playground' }
+            { text: 'Playground', link: '/playground' },
+            { text: 'Benchmark', link: '/benchmark' }
         ],
         sidebar: [
             {
                 text: 'Guide',
                 items: [
                     { text: 'Getting started', link: '/guide/getting-started' },
-                    { text: 'Migrating from v1', link: '/guide/migration' }
+                    { text: 'Migrating from v1', link: '/guide/migration' },
+                    { text: 'Performance', link: '/guide/performance' }
                 ]
             },
             { text: 'API', items: [{ text: 'Reference', link: '/api/' }] },
-            { text: 'Playground', link: '/playground' }
+            { text: 'Playground', link: '/playground' },
+            { text: 'Benchmark', link: '/benchmark' }
         ],
         socialLinks: [{ icon: 'github', link: 'https://github.com/niekes/lucid-search' }],
         search: { provider: 'local' },

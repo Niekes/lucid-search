@@ -1,0 +1,21 @@
+name: Benchmarks
+
+# Timing varies between runners, so this only reports and never gates.
+on:
+    workflow_dispatch:
+
+jobs:
+    bench:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+            - uses: pnpm/action-setup@v4
+            - uses: actions/setup-node@v7
+              with:
+                  node-version: 24
+                  cache: pnpm
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm exec playwright install --with-deps chromium
+            - run: pnpm bench --reporter=verbose
+            - run: pnpm bench:browser
+            - run: pnpm bench:size

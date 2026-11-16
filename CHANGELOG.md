@@ -8,6 +8,11 @@
 - `highlight` wraps the matches of `search` and HTML-escapes the whole haystack.
 - `score` also takes the matches of `search`, since a Match is a Range.
 - `llms.txt`, a compact API reference for coding assistants, ships in the package.
+- Benchmarks against other highlighting libraries, on the Performance page and as a live page in the docs.
+
+### Changed
+
+- `search` caches the regexes for its last 100 queries and reads the haystack once; `findRanges` searches ASCII haystacks without folding; `highlight` skips escaping when there is nothing to escape. Results are unchanged.
 
 ## [2.0.0] - 2026-11-15
 
