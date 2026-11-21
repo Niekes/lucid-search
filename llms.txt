@@ -1,10 +1,24 @@
 # lucid-search
 
-> Zero-dependency library (ESM, CommonJS, UMD) that finds literal, case-insensitive matches in a string and returns their positions. Safe HTML highlighting and a ranking score included.
+> Zero-dependency library (ESM, CommonJS, UMD) that finds literal, case-insensitive matches in a string, ignoring accents (by default in findRanges) and, optionally, typos, and returns their positions. A ranking score is included.
+
+In React, Vue or any framework, render toSegments output as elements; highlight() is for plain HTML strings only.
 
 import { findRanges, toSegments, search, highlight, score } from 'lucid-search';
 
-## search(haystack: string, query: string | string[], options?: { normalize?: boolean })
+## Rendering matches in a UI
+
+### findRanges(haystack: string, query: string | string[], options?: { normalize?: boolean = true, typos?: number = 0 }): { start, end }[]
+Sorted, merged Ranges into the original haystack; accent- and ligature-insensitive by default. Query split on whitespace only.
+typos: max Typos per term (insert, delete, replace, or swap of two adjacent letters), capped at one per 4 letters; terms over 32 letters match exactly.
+Throws TypeError on non-string haystack or invalid query.
+
+### toSegments(haystack: string, ranges: Range[]): { text, match }[]
+Joined, the segments rebuild the haystack exactly. Render match segments with your own elements (no HTML string).
+
+## Searching from an agent or tool call
+
+### search(haystack: string, query: string | string[], options?: { normalize?: boolean })
 Returns { matches: { start, end, text, term }[], missing: string[] }.
 - haystack.slice(start, end) === text. Matches are sorted by start and never overlap; the longer term wins.
 - query is literal (no regex). A string is split on whitespace . - _ into terms; pass an array to keep terms intact.
@@ -12,21 +26,14 @@ Returns { matches: { start, end, text, term }[], missing: string[] }.
 - normalize: true ignores accents the same way findRanges does (creme -> Crème, strasse -> Straße, final -> ﬁnal) without shifting positions.
 - Throws TypeError on non-string haystack or invalid query. Empty query -> { matches: [], missing: [] }.
 
-## highlight(haystack: string, matches: Match[], options?: { el?: string = 'span', cssClass?: string = 'matched' })
+### highlight(haystack: string, matches: Match[], options?: { el?: string = 'span', cssClass?: string = 'matched' })
 Returns HTML: the haystack HTML-escaped, each match wrapped in <el class="cssClass">. Pass matches as search returned them.
-
-## findRanges(haystack: string, query: string | string[], options?: { normalize?: boolean = true, typos?: number = 0 }): { start, end }[]
-Sorted, merged Ranges into the original haystack; accent- and ligature-insensitive by default. Query split on whitespace only.
-typos: max Typos per term (insert, delete, replace, or swap of two adjacent letters), capped at one per 4 letters; terms over 32 letters match exactly.
-Throws TypeError on non-string haystack or invalid query.
-
-## toSegments(haystack: string, ranges: Range[]): { text, match }[]
-Joined, the segments rebuild the haystack exactly. Render match segments with your own elements (no HTML string).
 
 ## score(haystack: string, ranges: Range[]): number
 Higher = better fit. Takes findRanges results or search matches. Use to sort several haystacks searched with the same query.
 
 ## Examples
+toSegments(haystack, findRanges(haystack, query, { typos: 1 })).map((segment, i) => segment.match ? <mark key={i}>{segment.text}</mark> : segment.text) // React
 search('The lazy dog', 'the cat') // { matches: [{ start: 0, end: 3, text: 'The', term: 'the' }], missing: ['cat'] }
 highlight('a < dog', search('a < dog', 'dog').matches) // 'a &lt; <span class="matched">dog</span>'
 docs.sort((a, b) => score(b, findRanges(b, q)) - score(a, findRanges(a, q))) // best first
