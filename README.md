@@ -91,6 +91,12 @@ findRanges('Pride and Prejudice', 'prejudcie', { typos: 1 });
 lucid-search returns positions, never HTML, so you render the matches yourself, e.g. as
 `<mark>` elements in React, and an untrusted haystack can't inject markup.
 
+```tsx
+toSegments(haystack, findRanges(haystack, query, { typos: 1 })).map((segment, i) =>
+    segment.match ? <mark key={i}>{segment.text}</mark> : segment.text
+);
+```
+
 ## Using it from an AI agent
 
 `search` returns plain JSON with positions, plus the terms it could not find, so an agent knows what to rephrase. `highlight` turns those matches into HTML and escapes the whole haystack.
