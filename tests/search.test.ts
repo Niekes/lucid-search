@@ -58,6 +58,8 @@ describe('search', () => {
         ['oﬃce', 'office', 'oﬃce'],
         ['waﬄe', 'waffle', 'waﬄe'],
         ['oﬀice', 'office', 'oﬀice'],
+        ['ofﬁce', 'office', 'ofﬁce'],
+        ['efﬂuent', 'effluent', 'efﬂuent'],
         ['office', 'oﬃce', 'office'],
         ['İstanbul', 'istanbul', 'İstanbul'],
         ['Hà Nội', 'noi', 'Nội'],

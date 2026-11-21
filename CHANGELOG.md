@@ -15,7 +15,7 @@
 
 ### Fixed
 
-- With `normalize`, ligatures fold into their letters, so `final` finds `ﬁnal` and `office` finds `oﬃce` (`ﬀ ﬁ ﬂ ﬃ ﬄ ﬅ ﬆ ĳ`), in `findRanges` and in `search`. Ranges still point into the original haystack; a term that covers part of a ligature highlights the whole character.
+- With `normalize`, ligatures fold into their letters, so `final` finds `ﬁnal` and `office` finds `oﬃce` and `ofﬁce` (`ﬀ ﬁ ﬂ ﬃ ﬄ ﬅ ﬆ ĳ`), in `findRanges` and in `search`. Ranges still point into the original haystack; a term that covers part of a ligature highlights the whole character.
 
 ## [2.2.1] - 2026-11-16
 
