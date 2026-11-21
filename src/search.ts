@@ -17,7 +17,7 @@ export interface SearchResult {
 }
 
 export interface SearchOptions {
-    /** Let plain letters match their accented variants. Default `false`. */
+    /** Let plain letters match their accented variants and ligatures. Default `false`. */
     normalize: boolean;
 }
 
@@ -56,16 +56,20 @@ const unit = (char: string): string => {
     return `${others ? `[${escapeClass(char + others)}]` : escapeRegExp(char)}\\p{M}*`;
 };
 
-// Folded characters, with `ss`, `ae` and `oe` also matching `ß`, `æ` and `œ`.
-// shortcut: pairs are read left to right, so `sss` finds `ßs` but not `sß`; fine for real words.
-function runPattern(folded: string): string {
+// Folded characters, with `ss`, `ae` and `ffi` also matching `ß`, `æ` and `ﬃ`. Letters a longer
+// fold covers are tried again with shorter ones, so `ffi` also matches `ﬀi`.
+// shortcut: folds are read left to right, so `sss` finds `ßs` but not `sß`; try every split if a real word needs it.
+// 3 is the longest fold in `UNDECOMPOSABLE` (src/find.ts): `ffi` and `ffl`.
+function runPattern(folded: string, longest = 3): string {
     const chars = Array.from(folded);
     let pattern = '';
     for (let i = 0; i < chars.length; i += 1) {
-        const pair = i + 1 < chars.length ? variantsOf(chars[i] + chars[i + 1]) : '';
-        if (pair) {
-            pattern += `(?:${unit(chars[i])}${unit(chars[i + 1])}|[${escapeClass(pair)}]\\p{M}*)`;
-            i += 1;
+        let size = Math.min(longest, chars.length - i);
+        while (size > 1 && !variantsOf(chars.slice(i, i + size).join(''))) size -= 1;
+        if (size > 1) {
+            const letters = chars.slice(i, i + size).join('');
+            pattern += `(?:${runPattern(letters, size - 1)}|[${escapeClass(variantsOf(letters))}]\\p{M}*)`;
+            i += size - 1;
         } else {
             pattern += unit(chars[i]);
         }
@@ -73,7 +77,7 @@ function runPattern(folded: string): string {
     return pattern;
 }
 
-/** A pattern that matches the term the way `findRanges` folds text: ignoring case and accents. */
+/** A pattern that matches the term the way `findRanges` folds text: ignoring case, accents and ligatures. */
 function foldedPattern(term: string): string {
     let pattern = '';
     let run = '';
@@ -152,7 +156,7 @@ function compiledQuery(query: string | string[], normalize: boolean): Compiled {
 /**
  * Find every literal, case-insensitive occurrence of the query's terms.
  * A string query is split on whitespace, `.`, `-` and `_`; pass an array to choose the terms.
- * With `normalize`, accents are ignored the same way `findRanges` ignores them.
+ * With `normalize`, accents and ligatures are ignored the same way `findRanges` ignores them.
  * @throws TypeError when haystack is not a string or query is not a string / string[].
  */
 export function search(
