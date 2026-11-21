@@ -4,6 +4,7 @@
 
 ### Added
 
+- `toSnippet(segments, size, { ellipsis })` cuts Segments to a window around the first match for result-list excerpts, keeping the `match` flags and adding `ellipsis` (default `…`) where text was cut. It avoids cutting words and never splits a surrogate pair ([#17](https://github.com/Niekes/lucid-search/issues/17)).
 - `findRanges` matches terms only where a word starts with `{ wordStart: true }`, like a server's prefix match (`(^|[^[:alnum:]])term` or `term:*`): `li` finds `Lina` but not `Feliz`. Off by default ([ADR 0004](docs/adr/0004-word-start-in-findranges.md)).
 - A guide, [Highlighting Postgres results](https://niekes.github.io/lucid-search/guide/postgres), for results found with `pg_trgm` and `unaccent`: which `typos` to use, how to handle short terms, how accent folding differs, and a trigram index for the server side.
 

@@ -4,7 +4,7 @@
 
 In React, Vue or any framework, render toSegments output as elements; highlight() is for plain HTML strings only.
 
-import { findRanges, toSegments, search, highlight, score } from 'lucid-search';
+import { findRanges, toSegments, toSnippet, search, highlight, score } from 'lucid-search';
 
 ## Rendering matches in a UI
 
@@ -15,6 +15,9 @@ Throws TypeError on non-string haystack or invalid query.
 
 ### toSegments(haystack: string, ranges: Range[]): { text, match }[]
 Joined, the segments rebuild the haystack exactly. Render match segments with your own elements (no HTML string).
+
+### toSnippet(segments: Segment[], size: number, options?: { ellipsis?: string = '…' }): { text, match }[]
+For a result-list excerpt: a window of size characters around the first match, with { text: ellipsis, match: false } where text was cut. Keeps match flags, avoids cutting words, never splits a surrogate pair. Returns segments unchanged when they fit.
 
 ## Searching from an agent or tool call
 
@@ -35,6 +38,7 @@ Higher = better fit. Takes findRanges results or search matches. Use to sort sev
 ## Examples
 toSegments(haystack, findRanges(haystack, query, { typos: 1 })).map((segment, i) => segment.match ? <mark key={i}>{segment.text}</mark> : segment.text) // React
 search('The lazy dog', 'the cat') // { matches: [{ start: 0, end: 3, text: 'The', term: 'the' }], missing: ['cat'] }
+toSnippet(toSegments(description, findRanges(description, query)), 160) // excerpt, render like toSegments
 highlight('a < dog', search('a < dog', 'dog').matches) // 'a &lt; <span class="matched">dog</span>'
 docs.sort((a, b) => score(b, findRanges(b, q)) - score(a, findRanges(a, q))) // best first
 const context = matches.map(m => text.slice(Math.max(0, m.start - 80), m.end + 80));

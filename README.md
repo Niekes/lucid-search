@@ -97,6 +97,9 @@ toSegments(haystack, findRanges(haystack, query, { typos: 1 })).map((segment, i)
 );
 ```
 
+For an excerpt in a result list, `toSnippet(segments, 160)` cuts the segments to a window around
+the first match and adds `…` where text was cut.
+
 ## Using it from an AI agent
 
 `search` returns plain JSON with positions, plus the terms it could not find, so an agent knows what to rephrase. `highlight` turns those matches into HTML and escapes the whole haystack.

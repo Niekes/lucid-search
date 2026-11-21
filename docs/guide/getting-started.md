@@ -71,3 +71,17 @@ function Highlight({ text, query }: { text: string; query: string }) {
 ```
 
 No HTML string is ever built, so a haystack like `<img onerror=…>` stays plain text.
+
+For an excerpt in a result list, cut the segments to a window of 160 characters around the first
+match with `toSnippet`, and render them the same way. Where text was cut, it adds a `…` segment
+that is not a match.
+
+```tsx
+import { findRanges, toSegments, toSnippet } from 'lucid-search';
+
+function Excerpt({ text, query }: { text: string; query: string }) {
+    return toSnippet(toSegments(text, findRanges(text, query)), 160).map((segment, i) =>
+        segment.match ? <mark key={i}>{segment.text}</mark> : segment.text
+    );
+}
+```
