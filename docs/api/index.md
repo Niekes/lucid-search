@@ -58,6 +58,22 @@ toSegments('a Café', [{ start: 2, end: 6 }]);
 // [{ text: 'a ', match: false }, { text: 'Café', match: true }]
 ```
 
+## `toSnippet(segments, size, { ellipsis })`
+
+Cuts Segments to a Snippet: a window of `size` characters (UTF-16 code units) around the first
+match, starting about a third of `size` before it. Where text was cut, it adds
+`{ text: ellipsis, match: false }` (default `'…'`, `''` for none). Edges move to a word boundary
+when one is close, a surrogate pair is never split, and the first match is cut only when it is
+longer than `size`. Returns `segments` unchanged when the haystack fits. Unlike `toSegments`, a
+Snippet does not rebuild the haystack. Throws a `TypeError` when `size` is not a positive integer or `ellipsis` is not a string.
+
+```js
+const text = 'one two three four five six seven eight nine ten Café eleven twelve thirteen';
+toSnippet(toSegments(text, findRanges(text, 'cafe')), 30);
+// [{ text: '…', match: false }, { text: 'nine ten ', match: false },
+//  { text: 'Café', match: true }, { text: ' eleven twelve', match: false }, { text: '…', match: false }]
+```
+
 ## `score(haystack, ranges)`
 
 Ranks how well a haystack matched: the length of every distinct matched text, weighted up to 2x

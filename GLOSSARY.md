@@ -10,6 +10,8 @@
 
 **Segment**: a consecutive slice of the haystack, flagged as a match or not. Laid end to end, the segments rebuild the haystack exactly.
 
+**Snippet**: a window of the haystack around its first match (or at its start, without one), as segments, for showing an excerpt in a result list. Where text was cut, it has an ellipsis segment that is not a match. Unlike the full list of segments, a snippet does not rebuild the haystack.
+
 **Normalization**: matching that ignores accents, diacritics and ligatures, so `e` matches `é`, `l` matches `ł`, `ss` matches `ß`, and `fi` matches `ﬁ`. On by default for `findRanges`, off for `search`. Matching always ignores case, whether normalization is on or not.
 
 **Typo**: one inserted, deleted or replaced character, or two adjacent characters swapped. `serach` is one typo away from `search`. A term may have at most one typo per 4 letters, because short terms with typos match almost anything. Off by default: `findRanges` matches a term exactly unless the caller allows typos.

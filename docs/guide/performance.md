@@ -19,8 +19,8 @@ absolute values. To run the string scenarios in your own browser, open the
   term up to 32 letters, and the fastest that does on a single haystack.
 - **Against mark.js, lucid-search is about 44 to 59 times faster.** mark.js walks and edits the
   DOM; lucid-search builds one string and sets it as `innerHTML` once.
-- **The imports are small:** 2.3 kB gzip for `findRanges` with `toSegments` (typo matching
-  included), 1.7 kB for `search` with `highlight`.
+- **The imports are small:** 2.8 kB gzip for `findRanges` with `toSegments` and `toSnippet` (typo
+  matching included), 1.7 kB for `search` with `highlight`.
 
 ### Why it is fast
 
@@ -146,15 +146,15 @@ mark.js highlights the element in place. Both highlight exactly the same text.
 
 Minified and gzipped size of the import, after tree-shaking.
 
-| Library                                       | min (kB) | gzip (kB) |
-| --------------------------------------------- | -------: | --------: |
-| highlight-words                               |      1.8 |       0.9 |
-| highlight-words-core                          |      3.1 |       1.3 |
-| spotmark                                      |      2.4 |       1.3 |
-| **lucid-search** (`search`, `highlight`)      |      2.7 |       1.4 |
-| **lucid-search** (`findRanges`, `toSegments`) |      5.6 |       2.3 |
-| accent-folding                                |      9.6 |       3.3 |
-| mark.js                                       |     23.4 |       6.6 |
+| Library                                                    | min (kB) | gzip (kB) |
+| ---------------------------------------------------------- | -------: | --------: |
+| highlight-words                                            |      1.8 |       0.9 |
+| highlight-words-core                                       |      3.1 |       1.3 |
+| spotmark                                                   |      2.4 |       1.3 |
+| **lucid-search** (`search`, `highlight`)                   |      2.7 |       1.4 |
+| **lucid-search** (`findRanges`, `toSegments`, `toSnippet`) |      7.1 |       2.8 |
+| accent-folding                                             |      9.6 |       3.3 |
+| mark.js                                                    |     23.4 |       6.6 |
 
 ## Setup
 
