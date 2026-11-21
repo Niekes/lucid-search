@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `llms.txt` lists `findRanges` and `toSegments` first, and it and the README show a React example, so AI assistants render matches as elements instead of building `highlight()` HTML.
+
 ### Fixed
 
 - With `normalize`, ligatures fold into their letters, so `final` finds `ﬁnal` and `office` finds `oﬃce` (`ﬀ ﬁ ﬂ ﬃ ﬄ ﬅ ﬆ ĳ`), in `findRanges` and in `search`. Ranges still point into the original haystack; a term that covers part of a ligature highlights the whole character.
