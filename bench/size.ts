@@ -35,6 +35,8 @@ for (const [library, code] of Object.entries(imports)) {
 }
 // `pnpm verify` fails when a lucid-search import grows over its gzip budget, in kB.
 const budgets: Record<string, number> = { 'lucid-search': 1.8, 'lucid-search (findRanges)': 2.3 };
+// A renamed import would otherwise drop its budget without a word.
+for (const name in budgets) if (!(name in imports)) throw new Error(`No import named ${name}`);
 for (const [library, min, gz] of rows.sort((a, b) => a[2] - b[2])) {
     if (gz / 1024 > (budgets[library] ?? Infinity)) {
         console.error(`${library} is over its budget of ${budgets[library]} kB gzip`);
