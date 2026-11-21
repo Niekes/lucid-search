@@ -56,7 +56,7 @@ findRanges('Feliz and Lina', 'li', { wordStart: true });
 
 If your server matches terms by prefix only, for example with a Postgres regex
 `(^|[^[:alnum:]])term` or a `tsquery` prefix `term:*`, set `wordStart` so the highlight agrees:
-`li` then marks `Lina` but not `Feliz`.
+`li` then marks `Lina` but not `Feliz`. See [Highlighting Postgres results](./postgres).
 
 ## Render in React
 
