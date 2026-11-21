@@ -33,7 +33,13 @@ for (const [library, code] of Object.entries(imports)) {
     const js = chunks.map((c) => ('code' in c ? c.code : '')).join('');
     rows.push([library, Buffer.byteLength(js), gzipSync(js).length]);
 }
+// `pnpm verify` fails when a lucid-search import grows over its gzip budget, in kB.
+const budgets: Record<string, number> = { 'lucid-search': 1.8, 'lucid-search (findRanges)': 2.3 };
 for (const [library, min, gz] of rows.sort((a, b) => a[2] - b[2])) {
+    if (gz / 1024 > (budgets[library] ?? Infinity)) {
+        console.error(`${library} is over its budget of ${budgets[library]} kB gzip`);
+        process.exitCode = 1;
+    }
     console.log(
         `${library.padEnd(26)} ${(min / 1024).toFixed(1).padStart(6)} kB min  ${(gz / 1024).toFixed(1).padStart(5)} kB gzip`
     );

@@ -42,7 +42,7 @@ Decisions live in `docs/adr/`.
 
 `pnpm verify` is the whole gate: typecheck (plus `tsconfig.lib.json`, which checks `index.ts` and `src/` without Node types), `vp check` (format and lint),
 tests with 100% coverage, fallow (`dead-code`, `health --coverage-gaps`,
-`dupes`, all with `--ci`), the library build and the docs build. It runs in CI
+`dupes`, all with `--ci`), the library build, the size budget (`bench/size.ts`) and the docs build. It runs in CI
 on every push and pull request. Fallow's audit gates every finding in changed
 files (`"audit": { "gate": "all" }` in `.fallowrc.jsonc`).
 
@@ -79,6 +79,7 @@ library must highlight exactly the same text as lucid-search before it is timed.
 `bench/fuzzy.bench.ts` times `findRanges` with typos against Fuse.js, uFuzzy and
 fuzzysort, and labels each one with its recall, because those libraries find different
 things.
-The benchmarks are not part of `pnpm verify`, because timing varies between
-runs. After a run that changes the numbers, update `docs/guide/performance.md`
+The timing benchmarks are not part of `pnpm verify`, because timing varies between
+runs. Only `bench:size` is, because sizes do not vary: it fails when a lucid-search import
+grows over its gzip budget. After a run that changes the numbers, update `docs/guide/performance.md`
 with the new results and setup.

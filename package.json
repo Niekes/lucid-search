@@ -60,7 +60,7 @@
         "docs:build": "vitepress build docs",
         "docs:preview": "vitepress preview docs",
         "lint:fallow": "fallow dead-code --ci --format ${FALLOW_FORMAT:-human} && fallow health --ci --coverage-gaps --format ${FALLOW_FORMAT:-human} && fallow dupes --ci --format ${FALLOW_FORMAT:-human}",
-        "verify": "pnpm typecheck && pnpm check && pnpm coverage && pnpm lint:fallow && pnpm build && pnpm docs:build",
+        "verify": "pnpm typecheck && pnpm check && pnpm coverage && pnpm lint:fallow && pnpm build && pnpm bench:size && pnpm docs:build",
         "hooks:install": "fallow hooks install --target git && fallow hooks install --target agent --agent claude && fallow hooks install --target agent --agent codex",
         "prepack": "pnpm build"
     },
