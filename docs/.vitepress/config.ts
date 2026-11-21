@@ -18,6 +18,7 @@ const config: UserConfig = defineConfig({
                 items: [
                     { text: 'Getting started', link: '/guide/getting-started' },
                     { text: 'Migrating from v1', link: '/guide/migration' },
+                    { text: 'Highlighting Postgres results', link: '/guide/postgres' },
                     { text: 'Performance', link: '/guide/performance' }
                 ]
             },

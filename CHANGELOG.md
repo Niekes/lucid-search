@@ -5,6 +5,7 @@
 ### Added
 
 - `findRanges` matches terms only where a word starts with `{ wordStart: true }`, like a server's prefix match (`(^|[^[:alnum:]])term` or `term:*`): `li` finds `Lina` but not `Feliz`. Off by default ([ADR 0004](docs/adr/0004-word-start-in-findranges.md)).
+- A guide, [Highlighting Postgres results](https://niekes.github.io/lucid-search/guide/postgres), for results found with `pg_trgm` and `unaccent`: which `typos` to use, how to handle short terms, how accent folding differs, and a trigram index for the server side.
 
 ### Changed
 
