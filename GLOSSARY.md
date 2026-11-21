@@ -10,7 +10,7 @@
 
 **Segment**: a consecutive slice of the haystack, flagged as a match or not. Laid end to end, the segments rebuild the haystack exactly.
 
-**Normalization**: matching that ignores accents and diacritics, so `e` matches `é`, `l` matches `ł`, and `ss` matches `ß`. On by default for `findRanges`, off for `search`. Matching always ignores case, whether normalization is on or not.
+**Normalization**: matching that ignores accents, diacritics and ligatures, so `e` matches `é`, `l` matches `ł`, `ss` matches `ß`, and `fi` matches `ﬁ`. On by default for `findRanges`, off for `search`. Matching always ignores case, whether normalization is on or not.
 
 **Typo**: one inserted, deleted or replaced character, or two adjacent characters swapped. `serach` is one typo away from `search`. A term may have at most one typo per 4 letters, because short terms with typos match almost anything. Off by default: `findRanges` matches a term exactly unless the caller allows typos.
 

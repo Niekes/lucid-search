@@ -24,7 +24,7 @@ Returns the `Range[]` of every term of the query in the haystack.
 - A string query is split on whitespace into terms. Pass a `string[]` to split it yourself.
 - Matching always ignores case, and terms are plain text, never patterns.
 - With `normalize` (the default), accents and diacritics are ignored: `cafe` finds `Café`,
-  `lodz` finds `Łódź`, `strasse` finds `Straße`. Standalone symbols like `^` stay searchable.
+  `lodz` finds `Łódź`, `strasse` finds `Straße`, `final` finds `ﬁnal`. Standalone symbols like `^` stay searchable.
 - With `typos`, a term may differ from the text by that many typos: an inserted, deleted or
   replaced letter, or two adjacent letters swapped. A term gets at most one typo per 4 letters,
   so `cat` always matches exactly, and terms over 32 letters always match exactly. Emoji and

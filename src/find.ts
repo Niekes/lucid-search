@@ -5,13 +5,14 @@ export interface Range {
 }
 
 export interface FindOptions {
-    /** Ignore accents and diacritics, so `cafe` matches `café`. Default `true`. */
+    /** Ignore accents, diacritics and ligatures, so `cafe` matches `café` and `final` matches `ﬁnal`. Default `true`. */
     normalize?: boolean;
     /** The most Typos a Term may have, at most one per 4 letters of the Term. Default `0`. */
     typos?: number;
 }
 
-// Letters that NFD does not split into a base letter plus a combining mark.
+// Letters that NFD does not split into a base letter plus a combining mark, and ligatures: NFKD
+// would split those too, but would also turn `²` into `2` and `…` into `...`.
 const UNDECOMPOSABLE: Record<string, string> = {
     ł: 'l',
     đ: 'd',
@@ -19,7 +20,15 @@ const UNDECOMPOSABLE: Record<string, string> = {
     ı: 'i',
     ß: 'ss',
     æ: 'ae',
-    œ: 'oe'
+    œ: 'oe',
+    ĳ: 'ij',
+    ﬀ: 'ff',
+    ﬁ: 'fi',
+    ﬂ: 'fl',
+    ﬃ: 'ffi',
+    ﬄ: 'ffl',
+    ﬅ: 'st',
+    ﬆ: 'st'
 };
 const undecomposable = new RegExp(`[${Object.keys(UNDECOMPOSABLE).join('')}]`, 'g');
 

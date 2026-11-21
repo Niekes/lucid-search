@@ -49,6 +49,18 @@ it('findRanges ignores accents by default and points Ranges into the original ha
     ]);
 });
 
+it('findRanges folds ligatures into their letters', () => {
+    expect(findRanges('ﬁesta ﬁnal', 'final')).toEqual([{ start: 6, end: 10 }]);
+    expect(findRanges('ﬂor oﬃce ĲSSEL', 'flor office ijssel')).toEqual([
+        { start: 0, end: 3 },
+        { start: 4, end: 8 },
+        { start: 9, end: 14 }
+    ]);
+    // A Range cannot split a character, so part of a ligature highlights all of it.
+    expect(findRanges('ﬁnal', 'inal')).toEqual([{ start: 0, end: 4 }]);
+    expect(findRanges('ﬁnal', 'final', { normalize: false })).toEqual([]);
+});
+
 it('findRanges keeps an already-decomposed accent inside its Range', () => {
     expect(findRanges('café au lait', 'cafe')).toEqual([{ start: 0, end: 5 }]);
     expect(findRanges('́abc', 'abc')).toEqual([{ start: 1, end: 4 }]);

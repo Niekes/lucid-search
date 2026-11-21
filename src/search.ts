@@ -56,16 +56,19 @@ const unit = (char: string): string => {
     return `${others ? `[${escapeClass(char + others)}]` : escapeRegExp(char)}\\p{M}*`;
 };
 
-// Folded characters, with `ss`, `ae` and `oe` also matching `ß`, `æ` and `œ`.
-// shortcut: pairs are read left to right, so `sss` finds `ßs` but not `sß`; fine for real words.
-function runPattern(folded: string): string {
+// Folded characters, with `ss`, `ae` and `ffi` also matching `ß`, `æ` and `ﬃ`. Letters a longer
+// fold covers are tried again with shorter ones, so `ffi` also matches `ﬀi`.
+// shortcut: folds are read left to right, so `sss` finds `ßs` but not `sß`; fine for real words.
+function runPattern(folded: string, longest = 3): string {
     const chars = Array.from(folded);
     let pattern = '';
     for (let i = 0; i < chars.length; i += 1) {
-        const pair = i + 1 < chars.length ? variantsOf(chars[i] + chars[i + 1]) : '';
-        if (pair) {
-            pattern += `(?:${unit(chars[i])}${unit(chars[i + 1])}|[${escapeClass(pair)}]\\p{M}*)`;
-            i += 1;
+        let size = Math.min(longest, chars.length - i);
+        while (size > 1 && !variantsOf(chars.slice(i, i + size).join(''))) size -= 1;
+        if (size > 1) {
+            const letters = chars.slice(i, i + size).join('');
+            pattern += `(?:${runPattern(letters, size - 1)}|[${escapeClass(variantsOf(letters))}]\\p{M}*)`;
+            i += size - 1;
         } else {
             pattern += unit(chars[i]);
         }
