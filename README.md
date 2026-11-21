@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>Find matches in text and highlight them safely. Zero dependencies, about 2 kB.</strong><br>
+  <strong>Find matches in text and highlight them safely. Zero dependencies, under 3 kB.</strong><br>
   Free and open source, kept alive by one maintainer and the people who sponsor the work.
 </p>
 

@@ -27,13 +27,13 @@ const isSpace = (char: string | undefined): boolean => char !== undefined && /\s
 const isLowSurrogate = (haystack: string, at: number): boolean =>
     (haystack.charCodeAt(at) & 0xfc00) === 0xdc00;
 
-function firstMatch(segments: Segment[]): Range {
+function firstMatch(segments: Segment[]): Range | undefined {
     let at = 0;
     for (const { text, match } of segments) {
         if (match) return { start: at, end: at + text.length };
         at += text.length;
     }
-    return { start: 0, end: 0 };
+    return undefined;
 }
 
 // Moves the window start forward to a word start within `slack`, never past `limit` (the first match).
@@ -75,9 +75,13 @@ export function toSnippet(
     const haystack = segments.map((segment) => segment.text).join('');
     if (haystack.length <= size) return segments;
 
-    const match = firstMatch(segments);
+    const found = firstMatch(segments);
+    // Without a match, the window starts where the text starts, after any leading whitespace.
+    const text = Math.max(0, haystack.search(/\S/));
+    const match = found ?? { start: text, end: text };
     // A third before the match, kept inside the haystack; the match stays whole unless longer than size.
-    let start = Math.max(0, Math.min(match.start - Math.floor(size / 3), haystack.length - size));
+    const before = found ? Math.floor(size / 3) : 0;
+    let start = Math.max(0, Math.min(match.start - before, haystack.length - size));
     start = Math.max(start, Math.min(match.start, match.end - size));
     const slack = Math.floor(size * 0.15);
     const end = toWordEnd(haystack, start + size, match.end, slack);

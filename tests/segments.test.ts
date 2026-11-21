@@ -49,6 +49,11 @@ it('toSnippet keeps the start without a match or with a match at the start', () 
     );
 });
 
+it('toSnippet without a match skips leading whitespace longer than size', () => {
+    const haystack = `\n${' '.repeat(12)}alpha beta gamma delta`;
+    expect(text(toSnippet(toSegments(haystack, []), 10))).toBe('alpha beta…');
+});
+
 it('toSnippet does not run past the end', () => {
     const haystack = 'alpha beta gamma delta epsilon zeta eta theta';
     expect(text(toSnippet(toSegments(haystack, findRanges(haystack, 'theta')), 23))).toBe(

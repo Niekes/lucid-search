@@ -56,19 +56,29 @@ const unit = (char: string): string => {
     return `${others ? `[${escapeClass(char + others)}]` : escapeRegExp(char)}\\p{M}*`;
 };
 
-// Folded characters, with `ss`, `ae` and `ffi` also matching `ß`, `æ` and `ﬃ`. Letters a longer
-// fold covers are tried again with shorter ones, so `ffi` also matches `ﬀi`.
-// shortcut: folds are read left to right, so `sss` finds `ßs` but not `sß`; try every split if a real word needs it.
+// Every way to write `chars` as single letters and folds: `ffi` matches `ffi`, `ﬀi`, `fﬁ` and `ﬃ`.
+// A prefix that is no fold gives `[]`, which matches nothing under the `u` flag.
+function splits(chars: string[]): string {
+    if (chars.length < 2) return chars.length ? unit(chars[0]) : '';
+    const options = [unit(chars[0]) + splits(chars.slice(1))];
+    for (let size = 2; size <= chars.length; size += 1) {
+        const others = escapeClass(variantsOf(chars.slice(0, size).join('')));
+        options.push(`[${others}]\\p{M}*${splits(chars.slice(size))}`);
+    }
+    return `(?:${options.join('|')})`;
+}
+
+// Folded characters, with `ss`, `ae` and `ffi` also matching `ß`, `æ` and `ﬃ`.
+// shortcut: windows of up to 3 letters are cut left to right and only split inside, so `sss` misses `sß` and `fffi` misses `fﬃ`; no real word needs more.
 // 3 is the longest fold in `UNDECOMPOSABLE` (src/find.ts): `ffi` and `ffl`.
-function runPattern(folded: string, longest = 3): string {
+function runPattern(folded: string): string {
     const chars = Array.from(folded);
     let pattern = '';
     for (let i = 0; i < chars.length; i += 1) {
-        let size = Math.min(longest, chars.length - i);
+        let size = Math.min(3, chars.length - i);
         while (size > 1 && !variantsOf(chars.slice(i, i + size).join(''))) size -= 1;
         if (size > 1) {
-            const letters = chars.slice(i, i + size).join('');
-            pattern += `(?:${runPattern(letters, size - 1)}|[${escapeClass(variantsOf(letters))}]\\p{M}*)`;
+            pattern += splits(chars.slice(i, i + size));
             i += size - 1;
         } else {
             pattern += unit(chars[i]);
