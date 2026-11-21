@@ -69,7 +69,7 @@ function splits(chars: string[]): string {
 }
 
 // Folded characters, with `ss`, `ae` and `ffi` also matching `ß`, `æ` and `ﬃ`.
-// shortcut: folds are found left to right, so `sss` finds `ßs` but not `sß`; try every split if a real word needs it.
+// shortcut: windows of up to 3 letters are cut left to right and only split inside, so `sss` misses `sß` and `fffi` misses `fﬃ`; no real word needs more.
 // 3 is the longest fold in `UNDECOMPOSABLE` (src/find.ts): `ffi` and `ffl`.
 function runPattern(folded: string): string {
     const chars = Array.from(folded);
