@@ -216,7 +216,7 @@ it('findRanges with wordStart reads the character before a match as findRanges f
     expect(atWordStart('𝐀li', 'li')).toEqual([]);
     expect(atWordStart('😀li', 'li')).toEqual([{ start: 2, end: 4 }]);
     // A combining mark belongs to its word, also when accents are kept.
-    expect(atWordStart('caféli', 'li', false)).toEqual([]);
+    expect(atWordStart('cafe\u0301li', 'li', false)).toEqual([]);
     // Punctuation and symbols end a word; a term that starts with one still needs a word start.
     expect(atWordStart('$li foo_li', 'li')).toEqual([
         { start: 1, end: 3 },
