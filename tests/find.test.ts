@@ -196,3 +196,37 @@ it('findRanges throws a TypeError an agent can act on for wrong input types', ()
     holes[1] = 'a';
     expect(findRanges('a b', holes)).toEqual([{ start: 0, end: 1 }]);
 });
+
+it('findRanges with wordStart matches a term only where a word starts', () => {
+    expect(findRanges('Feliz and Lina', 'li', { wordStart: true })).toEqual([
+        { start: 10, end: 12 }
+    ]);
+    expect(findRanges('Feliz and Lina', 'li')).toEqual([
+        { start: 2, end: 4 },
+        { start: 10, end: 12 }
+    ]);
+});
+
+it('findRanges with wordStart reads the character before a match as findRanges folds it', () => {
+    const atWordStart = (haystack: string, term: string, normalize = true) =>
+        findRanges(haystack, term, { wordStart: true, normalize });
+    // Inside a ligature the `i` follows an `f`, though its Range starts at the ligature.
+    expect(atWordStart('ﬁnal', 'i')).toEqual([]);
+    // A letter outside the BMP is still a letter; an emoji is not.
+    expect(atWordStart('𝐀li', 'li')).toEqual([]);
+    expect(atWordStart('😀li', 'li')).toEqual([{ start: 2, end: 4 }]);
+    // A combining mark belongs to its word, also when accents are kept.
+    expect(atWordStart('caféli', 'li', false)).toEqual([]);
+    // Punctuation and symbols end a word; a term that starts with one still needs a word start.
+    expect(atWordStart('$li foo_li', 'li')).toEqual([
+        { start: 1, end: 3 },
+        { start: 8, end: 10 }
+    ]);
+    expect(atWordStart('asp.net .net', '.net')).toEqual([{ start: 8, end: 12 }]);
+});
+
+it('findRanges with wordStart and typos keeps only matches that start a word', () => {
+    expect(findRanges('xserach and serach', 'search', { typos: 1, wordStart: true })).toEqual([
+        { start: 12, end: 18 }
+    ]);
+});

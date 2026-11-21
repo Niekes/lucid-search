@@ -14,6 +14,7 @@ interface Segment {
 interface FindOptions {
     normalize?: boolean; // default true
     typos?: number; // default 0
+    wordStart?: boolean; // default false
 }
 ```
 
@@ -29,6 +30,9 @@ Returns the `Range[]` of every term of the query in the haystack.
   replaced letter, or two adjacent letters swapped. A term gets at most one typo per 4 letters,
   so `cat` always matches exactly, and terms over 32 letters always match exactly. Emoji and
   other characters outside the Basic Multilingual Plane count as two letters.
+- With `wordStart`, a term matches only where a word starts: at the start of the haystack or
+  after a character that is not a letter, digit or combining mark. `li` finds `Lina` but not
+  `Feliz`, and `.net` does not match in `asp.net`.
 - Ranges always point into the original haystack, even where a letter folds to two (`ß` → `ss`).
   They are sorted, and overlapping or touching ones are merged.
 - An empty or blank query returns `[]`. Wrong input types throw a `TypeError`.
@@ -39,6 +43,9 @@ findRanges('Straße in Łódź', 'strasse lodz');
 
 findRanges('a search box', 'serach', { typos: 1 });
 // [{ start: 2, end: 8 }]
+
+findRanges('Feliz and Lina', 'li', { wordStart: true });
+// [{ start: 10, end: 12 }]
 ```
 
 ## `toSegments(haystack, ranges)`

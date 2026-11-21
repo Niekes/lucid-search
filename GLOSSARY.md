@@ -14,6 +14,8 @@
 
 **Typo**: one inserted, deleted or replaced character, or two adjacent characters swapped. `serach` is one typo away from `search`. A term may have at most one typo per 4 letters, because short terms with typos match almost anything. Off by default: `findRanges` matches a term exactly unless the caller allows typos.
 
+**Word start**: where a word begins: at the start of the haystack, or after a character that is not a letter, digit or combining mark. `findRanges` can be told to match terms only at word starts, so `li` finds `Lina` but not `Feliz`. Scripts without spaces, such as Chinese, have almost no word starts.
+
 **Match**: one occurrence found by `search`, as `{ start, end, text, term }`, so `haystack.slice(start, end) === text`. A Match is also a Range. `search` splits a string query on whitespace, `.`, `-` and `_`, and its matches never overlap: the longer term wins.
 
 **Missing term**: a term `search` finds nowhere in the haystack. One covered by a longer overlapping match still occurs, so it is not missing. Tells an agent which part of its query to rephrase.

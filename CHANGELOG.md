@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `findRanges` matches terms only where a word starts with `{ wordStart: true }`, like a server's prefix match (`(^|[^[:alnum:]])term` or `term:*`): `li` finds `Lina` but not `Feliz`. Off by default ([ADR 0004](docs/adr/0004-word-start-in-findranges.md)).
+
 ### Fixed
 
 - With `normalize`, ligatures fold into their letters, so `final` finds `ﬁnal` and `office` finds `oﬃce` (`ﬀ ﬁ ﬂ ﬃ ﬄ ﬅ ﬆ ĳ`), in `findRanges` and in `search`. Ranges still point into the original haystack; a term that covers part of a ligature highlights the whole character.
