@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.3.0] - 2026-11-21
 
 ### Added
 
@@ -11,6 +11,7 @@
 ### Changed
 
 - `llms.txt` lists `findRanges` and `toSegments` first, and it and the README show a React example, so AI assistants render matches as elements instead of building `highlight()` HTML.
+- `findRanges` with `toSegments` and `toSnippet` grows from 2.2 to 2.8 kB gzip, for `wordStart` and `toSnippet`; `search` with `highlight` grows from 1.7 to 1.8 kB, for the ligature folding. `pnpm verify` now fails when an import grows over its gzip budget.
 
 ### Fixed
 

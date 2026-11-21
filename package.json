@@ -1,6 +1,6 @@
 {
     "name": "lucid-search",
-    "version": "2.2.1",
+    "version": "2.3.0",
     "description": "Find matches in text and get ranges and segments to highlight them safely, with accent-insensitive matching",
     "keywords": [
         "diacritics",

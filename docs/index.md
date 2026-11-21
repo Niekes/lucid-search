@@ -2,7 +2,7 @@
 layout: home
 hero:
     name: lucid-search
-    tagline: Find matches in text and highlight them safely. Zero dependencies, about 2 kB.
+    tagline: Find matches in text and highlight them safely. Zero dependencies, under 3 kB.
     actions:
         - theme: brand
           text: Get started
