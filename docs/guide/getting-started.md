@@ -47,6 +47,17 @@ typos match almost anything. Each Range covers the best match: whole words, with
 `score` ranks a match with typos like an exact one of the same length. See the
 [benchmarks](./performance#typos) against Fuse.js, uFuzzy and fuzzysort.
 
+## Match only at word starts
+
+```js
+findRanges('Feliz and Lina', 'li', { wordStart: true });
+// [{ start: 10, end: 12 }]
+```
+
+If your server matches terms by prefix only, for example with a Postgres regex
+`(^|[^[:alnum:]])term` or a `tsquery` prefix `term:*`, set `wordStart` so the highlight agrees:
+`li` then marks `Lina` but not `Feliz`.
+
 ## Render in React
 
 ```tsx

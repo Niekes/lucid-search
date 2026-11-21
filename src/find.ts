@@ -9,6 +9,8 @@ export interface FindOptions {
     normalize?: boolean;
     /** The most Typos a Term may have, at most one per 4 letters of the Term. Default `0`. */
     typos?: number;
+    /** Match a Term only at a Word start: at the start of the haystack or after a character that is not a letter, digit or combining mark. Default `false`. */
+    wordStart?: boolean;
 }
 
 // Letters that NFD does not split into a base letter plus a combining mark, and ligatures: NFKD
@@ -282,10 +284,14 @@ interface Candidate extends Range {
 /**
  * Finds the matches of `term` within the Typo budget. Neighbouring end positions are variants of
  * the same few matches, so each run of them keeps every exact match, then the best of the rest
- * that overlap nothing kept: fewest Typos, then the closest shape.
+ * that overlap nothing kept: fewest Typos, then the closest shape. Each one goes to `add`.
  */
-function fuzzyFind(folded: Folded, term: string, typos: number, found: Range[]): void {
-    const { text } = folded;
+function fuzzyFind(
+    text: string,
+    term: string,
+    typos: number,
+    add: (first: number, last: number) => void
+): void {
     let reversed = '';
     for (let unit = term.length - 1; unit >= 0; unit -= 1) reversed += term[unit];
     // Whatever its start, a match ending at `end` covers its last `core` units.
@@ -316,7 +322,7 @@ function fuzzyFind(folded: Folded, term: string, typos: number, found: Range[]):
             for (const { start, end } of spans) {
                 if (count && !free(start, end)) continue;
                 taken.fill(1, start - base, end - base + 1);
-                found.push(toRange(folded, start, end));
+                add(start, end);
             }
         }
         run = [];
@@ -327,6 +333,9 @@ function fuzzyFind(folded: Folded, term: string, typos: number, found: Range[]):
     });
     if (run.length) flush();
 }
+
+// Matches at `lastIndex` when a letter, digit or combining mark comes right before it.
+const inWord = /(?<=[\p{L}\p{N}\p{M}])/uy;
 
 /**
  * Finds every term of the query in the haystack, case-insensitively and as plain text,
@@ -345,6 +354,16 @@ export function findRanges(
     const terms = typeof query === 'string' ? query.split(/\s+/) : query.filter(() => true);
     const folded = fold(haystack, normalize);
     const ranges: Range[] = [];
+    // Reads the folded text, so `i` inside `ﬁnal` follows an `f` even though its Range starts at the ligature.
+    // shortcut: with typos this filters chosen matches, so a mid-word one can hide a worse one at a Word start; let only Word-start candidates compete if a caller hits it.
+    const addAtWordStart = (first: number, last: number): void => {
+        if (options.wordStart) {
+            // A lookbehind reads a whole code point; V8 misses a letter outside the BMP in `/[\p{L}]$/u`.
+            inWord.lastIndex = first;
+            if (inWord.test(folded.text)) return;
+        }
+        ranges.push(toRange(folded, first, last));
+    };
     for (const term of terms) {
         const foldedTerm = fold(term, normalize).text;
         if (!foldedTerm) continue;
@@ -354,7 +373,7 @@ export function findRanges(
                 ? 0
                 : Math.min(options.typos ?? 0, Math.floor(foldedTerm.length / 4));
         if (typos > 0) {
-            fuzzyFind(folded, foldedTerm, typos, ranges);
+            fuzzyFind(folded.text, foldedTerm, typos, addAtWordStart);
             continue;
         }
         for (
@@ -362,7 +381,7 @@ export function findRanges(
             at !== -1;
             at = folded.text.indexOf(foldedTerm, at + 1)
         ) {
-            ranges.push(toRange(folded, at, at + foldedTerm.length - 1));
+            addAtWordStart(at, at + foldedTerm.length - 1);
         }
     }
     return merge(ranges);

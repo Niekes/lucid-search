@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `findRanges` matches terms only where a word starts with `{ wordStart: true }`, like a server's prefix match (`(^|[^[:alnum:]])term` or `term:*`): `li` finds `Lina` but not `Feliz`. Off by default ([ADR 0004](docs/adr/0004-word-start-in-findranges.md)).
+
 ### Changed
 
 - `llms.txt` lists `findRanges` and `toSegments` first, and it and the README show a React example, so AI assistants render matches as elements instead of building `highlight()` HTML.
