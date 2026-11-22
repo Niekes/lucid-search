@@ -64,7 +64,7 @@ directly leaves the public export untested, which `coverage-gaps` reports.
 ## Releasing
 
 A release is a pull request that bumps the version in `package.json` and
-updates `CHANGELOG.md`. Merging it into `master` triggers
+updates `CHANGELOG.md`. Merging it into `main` triggers
 `.github/workflows/release.yml`, which stages the new version on npm (only when
 the version is not on npm yet) and creates the `vX.Y.Z` GitHub release. The
 version goes live once a maintainer approves it with 2FA. Never run
