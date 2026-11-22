@@ -7,6 +7,9 @@ own haystack.
 `typos` is a maximum: a term gets at most one typo per 4 letters, so `mllr` (4 letters) gets 1
 even with `typos` at 2, and does not find Müller, which is 2 typos away.
 
+With `search`, **Did you mean** shows the suggestion from `suggest` for each missing term: try
+`quikc forrest` to get quick and forest.
+
 <Playground />
 
 ## Search a list

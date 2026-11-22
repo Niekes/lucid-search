@@ -39,7 +39,7 @@ const undecomposable = new RegExp(`[${Object.keys(UNDECOMPOSABLE).join('')}]`, '
  * ASCII (`to` is -1: unit `i` of the run came from `from + i`) or the folded units of one character
  * (all from the original span `from` to `to`). `at` is where each piece starts in `text`.
  */
-interface Folded {
+export interface Folded {
     text: string;
     at: number[];
     from: number[];
@@ -87,7 +87,7 @@ function widenLast(folded: Folded, end: number): void {
     folded.to.push(end);
 }
 
-function fold(input: string, normalize: boolean): Folded {
+export function fold(input: string, normalize: boolean): Folded {
     // Most haystacks are pure ASCII: one piece, no character to fold one by one.
     if (/^[\0-\x7f]*$/.test(input)) {
         return { text: input.toLowerCase(), at: [0], from: [0], to: [-1] };
@@ -126,7 +126,7 @@ function pieceOf(at: number[], unit: number): number {
 }
 
 /** The Range of the original haystack that folded units `first` to `last` (inclusive) came from. */
-function toRange({ at, from, to }: Folded, first: number, last: number): Range {
+export function toRange({ at, from, to }: Folded, first: number, last: number): Range {
     const head = pieceOf(at, first);
     const tail = pieceOf(at, last);
     return {
@@ -290,7 +290,7 @@ function fuzzyFind(
     text: string,
     term: string,
     typos: number,
-    add: (first: number, last: number) => void
+    add: (first: number, last: number, typos: number) => void
 ): void {
     let reversed = '';
     for (let unit = term.length - 1; unit >= 0; unit -= 1) reversed += term[unit];
@@ -322,7 +322,7 @@ function fuzzyFind(
             for (const { start, end } of spans) {
                 if (count && !free(start, end)) continue;
                 taken.fill(1, start - base, end - base + 1);
-                add(start, end);
+                add(start, end, count);
             }
         }
         run = [];
@@ -335,7 +335,25 @@ function fuzzyFind(
 }
 
 // Matches at `lastIndex` when a letter, digit or combining mark comes right before it.
-const inWord = /(?<=[\p{L}\p{N}\p{M}])/uy;
+export const inWord: RegExp = /(?<=[\p{L}\p{N}\p{M}])/uy;
+
+/**
+ * Calls `add` with the folded units of each match of `term` (already folded) in `text`, and its Typos.
+ * `typos` is the caller's maximum; the Term gets at most one per 4 letters, and none over 32 letters.
+ */
+export function findTerm(
+    text: string,
+    term: string,
+    typos: number,
+    add: (first: number, last: number, typos: number) => void
+): void {
+    // shortcut: one 32-bit integer holds the Term, so longer Terms match exactly; use multi-block Myers if needed.
+    const budget = term.length > 32 ? 0 : Math.min(typos, Math.floor(term.length / 4));
+    if (budget > 0) return fuzzyFind(text, term, budget, add);
+    for (let at = text.indexOf(term); at !== -1; at = text.indexOf(term, at + 1)) {
+        add(at, at + term.length - 1, 0);
+    }
+}
 
 /**
  * Finds every term of the query in the haystack, case-insensitively and as plain text,
@@ -366,23 +384,7 @@ export function findRanges(
     };
     for (const term of terms) {
         const foldedTerm = fold(term, normalize).text;
-        if (!foldedTerm) continue;
-        // shortcut: one 32-bit integer holds the Term, so longer Terms match exactly; use multi-block Myers if needed.
-        const typos =
-            foldedTerm.length > 32
-                ? 0
-                : Math.min(options.typos ?? 0, Math.floor(foldedTerm.length / 4));
-        if (typos > 0) {
-            fuzzyFind(folded.text, foldedTerm, typos, addAtWordStart);
-            continue;
-        }
-        for (
-            let at = folded.text.indexOf(foldedTerm);
-            at !== -1;
-            at = folded.text.indexOf(foldedTerm, at + 1)
-        ) {
-            addAtWordStart(at, at + foldedTerm.length - 1);
-        }
+        if (foldedTerm) findTerm(folded.text, foldedTerm, options.typos ?? 0, addAtWordStart);
     }
     return merge(ranges);
 }

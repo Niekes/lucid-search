@@ -109,6 +109,21 @@ search('Crème', 'creme', { normalize: true }).matches; // [{ start: 0, end: 5, 
 
 A Match is also a Range, so `score(haystack, search(haystack, query).matches)` works.
 
+## `suggest(haystack, term)`
+
+The "did you mean" for a missing term of `search`: the whole word in the haystack that is the
+fewest typos away from the term, as a Match, or `undefined`. It allows one typo per 4 letters of
+the term, ignores case and accents, and on a tie takes the earliest word. It never suggests part
+of a word, so `serch` gets nothing from `researching`. Wrong input types throw a `TypeError`.
+
+```js
+const haystack = 'Lucid search highlights matches';
+const { missing } = search(haystack, 'serach cafe');
+missing.map((term) => suggest(haystack, term)?.text); // ['search', undefined]
+
+suggest('Ein Café in Köln', 'cafe'); // { start: 4, end: 8, text: 'Café', term: 'cafe' }
+```
+
 ## `highlight(haystack, matches, options?)`
 
 Wraps the matches of `search` in `<el class="cssClass">` (default `span` and `matched`) and

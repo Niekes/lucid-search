@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `suggest(haystack, term)` is "did you mean" for the missing terms of `search`: the whole word in the haystack that is the fewest typos away, as a Match, or `undefined`. One typo per 4 letters, case and accents ignored, the earliest word on a tie ([ADR 0005](docs/adr/0005-suggest-is-separate-from-search.md)). The playground shows it for each missing term.
+
+### Changed
+
+- `findRanges` with `toSegments` and `toSnippet` grows from 2.8 to 2.9 kB gzip, because its typo matching is shared with `suggest`. `search` with `highlight` stays at 1.8 kB; adding `suggest` makes it 3.4 kB.
+
 ## [2.3.0] - 2026-11-21
 
 ### Added

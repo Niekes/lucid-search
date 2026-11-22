@@ -19,8 +19,8 @@ absolute values. To run the string scenarios in your own browser, open the
   term up to 32 letters, and the fastest that does on a single haystack.
 - **Against mark.js, lucid-search is about 44 to 59 times faster.** mark.js walks and edits the
   DOM; lucid-search builds one string and sets it as `innerHTML` once.
-- **The imports are small:** 2.8 kB gzip for `findRanges` with `toSegments` and `toSnippet` (typo
-  matching included), 1.8 kB for `search` with `highlight`.
+- **The imports are small:** 2.9 kB gzip for `findRanges` with `toSegments` and `toSnippet` (typo
+  matching included), 1.8 kB for `search` with `highlight`, and 3.4 kB with `suggest` added.
 
 ### Why it is fast
 

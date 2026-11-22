@@ -30,6 +30,10 @@ Returns { matches: { start, end, text, term }[], missing: string[] }.
 - normalize: true ignores accents the same way findRanges does (creme -> Crème, strasse -> Straße, final -> ﬁnal) without shifting positions.
 - Throws TypeError on non-string haystack or invalid query. Empty query -> { matches: [], missing: [] }.
 
+### suggest(haystack: string, term: string): Match | undefined
+"Did you mean" for a missing term: the whole word in the haystack fewest typos away (one typo per 4 letters, ignores case and accents, earliest on a tie). Never part of a word. Throws TypeError on non-string arguments.
+missing.map(term => suggest(haystack, term)?.text) // suggestions to offer, or to rephrase the query with
+
 ### highlight(haystack: string, matches: Match[], options?: { el?: string = 'span', cssClass?: string = 'matched' })
 Returns HTML: the haystack HTML-escaped, each match wrapped in <el class="cssClass">. Pass matches as search returned them.
 
