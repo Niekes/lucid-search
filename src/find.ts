@@ -334,8 +334,14 @@ function fuzzyFind(
     if (run.length) flush();
 }
 
-// Matches at `lastIndex` when a letter, digit or combining mark comes right before it.
-export const inWord: RegExp = /(?<=[\p{L}\p{N}\p{M}])/uy;
+const wordChar = /[\p{L}\p{N}\p{M}]/u;
+
+/** Whether a letter, digit or combining mark ends right before `at`. No lookbehind: Safari has it only from 16.4. */
+export function inWord(text: string, at: number): boolean {
+    // Step back over a whole surrogate pair, so a letter outside the BMP counts.
+    const back = at > 1 && (text.charCodeAt(at - 1) & 0xfc00) === 0xdc00 ? 2 : 1;
+    return at > 0 && wordChar.test(text.slice(at - back, at));
+}
 
 /**
  * Calls `add` with the folded units of each match of `term` (already folded) in `text`, and its Typos.
@@ -376,9 +382,7 @@ export function findRanges(
     // shortcut: with typos this filters chosen matches, so a mid-word one can hide a worse one at a Word start; let only Word-start candidates compete if a caller hits it.
     const addAtWordStart = (first: number, last: number): void => {
         if (options.wordStart) {
-            // A lookbehind reads a whole code point; V8 misses a letter outside the BMP in `/[\p{L}]$/u`.
-            inWord.lastIndex = first;
-            if (inWord.test(folded.text)) return;
+            if (inWord(folded.text, first)) return;
         }
         ranges.push(toRange(folded, first, last));
     };

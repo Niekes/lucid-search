@@ -34,6 +34,11 @@ for (const [library, code] of Object.entries(imports)) {
         'output' in o ? o.output : []
     );
     const js = chunks.map((c) => ('code' in c ? c.code : '')).join('');
+    // Safari before 16.4 cannot parse a regex lookbehind, so one in the bundle breaks every import.
+    if (library.startsWith('lucid-search') && /\(\?<[=!]/.test(js)) {
+        console.error(`${library} contains a regex lookbehind`);
+        process.exitCode = 1;
+    }
     rows.push([library, Buffer.byteLength(js), gzipSync(js).length]);
 }
 // `pnpm verify` fails when a lucid-search import grows over its gzip budget, in kB.
