@@ -17,7 +17,8 @@ export function suggest(haystack: string, term: string): Match | undefined {
     const foldedTerm = fold(term, true).text;
     if (!foldedTerm) return undefined;
     let best: { first: number; last: number; typos: number } | undefined;
-    findTerm(folded.text, foldedTerm, 32, (first, last, typos) => {
+    // shortcut: filters chosen matches, so a mid-word one can hide a worse whole word in the same run (ADR 0005); let only whole words compete if a caller hits it.
+    findTerm(folded.text, foldedTerm, Infinity, (first, last, typos) => {
         inWord.lastIndex = first;
         wordChar.lastIndex = last + 1;
         if (inWord.test(folded.text) || wordChar.test(folded.text)) return;

@@ -137,7 +137,7 @@ const tool = {
 function findInText({ terms }) {
     const { matches, missing } = search(documentText, terms, { normalize: true });
     return {
-        missing: missing.map((term) => ({ term, didYouMean: suggest(documentText, term)?.text })),
+        missing: missing.map((term) => ({ term, suggestion: suggest(documentText, term)?.text })),
         matches: matches.slice(0, 20).map((m) => ({
             ...m,
             context: documentText.slice(Math.max(0, m.start - 80), m.end + 80)

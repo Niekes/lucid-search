@@ -1,6 +1,6 @@
 # Suggestions come from a separate `suggest`, not from search
 
-Agents that get a Missing Term back from `search` need to know what to rephrase it to. `suggest(haystack, term)` returns one Suggestion as a Match, or `undefined`: the whole word in the haystack that is the fewest Typos away from the Term (ties go to the earliest), with Normalization always on and the Typo budget of `findRanges` (at most one per 4 letters). It reuses the typo matching from [ADR 0003](0003-typo-tolerant-findranges.md) and keeps only matches that start at a Word start and end at a word end. It is its own function, so `search` stays exact and does not bundle the typo code. Callers run it on `result.missing`.
+Agents that get a Missing Term back from `search` need to know what to rephrase it to. `suggest(haystack, term)` returns one Suggestion as a Match, or `undefined`: the whole word in the haystack that is the fewest Typos away from the Term (ties go to the earliest), with Normalization always on and the Typo budget of `findRanges` (at most one per 4 letters). It reuses the typo matching from [ADR 0003](0003-typo-tolerant-findranges.md) and keeps only matches that start at a Word start and end where a word ends. It is its own function, so `search` stays exact and does not bundle the typo code. Callers run it on `result.missing`.
 
 ## Considered Options
 
