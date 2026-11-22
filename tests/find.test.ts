@@ -100,6 +100,8 @@ it('findRanges allows at most one Typo per 4 letters of a term', () => {
     expect(findRanges('cat cot', 'cat', { typos: 2 })).toEqual([{ start: 0, end: 3 }]);
     expect(findRanges('a sxarxh box', 'search', { typos: 2 })).toEqual([]);
     expect(findRanges('a sxarxhes box', 'searches', { typos: 2 })).toEqual([{ start: 2, end: 10 }]);
+    // Letters, not UTF-16 units: each of these letters takes two units.
+    expect(findRanges('𝐀𝐁', '𝐀𝐂', { typos: 1 })).toEqual([]);
 });
 
 it('findRanges with typos returns the best match, not one padded by a letter', () => {
@@ -178,7 +180,7 @@ it('findRanges with typos keeps whole words: no space at an edge, no letter cut 
         { start: 0, end: 5 },
         { start: 6, end: 12 }
     ]);
-    expect(findRanges('a 😀😀 b', '😀😀x', { typos: 1 })).toEqual([{ start: 2, end: 6 }]);
+    expect(findRanges('a 😀😀😀 b', '😀😀😀x', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
 });
 
 it('findRanges with typos handles a haystack that is one long run of candidates', () => {

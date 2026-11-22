@@ -354,7 +354,7 @@ export function findTerm(
     add: (first: number, last: number, typos: number) => void
 ): void {
     // shortcut: one 32-bit integer holds the Term, so longer Terms match exactly; use multi-block Myers if needed.
-    const budget = term.length > 32 ? 0 : Math.min(typos, Math.floor(term.length / 4));
+    const budget = term.length > 32 ? 0 : Math.min(typos, Math.floor([...term].length / 4));
     if (budget > 0) return fuzzyFind(text, term, budget, add);
     for (let at = text.indexOf(term); at !== -1; at = text.indexOf(term, at + 1)) {
         add(at, at + term.length - 1, 0);

@@ -37,6 +37,7 @@ describe('suggest', () => {
         expect(suggest('the cat', 'CAT')?.text).toBe('cat');
         expect(suggest('a lovely day', 'lvoely')?.text).toBe('lovely');
         expect(suggest('a lovely day', 'lvoley')).toBeUndefined();
+        expect(suggest('𝐀𝐁 x', '𝐀𝐂')).toBeUndefined();
     });
 
     it('suggests nothing for an empty term or a haystack without a close word', () => {
