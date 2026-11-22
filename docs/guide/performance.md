@@ -165,7 +165,7 @@ accent-folding 2.7.0, mark.js 8.11.1, Fuse.js 7.5.0, uFuzzy 1.0.19 and fuzzysort
 - **Node:** Vitest benchmarks, 5 seconds per library and scenario.
 - **Browser:** 50 warm-up runs, then the median of 7 one-second rounds.
 
-The benchmarks live in [`bench/`](https://github.com/niekes/lucid-search/tree/master/bench).
+The benchmarks live in [`bench/`](https://github.com/niekes/lucid-search/tree/main/bench).
 Run them yourself:
 
 ```bash

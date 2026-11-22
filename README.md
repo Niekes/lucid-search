@@ -9,11 +9,11 @@
 
 <p align="center">
   <a href="https://github.com/niekes/lucid-search/actions"><img src="https://github.com/niekes/lucid-search/actions/workflows/main.yml/badge.svg" alt="Build"></a>
-  <a href="https://github.com/niekes/lucid-search/actions"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/niekes/lucid-search/master/.github/badges/coverage.json" alt="Coverage"></a>
-  <a href="https://fallow.tools/docs/explanations/health/"><img src="https://raw.githubusercontent.com/niekes/lucid-search/master/.github/badges/health.svg" alt="fallow health"></a>
+  <a href="https://github.com/niekes/lucid-search/actions"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/niekes/lucid-search/main/.github/badges/coverage.json" alt="Coverage"></a>
+  <a href="https://fallow.tools/docs/explanations/health/"><img src="https://raw.githubusercontent.com/niekes/lucid-search/main/.github/badges/health.svg" alt="fallow health"></a>
   <a href="https://www.npmjs.com/package/lucid-search"><img src="https://img.shields.io/npm/dt/lucid-search" alt="npm downloads"></a>
   <a href="https://www.npmjs.com/package/lucid-search"><img src="https://img.shields.io/npm/dw/lucid-search" alt="npm weekly downloads"></a>
-  <a href="https://github.com/niekes/lucid-search/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/lucid-search" alt="License"></a>
+  <a href="https://github.com/niekes/lucid-search/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/lucid-search" alt="License"></a>
   <a href="https://www.npmjs.com/package/lucid-search"><img src="https://img.shields.io/npm/v/lucid-search" alt="npm version"></a>
   <a href="https://bundlephobia.com/result?p=lucid-search"><img src="https://img.shields.io/bundlephobia/minzip/lucid-search" alt="Bundle size"></a>
   <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript">
