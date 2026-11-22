@@ -8,7 +8,12 @@
 
 ### Changed
 
-- `findRanges` with `toSegments` and `toSnippet` grows from 2.8 to 2.9 kB gzip, because its typo matching is shared with `suggest`. `search` with `highlight` stays at 1.8 kB; adding `suggest` makes it 3.4 kB.
+- `findRanges` with `toSegments` and `toSnippet` grows from 2.8 to 2.9 kB gzip, because its typo matching is shared with `suggest`. `search` with `highlight` stays at 1.8 kB; adding `suggest` makes it 3.5 kB.
+
+### Fixed
+
+- The library loads on Safari before 16.4 again. Since 2.3.0 its bundle held a regex lookbehind, which those versions cannot parse, so every import failed there. `pnpm verify` now fails when a lucid-search import contains one.
+- The typo budget of `findRanges` counts letters, not UTF-16 units, as documented: a 2-letter term made of letters outside the BMP, such as `𝐀𝐂`, no longer gets a typo. Changing one such letter still costs two typos.
 
 ## [2.3.0] - 2026-11-21
 
