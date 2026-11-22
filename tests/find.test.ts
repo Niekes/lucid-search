@@ -216,6 +216,8 @@ it('findRanges with wordStart reads the character before a match as findRanges f
     expect(atWordStart('ﬁnal', 'i')).toEqual([]);
     // A letter outside the BMP is still a letter; an emoji is not.
     expect(atWordStart('𝐀li', 'li')).toEqual([]);
+    // A lone second half of a surrogate pair is no letter, even right after one.
+    expect(atWordStart('e\uDC00x y', 'x')).toEqual([{ start: 2, end: 3 }]);
     expect(atWordStart('😀li', 'li')).toEqual([{ start: 2, end: 4 }]);
     // A combining mark belongs to its word, also when accents are kept.
     expect(atWordStart('cafe\u0301li', 'li', false)).toEqual([]);

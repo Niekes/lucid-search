@@ -334,7 +334,8 @@ function fuzzyFind(
     if (run.length) flush();
 }
 
-const wordChar = /[\p{L}\p{N}\p{M}]/u;
+// Anchored: the slice before a position counts only when it is one whole character.
+const wordChar = /^[\p{L}\p{N}\p{M}]$/u;
 
 /** Whether a letter, digit or combining mark ends right before `at`. No lookbehind: Safari has it only from 16.4. */
 export function inWord(text: string, at: number): boolean {
@@ -345,7 +346,7 @@ export function inWord(text: string, at: number): boolean {
 
 /**
  * Calls `add` with the folded units of each match of `term` (already folded) in `text`, and its Typos.
- * `typos` is the caller's maximum; the Term gets at most one per 4 letters, and none over 32 letters.
+ * `typos` is the caller's maximum; the Term gets at most one per 4 letters, and none over 32 UTF-16 units.
  */
 export function findTerm(
     text: string,
@@ -353,7 +354,7 @@ export function findTerm(
     typos: number,
     add: (first: number, last: number, typos: number) => void
 ): void {
-    // shortcut: one 32-bit integer holds the Term, so longer Terms match exactly; use multi-block Myers if needed.
+    // shortcut: one 32-bit integer holds the Term, so Terms over 32 UTF-16 units (16 letters outside the BMP) match exactly, and a letter outside the BMP can cost two Typos; use multi-block Myers on code points if needed.
     const budget = term.length > 32 ? 0 : Math.min(typos, Math.floor(Array.from(term).length / 4));
     if (budget > 0) return fuzzyFind(text, term, budget, add);
     for (let at = text.indexOf(term); at !== -1; at = text.indexOf(term, at + 1)) {
