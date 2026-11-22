@@ -22,6 +22,8 @@
 
 **Missing term**: a term `search` finds nowhere in the haystack. One covered by a longer overlapping match still occurs, so it is not missing. Tells an agent which part of its query to rephrase.
 
+**Suggestion**: for a missing term, the text in the haystack that is the fewest typos away from it, offered as "did you mean". At most one per term, and only from the haystack itself, never from a word list. A suggestion is always a whole word, never part of one: `serch` in `researching` gets none. Matching ignores accents, so `cafe` gets `Café`. A term too short to allow a typo can only get a suggestion that differs from it in accents or case.
+
 **Highlight**: build HTML from the matches of `search`, escaping the whole haystack. Separate from searching; `search` never produces display output.
 
 **Score**: a number ranking how well a haystack matched. Longer distinct matches and matches closer to the start of the haystack score higher.

@@ -102,10 +102,10 @@ the first match and adds `…` where text was cut.
 
 ## Using it from an AI agent
 
-`search` returns plain JSON with positions, plus the terms it could not find, so an agent knows what to rephrase. `highlight` turns those matches into HTML and escapes the whole haystack.
+`search` returns plain JSON with positions, plus the terms it could not find, so an agent knows what to rephrase. `suggest(haystack, term)` offers the closest word in the haystack for such a term ("did you mean"). `highlight` turns those matches into HTML and escapes the whole haystack.
 
 ```js
-import { search, highlight } from 'lucid-search';
+import { search, suggest, highlight } from 'lucid-search';
 
 search('The quick brown fox jumps over the lazy dog', 'The dog barks');
 /*
@@ -137,7 +137,7 @@ const tool = {
 function findInText({ terms }) {
     const { matches, missing } = search(documentText, terms, { normalize: true });
     return {
-        missing,
+        missing: missing.map((term) => ({ term, didYouMean: suggest(documentText, term)?.text })),
         matches: matches.slice(0, 20).map((m) => ({
             ...m,
             context: documentText.slice(Math.max(0, m.start - 80), m.end + 80)

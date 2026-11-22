@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { findRanges, highlight, score, search, toSegments } from '../../../index';
+import { findRanges, highlight, score, search, suggest, toSegments } from '../../../index';
 
 type Mode = 'search' | 'findRanges';
 
@@ -36,7 +36,16 @@ const result = computed(() => {
                 stats: [
                     { label: 'Matches', value: matches.length },
                     { label: 'Found', value: list([...perTerm].map(([t, n]) => `${t} ×${n}`)) },
-                    { label: 'Missing', value: list(missing) }
+                    { label: 'Missing', value: list(missing) },
+                    {
+                        label: 'Did you mean',
+                        value: list(
+                            missing.flatMap((term) => {
+                                const suggestion = suggest(haystack.value, term);
+                                return suggestion ? [`${term} → ${suggestion.text}`] : [];
+                            })
+                        )
+                    }
                 ],
                 lines: lines(matches),
                 html: highlight(haystack.value, matches, { el: el.value, cssClass: cssClass.value })
