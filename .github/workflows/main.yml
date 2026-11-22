@@ -56,4 +56,6 @@ jobs:
                   git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
                   git add .github/badges/health.svg .github/badges/coverage.json
                   git diff --quiet --cached || git commit -m "chore: update the health and coverage badges [skip ci]"
+                  # Another merge may have landed while this ran.
+                  git pull --rebase
                   git push
