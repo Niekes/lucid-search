@@ -100,6 +100,8 @@ it('findRanges allows at most one Typo per 4 letters of a term', () => {
     expect(findRanges('cat cot', 'cat', { typos: 2 })).toEqual([{ start: 0, end: 3 }]);
     expect(findRanges('a sxarxh box', 'search', { typos: 2 })).toEqual([]);
     expect(findRanges('a sxarxhes box', 'searches', { typos: 2 })).toEqual([{ start: 2, end: 10 }]);
+    // Letters, not UTF-16 units: each of these letters takes two units.
+    expect(findRanges('𝐀𝐁', '𝐀𝐂', { typos: 1 })).toEqual([]);
 });
 
 it('findRanges with typos returns the best match, not one padded by a letter', () => {
@@ -178,7 +180,7 @@ it('findRanges with typos keeps whole words: no space at an edge, no letter cut 
         { start: 0, end: 5 },
         { start: 6, end: 12 }
     ]);
-    expect(findRanges('a 😀😀 b', '😀😀x', { typos: 1 })).toEqual([{ start: 2, end: 6 }]);
+    expect(findRanges('a 😀😀😀 b', '😀😀😀x', { typos: 1 })).toEqual([{ start: 2, end: 8 }]);
 });
 
 it('findRanges with typos handles a haystack that is one long run of candidates', () => {
@@ -214,6 +216,8 @@ it('findRanges with wordStart reads the character before a match as findRanges f
     expect(atWordStart('ﬁnal', 'i')).toEqual([]);
     // A letter outside the BMP is still a letter; an emoji is not.
     expect(atWordStart('𝐀li', 'li')).toEqual([]);
+    // A lone second half of a surrogate pair is no letter, even right after one.
+    expect(atWordStart('e\uDC00x y', 'x')).toEqual([{ start: 2, end: 3 }]);
     expect(atWordStart('😀li', 'li')).toEqual([{ start: 2, end: 4 }]);
     // A combining mark belongs to its word, also when accents are kept.
     expect(atWordStart('cafe\u0301li', 'li', false)).toEqual([]);

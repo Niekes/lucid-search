@@ -334,12 +334,19 @@ function fuzzyFind(
     if (run.length) flush();
 }
 
-// Matches at `lastIndex` when a letter, digit or combining mark comes right before it.
-export const inWord: RegExp = /(?<=[\p{L}\p{N}\p{M}])/uy;
+// Anchored: the slice before a position counts only when it is one whole character.
+const wordChar = /^[\p{L}\p{N}\p{M}]$/u;
+
+/** Whether a letter, digit or combining mark ends right before `at`. No lookbehind: Safari has it only from 16.4. */
+export function inWord(text: string, at: number): boolean {
+    // Step back over a whole surrogate pair, so a letter outside the BMP counts.
+    const back = at > 1 && (text.charCodeAt(at - 1) & 0xfc00) === 0xdc00 ? 2 : 1;
+    return at > 0 && wordChar.test(text.slice(at - back, at));
+}
 
 /**
  * Calls `add` with the folded units of each match of `term` (already folded) in `text`, and its Typos.
- * `typos` is the caller's maximum; the Term gets at most one per 4 letters, and none over 32 letters.
+ * `typos` is the caller's maximum; the Term gets at most one per 4 letters, and none over 32 UTF-16 units.
  */
 export function findTerm(
     text: string,
@@ -347,8 +354,8 @@ export function findTerm(
     typos: number,
     add: (first: number, last: number, typos: number) => void
 ): void {
-    // shortcut: one 32-bit integer holds the Term, so longer Terms match exactly; use multi-block Myers if needed.
-    const budget = term.length > 32 ? 0 : Math.min(typos, Math.floor(term.length / 4));
+    // shortcut: one 32-bit integer holds the Term, so Terms over 32 UTF-16 units (16 letters outside the BMP) match exactly, and a letter outside the BMP can cost two Typos; use multi-block Myers on code points if needed.
+    const budget = term.length > 32 ? 0 : Math.min(typos, Math.floor(Array.from(term).length / 4));
     if (budget > 0) return fuzzyFind(text, term, budget, add);
     for (let at = text.indexOf(term); at !== -1; at = text.indexOf(term, at + 1)) {
         add(at, at + term.length - 1, 0);
@@ -376,9 +383,7 @@ export function findRanges(
     // shortcut: with typos this filters chosen matches, so a mid-word one can hide a worse one at a Word start; let only Word-start candidates compete if a caller hits it.
     const addAtWordStart = (first: number, last: number): void => {
         if (options.wordStart) {
-            // A lookbehind reads a whole code point; V8 misses a letter outside the BMP in `/[\p{L}]$/u`.
-            inWord.lastIndex = first;
-            if (inWord.test(folded.text)) return;
+            if (inWord(folded.text, first)) return;
         }
         ranges.push(toRange(folded, first, last));
     };
