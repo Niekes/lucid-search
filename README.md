@@ -35,7 +35,7 @@
   <a target="_blank" href="https://niekes.github.io/lucid-search/playground"><img src="assets/demo-1.gif" alt="lucid-search highlighting matches as you type"></a>
 </p>
 
-Try it in the [playground](https://niekes.github.io/lucid-search/playground).
+Try it in the [playground](https://niekes.github.io/lucid-search/playground) or see [examples on CodePen](https://codepen.io/collection/AEqKVL).
 
 ## Sponsor lucid-search
 
